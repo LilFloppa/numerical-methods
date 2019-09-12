@@ -40,32 +40,29 @@ void LUDecomposition(int& N, real* DI, real* AL, real* AU, int* IA)
 {
 	for (int i = 0; i < N; i++)
 	{
-		real sum = 0;
+		real sum1 = 0, sum2 = 0;
 		int col = i - (IA[i + 1] - IA[i]);
 
 		for (int k = IA[i]; k < IA[i + 1]; k++)
-		{		
+		{
 			for (int j = 0; j < k - IA[i]; j++)
-				sum += AL[IA[i] + j] * AU[IA[col] + j];
+			{
+				sum1 += AL[IA[i] + j] * AU[IA[col] + j];
+				sum2 += AU[IA[i] + j] * AL[IA[col] + j];
+			}
 
-			AL[k] -= sum;
-
-			sum = 0;
-
-			for (int j = 0; j < k - IA[i]; j++)
-				sum += AU[IA[i] + j] * AL[IA[col] + j];
-
-			AU[k] -= sum;
+			AL[k] -= sum1;
+			AU[k] -= sum2;
 			AU[k] /= DI[col];
 			
-			sum = 0;
+			sum1 = sum2 = 0;
 			col++;
 		}
 
 		for (int j = IA[i]; j < IA[i + 1]; j++)
-			sum += AL[j] * AU[j];
+			sum1 += AL[j] * AU[j];
 
-		DI[i] -= sum;
+		DI[i] -= sum1;
 			
 	}
 }
