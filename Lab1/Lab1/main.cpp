@@ -29,7 +29,10 @@ void ReadMatrix(int& N, int& ALsize, real* DI, real* AL, real* AU, int* IA)
 
 	in.open("input/ia.txt");
 	for (int i = 0; i < N + 1; i++)
+	{
 		in >> IA[i];
+		IA[i]--;
+	}
 	in.close();
 }
 
@@ -38,28 +41,28 @@ void LUDecomposition(int& N, real* DI, real* AL, real* AU, int* IA)
 	for (int i = 0; i < N; i++)
 	{
 		real sum = 0;
+		int col = i - (IA[i + 1] - IA[i]);
 
-		for (int k = IA[i] - 1; k < IA[i + 1] - 1; k++)
-		{
-			int col = i - (IA[i + 1] - k - 1);
-			
-			for (int j = 0; j < k - IA[i] + 1; j++)
-				sum += AL[IA[i] + j - 1] * AU[IA[col] + j - 1];
+		for (int k = IA[i]; k < IA[i + 1]; k++)
+		{		
+			for (int j = 0; j < k - IA[i]; j++)
+				sum += AL[IA[i] + j] * AU[IA[col] + j];
 
 			AL[k] -= sum;
 
 			sum = 0;
 
-			for (int j = 0; j < k - IA[i] + 1; j++)
-				sum += AU[IA[i] + j - 1] * AL[IA[col] + j - 1];
+			for (int j = 0; j < k - IA[i]; j++)
+				sum += AU[IA[i] + j] * AL[IA[col] + j];
 
 			AU[k] -= sum;
 			AU[k] /= DI[col];
 			
 			sum = 0;
+			col++;
 		}
 
-		for (int j = IA[i] - 1; j < IA[i + 1] - 1; j++)
+		for (int j = IA[i]; j < IA[i + 1]; j++)
 			sum += AL[j] * AU[j];
 
 		DI[i] -= sum;
