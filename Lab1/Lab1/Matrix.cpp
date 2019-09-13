@@ -79,13 +79,13 @@ void Solve(int& N, real* DI, real* AL, real* AU, int* IA, real* B)
 	}
 
 	// Решение системы Ux = y обратным обходом
-	for (int i = N; i > 0; i--)
+	for (int i = N - 1; i >= 0; i--)
 	{
 		real sumU = 0;
-		for (int k = i; k < N; k++)
-			if (IA[k + 1] - IA[k] >= k)
-				sumU += B[k] * AU[IA[k] + i - 1];
+		for (int k = i + 1; k < N; k++)
+			if (IA[k + 1] - IA[k] >= N - i - k)
+				sumU += B[k] * AU[IA[k] + i];
 
-		B[i - 1] -= sumU;
+		B[i] -= sumU;
 	}
 }
