@@ -82,12 +82,9 @@ void Solve(int& N, real* DI, real* AL, real* AU, int* IA, real* B)
 	for (int i = N; i > 0; i--)
 	{
 		real sumU = 0;
-		for (int k = 0; k < N - i; k++)
-		{
-			int m = N - i - k; 
-			if (IA[N - k] - IA[N - k - 1] >= m)
-				sumU += B[N - k - 1] * AU[IA[N - k] - m];
-		}
+		for (int k = i; k < N; k++)
+			if (IA[k + 1] - IA[k] >= k)
+				sumU += B[k] * AU[IA[k] + i - 1];
 
 		B[i - 1] -= sumU;
 	}
