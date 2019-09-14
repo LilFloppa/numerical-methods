@@ -66,26 +66,30 @@ void LUDecomposition(int& N, real* DI, real* AL, real* AU, int* IA)
 	}
 }
 
-void Solve(int& N, real* DI, real* AL, real* AU, int* IA, real* B)
+void Solve(int& N, real* DI, real* AL, real* AU, int* IA, real* B, real *Y, real* X)
 {
 	// Решение системы Ly = b прямым обходом
 	for (int i = 0; i < N; i++)
 	{
 		real sumL = 0;
-		for (int k = 1; k < IA[i + 1] - IA[i] + 1; k++)
-			sumL += AL[IA[i + 1] - k] * B[i - k];
-		B[i] -= sumL;
-		B[i] /= DI[i];
+		int m = i - 1;
+		for (int k = IA[i + 1] - 1; k >= IA[i]; k--)
+		{
+			sumL += AL[k] * B[m];
+			m--;
+		}
+
+		Y[i] =  (B[i] - sumL) / DI[i];
 	}
 
 	// Решение системы Ux = y обратным обходом
-	for (int i = N - 1; i >= 0; i--)
+	for (int i = N - 1; i > 0; i--)
 	{
-		real sumU = 0;
-		for (int k = i + 1; k < N; k++)
-			if (IA[k + 1] - IA[k] >= N - i - k)
-				sumU += B[k] * AU[IA[k] + i];
-
-		B[i] -= sumU;
+		int m = i - 1;
+		for (int k = IA[i + 1] - 1; k >= IA[i]; k--)
+		{
+			X[m] = Y[m] - AU[k] * X[i];
+			m--;
+		}
 	}
 }

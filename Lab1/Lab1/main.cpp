@@ -15,14 +15,15 @@ int main()
 	int* IA = new int[N + 1];
 
 	real* B = new real[N];
-	B[0] = 1;
-	B[1] = 1;
-	B[2] = 1;
-	B[3] = 1;
+
+	for (int i = 0; i < N; i++)
+		B[i] = 1;
+	real* Y = B;
+	real* X = B;
 
 	ReadMatrix(N, ALSize, DI, AL, AU, IA);
 	LUDecomposition(N, DI, AL, AU, IA);
-	Solve(N, DI, AL, AU, IA, B);
+	Solve(N, DI, AL, AU, IA, B, Y, X);
 
 	for (int i = 0; i < N; i++)
 		std::cout << DI[i] << ' ';
