@@ -92,3 +92,11 @@ void Solve(Matrix mat, real* B, real *Y, real* X)
 		}
 	}
 }
+
+void ReadB(real* B, int& N)
+{
+	std::ifstream in("input/b.txt");
+	
+	for (int i = 0; i < N; i++)
+		in >> B[i];
+}

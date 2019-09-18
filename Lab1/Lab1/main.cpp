@@ -18,11 +18,9 @@ int main()
 	real* Y = B;
 	real* X = B;
 
-	for (int i = 0; i < matrix.N; i++)
-		B[i] = 1;
-
 	ReadMatrix(matrix);
 	LUDecomposition(matrix);
+	ReadB(B, matrix.N);
 	Solve(matrix, B, Y, X);
 
 	for (int i = 0; i < matrix.N; i++)
