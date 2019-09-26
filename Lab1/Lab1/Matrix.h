@@ -2,8 +2,8 @@
 #include <fstream>
 #include <iostream>
 
-typedef float real;
-typedef float realScal;
+typedef double real;
+typedef double realScal;
 
 struct Matrix
 {
@@ -23,3 +23,4 @@ void LUDecomposition(Matrix& mat);					// Разложение матрицы А на матрицы L и U
 void Solve(Matrix& mat, real* B, real* res);		// Решение СЛАУ
 void Multiply(Matrix& mat, real* vec, real* res);	// Умножение матрицы на вектор
 Matrix HilbertMatrix(int size);						// Создание матрицы Гильберта порядка size
+void ToTight(Matrix& m, real** A);					// Перевод матрицы из профильного формата в плотный

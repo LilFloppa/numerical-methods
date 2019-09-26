@@ -167,3 +167,32 @@ void ReadB(real* B, int& N)
 	for (int i = 0; i < N; i++)
 		in >> B[i];
 }
+
+void ToTight(Matrix& m, real **A)
+{
+	if (m.isDecomposed)
+	{
+		std::cout << "ERROR! Matrix is decomposed. Can't convert to tight format." << std::endl;
+		return;
+	}
+
+	for (int i = 0; i < m.N; i++)
+		for (int j = 0; j < m.N; j++)
+			A[i][j] = 0;
+
+	for (int i = 0; i < m.N; i++)
+		A[i][i] = m.DI[i];
+
+	for (int i = 1; i < m.N; i++)
+	{
+		int i0 = m.IA[i];
+		int i1 = m.IA[i + 1];
+		int j = i - (i1 - i0);
+
+		for (int k = i0; k < i1; k++, j++)
+		{
+			A[i][j] = m.AL[k];
+			A[j][i] = m.AU[k];
+		}
+	}
+}
