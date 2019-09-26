@@ -7,125 +7,129 @@ void ReadMatrixSize(int& N, int& ALsize)
 	in.close();
 }
 
-void ReadMatrix(Matrix& mat)
+void ReadMatrix(Matrix& m)
 {
 	std::ifstream in("input/di.txt");
-	for (int i = 0; i < mat.N; i++)
-		in >> mat.DI[i];
+	for (int i = 0; i < m.N; i++)
+		in >> m.DI[i];
 	in.close();
 
 	in.open("input/al.txt");
-	for (int i = 0; i < mat.ALSize; i++)
-		in >> mat.AL[i];
+	for (int i = 0; i < m.ALSize; i++)
+		in >> m.AL[i];
 	in.close();
 
 	in.open("input/au.txt");
-	for (int i = 0; i < mat.ALSize; i++)
-		in >> mat.AU[i];
+	for (int i = 0; i < m.ALSize; i++)
+		in >> m.AU[i];
 	in.close();
 
 	in.open("input/ia.txt");
-	for (int i = 0; i < mat.N + 1; i++)
+	for (int i = 0; i < m.N + 1; i++)
 	{
-		in >> mat.IA[i];
-		mat.IA[i]--;
+		in >> m.IA[i];
+		m.IA[i]--;
 	}
 	in.close();
 }
 
-void LUDecomposition(Matrix& mat)
+void LUDecomposition(Matrix& m)
 {
-	if (mat.isDecomposed)
+	if (m.isDecomposed)
 	{
 		std::cout << "ERROR. Matrix is already decomposed." << std::endl;
 		return;
 	}
 
-	for (int i = 0; i < mat.N; i++)
+	for (int i = 0; i < m.N; i++)
 	{
-		real sumL = 0, sumU = 0, sumD = 0;
-		int j = i - (mat.IA[i + 1] - mat.IA[i]);
+		realScal sumD = 0;
+		int i0 = m.IA[i], i1 = m.IA[i + 1];
+		int j = i - (i1 - i0);
 
-		for (int k = mat.IA[i]; k < mat.IA[i + 1]; k++)
+		for (int k = i0; k < i1; k++, j++)
 		{
-			// Вычисление элеметов L[i][j] и U[j][i]
-			for (int m = 0; m < k - mat.IA[i]; m++)
+			realScal sumL = 0, sumU = 0;
+
+			// Calculation elements L[i][j] and U[j][i]
+			int j0 = m.IA[j], j1 = m.IA[j + 1];
+			int size_i = k - i0, size_j = j1 - j0;
+			int diff = size_i - size_j;
+			int kl = i0, ku = j0;
+
+			(diff < 0) ? ku -= diff : kl += diff;
+
+			for (; kl < k; kl++, ku++)
 			{
-				sumL += mat.AL[mat.IA[i] + m] * mat.AU[mat.IA[j] + m];
-				sumU += mat.AU[mat.IA[i] + m] * mat.AL[mat.IA[j] + m];
+				sumL += m.AL[kl] * m.AU[ku];
+				sumU += m.AU[kl] * m.AL[ku];
 			}
 
-			mat.AL[k] -= sumL;
-			mat.AU[k] -= sumU;
-			mat.AU[k] /= mat.DI[j];
+			m.AL[k] -= sumL;
+			m.AU[k] -= sumU;
+			m.AU[k] /= m.DI[j];
 
-			// Накопление суммы для вычисления DI[i]
-			sumD += mat.AL[k] * mat.AU[k];
-			sumL = sumU = 0;
-			j++;
+			// Accumulation of sum for DI[i]
+			sumD += m.AL[k] * m.AU[k];
 		}
-		
-		// Вычисление DI[i]
-		mat.DI[i] -= sumD;
+
+		// Calculation DI[i]
+		m.DI[i] -= sumD;
 		sumD = 0;
 	}
 
-	mat.isDecomposed = true;
+	m.isDecomposed = true;
 }
 
-void Solve(Matrix& mat, real* B, real *Y, real* X)
+void Solve(Matrix& m, real* B, real *res)
 {
-	if (!mat.isDecomposed)
+	if (!m.isDecomposed)
 	{
 		std::cout << "ERROR. Can't solve. Matrix is not decomposed." << std::endl;
 		return;
 	}
 
-	// Решение системы Ly = b прямым обходом
-	for (int i = 0; i < mat.N; i++)
-	{
-		real sumL = 0;
-		int m = i - 1;
-		for (int k = mat.IA[i + 1] - 1; k >= mat.IA[i]; k--)
-		{
-			sumL += mat.AL[k] * B[m];
-			m--;
-		}
+	real* y = B;
 
-		Y[i] =  (B[i] - sumL) / mat.DI[i];
+	for (int i = 0; i < m.N; i++)
+	{
+		realScal sumL = 0;
+		int j = i - 1;
+
+		for (int k = m.IA[i + 1] - 1; k >= m.IA[i]; k--, j--)
+			sumL += m.AL[k] * y[j];
+
+		y[i] = (B[i] - sumL) / m.DI[i];
 	}
 
-	// Решение системы Ux = y обратным обходом
-	for (int i = mat.N - 1; i > 0; i--)
+	for (int i = m.N - 1; i >= 0; i--)
 	{
-		int m = i - 1;
-		for (int k = mat.IA[i + 1] - 1; k >= mat.IA[i]; k--)
-		{
-			X[m] = Y[m] - mat.AU[k] * X[i];
-			m--;
-		}
+		int j = i - 1;
+		res[i] = y[i];
+		for (int k = m.IA[i + 1] - 1; k >= m.IA[i]; k--, j--)
+			y[j] -= m.AU[k] * res[i];
 	}
 }
 
-void Multiply(Matrix& mat, real* vec, real* res)
+void Multiply(Matrix& m, real* vector, real* res)
 {
-	if (mat.isDecomposed)
+	if (m.isDecomposed)
 	{
 		std::cout << "ERROR. Matrix is decomposed. Can't multiply." << std::endl;
 		return;
 	}
 
-	for (int i = 0; i < mat.N; i++)
-		res[i] = vec[i] * mat.DI[i];
+	for (int i = 0; i < m.N; i++)
+		res[i] = vector[i] * m.DI[i];
 
-	for (int i = 1; i < mat.N; i++)
+	for (int i = 1; i < m.N; i++)
 	{
-		int j = i - (mat.IA[i + 1] - mat.IA[i]);
+		int j = i - (m.IA[i + 1] - m.IA[i]);
 
-		for (int k = mat.IA[i]; k < mat.IA[i + 1]; k++)
+		for (int k = m.IA[i]; k < m.IA[i + 1]; k++)
 		{
-			res[i] += vec[j] * mat.AL[k];
-			res[j] += vec[i] * mat.AU[k];
+			res[i] += vector[j] * m.AL[k];
+			res[j] += vector[i] * m.AU[k];
 			j++;
 		}
 	}
@@ -133,27 +137,27 @@ void Multiply(Matrix& mat, real* vec, real* res)
 
 Matrix HilbertMatrix(int size)
 {
-	Matrix mat = { };
+	Matrix m = { };
 	int ALSize = size * (size - 1) / 2;
-	mat.DI = new real[size];
-	mat.AL = new real[ALSize];
-	mat.AU = new real[ALSize];
-	mat.IA = new int[size + 1];
+	m.N = size;
+	m.ALSize = ALSize;
+	m.DI = new real[size];
+	m.AL = new real[ALSize];
+	m.AU = new real[ALSize];
+	m.IA = new int[size + 1];
 
 	for (int i = 0; i < size; i++)
-		mat.DI[i] = 1.0 / (2 * i - 1);
+		m.DI[i] = 1.0 / (2 * i + 1);
 
-	mat.IA[0] = 1;
-	for (int i = 1; i < size + 1; i++)
-		mat.IA[i] = 
+	m.IA[0] = 0;
+	for (int i = 0; i < size; i++)
+		m.IA[i + 1] = m.IA[i] + i;
 
 	for (int i = 1; i < size; i++)
-	{
 		for (int j = 0; j < i; j++)
+			m.AU[m.IA[i] + j] = m.AL[m.IA[i] + j] = 1.0 / (i + j + 1);
 
-	}
-
-	return mat;
+	return m;
 }
 
 void ReadB(real* B, int& N)

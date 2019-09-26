@@ -1,30 +1,34 @@
 #include <iostream>
-
+#include <stdio.h>
 #include "Matrix.h"
-
-typedef float real;
 
 int main()
 {
-	Matrix matrix = { 0 };
-	ReadMatrixSize(matrix.N, matrix.ALSize);
+	Matrix m = { };
+	real* X = nullptr;
+	real* B = nullptr;
+	real* res = nullptr;
 
-	matrix.DI = new real[matrix.N];
-	matrix.AL = new real[matrix.ALSize];
-	matrix.AU = new real[matrix.ALSize];
-	matrix.IA = new int[matrix.N + 1];
+	for (int k = 1; k < 8; k++)
+	{
+		m = HilbertMatrix(k);
+		X = new real[k];
+		for (int i = 0; i < k; i++)
+			X[i] = i + 1;
 
-	real* B = new real[matrix.N];
-	real* Y = B;
-	real* X = B;
-	real* res = new real[matrix.N];
+		B = new real[k];
+		Multiply(m, X, B);
 
-	Matrix mat = HilbertMatrix(2);
-	//ReadMatrix(matrix);
-	//LUDecomposition(matrix);
-	//ReadB(B, matrix.N);
-	//Multiply(matrix, B, res);
-	//Solve(matrix, B, Y, X);
+		res = new real[k];
+		LUDecomposition(m);
+		Solve(m, B, res);
 
+		for (int i = 0; i < k; i++)
+			printf_s("%10.6E  %10.6E\n", res[i], X[i] - res[i]);
+
+		std::cout << std::endl << std::endl;
+	}
+
+	system("pause");
 	return 0;
 }
