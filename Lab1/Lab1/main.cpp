@@ -17,29 +17,14 @@ int main()
 	real* B = new real[matrix.N];
 	real* Y = B;
 	real* X = B;
+	real* res = new real[matrix.N];
 
-	ReadMatrix(matrix);
-	LUDecomposition(matrix);
-	ReadB(B, matrix.N);
-	Solve(matrix, B, Y, X);
-
-	for (int i = 0; i < matrix.N; i++)
-		std::cout << matrix.DI[i] << ' ';
-
-	std::cout << std::endl << std::endl;
-
-	for (int i = 0; i < matrix.ALSize; i++)
-		std::cout << matrix.AL[i] << ' ';
-
-	std::cout << std::endl << std::endl;
-
-	for (int i = 0; i < matrix.ALSize; i++)
-		std::cout << matrix.AU[i] << ' ';
-
-	std::cout << std::endl << std::endl;
-
-	for (int i = 0; i < matrix.N; i++)
-		std::cout << B[i] << ' ';
+	Matrix mat = HilbertMatrix(2);
+	//ReadMatrix(matrix);
+	//LUDecomposition(matrix);
+	//ReadB(B, matrix.N);
+	//Multiply(matrix, B, res);
+	//Solve(matrix, B, Y, X);
 
 	return 0;
 }

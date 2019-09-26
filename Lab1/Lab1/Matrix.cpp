@@ -7,7 +7,7 @@ void ReadMatrixSize(int& N, int& ALsize)
 	in.close();
 }
 
-void ReadMatrix(Matrix mat)
+void ReadMatrix(Matrix& mat)
 {
 	std::ifstream in("input/di.txt");
 	for (int i = 0; i < mat.N; i++)
@@ -33,8 +33,14 @@ void ReadMatrix(Matrix mat)
 	in.close();
 }
 
-void LUDecomposition(Matrix mat)
+void LUDecomposition(Matrix& mat)
 {
+	if (mat.isDecomposed)
+	{
+		std::cout << "ERROR. Matrix is already decomposed." << std::endl;
+		return;
+	}
+
 	for (int i = 0; i < mat.N; i++)
 	{
 		real sumL = 0, sumU = 0, sumD = 0;
@@ -63,10 +69,18 @@ void LUDecomposition(Matrix mat)
 		mat.DI[i] -= sumD;
 		sumD = 0;
 	}
+
+	mat.isDecomposed = true;
 }
 
-void Solve(Matrix mat, real* B, real *Y, real* X)
+void Solve(Matrix& mat, real* B, real *Y, real* X)
 {
+	if (!mat.isDecomposed)
+	{
+		std::cout << "ERROR. Can't solve. Matrix is not decomposed." << std::endl;
+		return;
+	}
+
 	// Решение системы Ly = b прямым обходом
 	for (int i = 0; i < mat.N; i++)
 	{
@@ -91,6 +105,55 @@ void Solve(Matrix mat, real* B, real *Y, real* X)
 			m--;
 		}
 	}
+}
+
+void Multiply(Matrix& mat, real* vec, real* res)
+{
+	if (mat.isDecomposed)
+	{
+		std::cout << "ERROR. Matrix is decomposed. Can't multiply." << std::endl;
+		return;
+	}
+
+	for (int i = 0; i < mat.N; i++)
+		res[i] = vec[i] * mat.DI[i];
+
+	for (int i = 1; i < mat.N; i++)
+	{
+		int j = i - (mat.IA[i + 1] - mat.IA[i]);
+
+		for (int k = mat.IA[i]; k < mat.IA[i + 1]; k++)
+		{
+			res[i] += vec[j] * mat.AL[k];
+			res[j] += vec[i] * mat.AU[k];
+			j++;
+		}
+	}
+}
+
+Matrix HilbertMatrix(int size)
+{
+	Matrix mat = { };
+	int ALSize = size * (size - 1) / 2;
+	mat.DI = new real[size];
+	mat.AL = new real[ALSize];
+	mat.AU = new real[ALSize];
+	mat.IA = new int[size + 1];
+
+	for (int i = 0; i < size; i++)
+		mat.DI[i] = 1.0 / (2 * i - 1);
+
+	mat.IA[0] = 1;
+	for (int i = 1; i < size + 1; i++)
+		mat.IA[i] = 
+
+	for (int i = 1; i < size; i++)
+	{
+		for (int j = 0; j < i; j++)
+
+	}
+
+	return mat;
 }
 
 void ReadB(real* B, int& N)
