@@ -126,11 +126,10 @@ void Multiply(Matrix& m, real* vector, real* res)
 	{
 		int j = i - (m.IA[i + 1] - m.IA[i]);
 
-		for (int k = m.IA[i]; k < m.IA[i + 1]; k++)
+		for (int k = m.IA[i]; k < m.IA[i + 1]; k++, j++)
 		{
 			res[i] += vector[j] * m.AL[k];
 			res[j] += vector[i] * m.AU[k];
-			j++;
 		}
 	}
 }
