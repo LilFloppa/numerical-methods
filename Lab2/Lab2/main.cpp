@@ -2,30 +2,22 @@
 
 int main()
 {
-	int N = 0, di_num = 0, m = 0;
-	ReadMatrixSize(N, di_num, m);
+	Matrix mat = { };
+	ReadMatrix(mat);
 
-	float** A = new float* [N];
-	for (int i = 0; i < N; i++)
-		A[i] = new float[di_num];
+	float* f = new float[mat.N];
+	ReadF(f, mat.N);
+	
+	float* x0 = new float[mat.N];
+	float* x = new float[mat.N];
+	ReadX0(x0, mat.N);
 
-	ReadMatrix(N, di_num, A);
-
-	float* res = new float[N];
-	float* vec = new float[N];
-
-	for (int i = 0; i < N; i++)
-	{
-		res[i] = 0;
-		vec[i] = 1;
-	}
-
-	Multiply(N, di_num, A, m, vec, res);
+	int J = Jacobi(mat, f, x0, x, 0.909);
+	int S = Seidel(mat, f, x0, x, 0.909);
 
 	while (true)
 	{
-		m++;
-	}
 
+	}
 	return 0;
 }
