@@ -195,3 +195,45 @@ void ToTight(Matrix& m, real **A)
 		}
 	}
 }
+
+void Gauss(int& N, real* x, real* b, real** A)
+{
+	for (int k = 0; k < N - 1; k++)
+	{
+		// Поиск ведущего элемента
+		real max = abs(A[k][k]);
+		int m = k;
+		for (int i = k + 1; i < N; i++)
+			if (abs(A[k][i]) > max)
+			{
+				max = abs(A[k][i]);
+				m = i;
+			}
+
+		// Обмен местами b[m] и b[k]
+		
+		// Обмен местами k-ого и m-ого столбцов
+		for (int j = k; j < N; j++)
+			std::swap(A[k][j], A[m][j]);
+
+		// Обнуление k-ого столбца
+		for (int i = k + 1; i < N; i++)
+		{
+			real t = A[i][k] / A[k][k];
+			b[i] -= t * b[k];
+			for (int j = k + 1; j < N; j++)
+				A[i][j] -= t * A[k][j];
+		}
+	}
+
+	// Вычисление вектора x
+	x[N - 1] = b[N - 1] / A[N - 1][N - 1];
+	for (int k = N - 2; k >= 0; k--)
+	{
+		realScal sum = 0;
+		for (int j = k + 1; j < N; j++)
+			sum += A[k][j] * x[j];
+
+		x[k] = (b[k] - sum) / A[k][k];
+	}
+}

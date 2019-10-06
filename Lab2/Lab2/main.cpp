@@ -13,7 +13,7 @@ int main()
 	ReadX0(x0, mat.N);
 
 	int J = Jacobi(mat, f, x0, x, 0.909);
-	int S = Seidel(mat, f, x0, x, 0.909);
+	int S = Seidel(mat, f, x0, x, 1.009);
 
 	while (true)
 	{
