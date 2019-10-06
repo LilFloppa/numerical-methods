@@ -211,7 +211,7 @@ void Gauss(int& N, real* x, real* b, real** A)
 			}
 
 		// ־בלום לוסעאלט b[m] ט b[k]
-		
+		std::swap(b[m], b[k]);
 		// ־בלום לוסעאלט k-מדמ ט m-מדמ סעמכבצמג
 		for (int j = k; j < N; j++)
 			std::swap(A[k][j], A[m][j]);
