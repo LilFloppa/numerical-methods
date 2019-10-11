@@ -51,7 +51,7 @@ void LUDecomposition(Matrix& m)
 		{
 			realScal sumL = 0, sumU = 0;
 
-			// Calculation elements L[i][j] and U[j][i]
+			// Вычисление элементов L[i][j] и U[j][i]
 			int j0 = m.IA[j], j1 = m.IA[j + 1];
 			int size_i = k - i0, size_j = j1 - j0;
 			int diff = size_i - size_j;
@@ -69,11 +69,11 @@ void LUDecomposition(Matrix& m)
 			m.AU[k] -= sumU;
 			m.AU[k] /= m.DI[j];
 
-			// Accumulation of sum for DI[i]
+			// Накопление суммы для DI[i]
 			sumD += m.AL[k] * m.AU[k];
 		}
 
-		// Calculation DI[i]
+		// Вычисление DI[i]
 		m.DI[i] -= sumD;
 		sumD = 0;
 	}
@@ -81,7 +81,7 @@ void LUDecomposition(Matrix& m)
 	m.isDecomposed = true;
 }
 
-void Solve(Matrix& m, real* B, real *res)
+void Solve(Matrix& m, real* b)
 {
 	if (!m.isDecomposed)
 	{
@@ -89,8 +89,9 @@ void Solve(Matrix& m, real* B, real *res)
 		return;
 	}
 
-	real* y = B;
+	real *y = b, *x = b;
 
+	// Прямой обход
 	for (int i = 0; i < m.N; i++)
 	{
 		realScal sumL = 0;
@@ -99,15 +100,16 @@ void Solve(Matrix& m, real* B, real *res)
 		for (int k = m.IA[i + 1] - 1; k >= m.IA[i]; k--, j--)
 			sumL += m.AL[k] * y[j];
 
-		y[i] = (B[i] - sumL) / m.DI[i];
+		y[i] = (b[i] - sumL) / m.DI[i];
 	}
 
+	// Обратный обход
 	for (int i = m.N - 1; i >= 0; i--)
 	{
 		int j = i - 1;
-		res[i] = y[i];
+		x[i] = y[i];
 		for (int k = m.IA[i + 1] - 1; k >= m.IA[i]; k--, j--)
-			y[j] -= m.AU[k] * res[i];
+			y[j] -= m.AU[k] * x[i];
 	}
 }
 
@@ -124,9 +126,11 @@ void Multiply(Matrix& m, real* vector, real* res)
 
 	for (int i = 1; i < m.N; i++)
 	{
-		int j = i - (m.IA[i + 1] - m.IA[i]);
+		int i0 = m.IA[i];
+		int i1 = m.IA[i + 1];
+		int j = i - (i1 - i0);
 
-		for (int k = m.IA[i]; k < m.IA[i + 1]; k++, j++)
+		for (int k = i0; k < i1; k++, j++)
 		{
 			res[i] += vector[j] * m.AL[k];
 			res[j] += vector[i] * m.AU[k];
@@ -171,7 +175,7 @@ void ToTight(Matrix& m, real **A)
 {
 	if (m.isDecomposed)
 	{
-		std::cout << "ERROR! Matrix is decomposed. Can't convert to tight format." << std::endl;
+		std::cout << "ERROR! Matrix is decomposed. Can't convert to tight format.\n";
 		return;
 	}
 
