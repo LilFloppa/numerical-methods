@@ -5,15 +5,18 @@ int main()
 	Matrix mat = { };
 	ReadMatrix(mat);
 
-	float* f = new float[mat.N];
+	double* f = new double[mat.N];
 	ReadF(f, mat.N);
 	
-	float* x0 = new float[mat.N];
-	float* x = new float[mat.N];
-	ReadX0(x0, mat.N);
+	double* x0 = new double[mat.N];
+	double* x1 = new double[mat.N];
+	double* r = new double[mat.N];
 
-	int J = Jacobi(mat, f, x0, x, 0.909);
-	int S = Seidel(mat, f, x0, x, 1.009);
+	ReadX0(x0, mat.N);
+	int J = Jacobi(mat, f, x0, x1, r, 0.99);
+
+	ReadX0(x0, mat.N);
+	int Z = Zeidel(mat, f, x0, r, 1.01);
 
 	while (true)
 	{
