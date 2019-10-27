@@ -123,11 +123,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\CGM\cgm.cpp" />
+    <ClCompile Include="Source\LOS\los.cpp" />
     <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="Source\Matrix.cpp" />
+    <ClCompile Include="Source\Matrix\Matrix.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Matrix.h" />
+    <ClInclude Include="Source\CGM\cgm.h" />
+    <ClInclude Include="Source\LOS\los.h" />
+    <ClInclude Include="Source\Matrix\Matrix.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input\di.txt" />
