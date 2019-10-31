@@ -24,7 +24,7 @@
     <ClCompile Include="Source\LOS\los.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Matrix\Matrix.cpp">
+    <ClCompile Include="Source\Matrix\matrix.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,17 +35,31 @@
     <ClInclude Include="Source\LOS\los.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Matrix\Matrix.h">
+    <ClInclude Include="Source\Matrix\matrix.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="input\di.txt" />
-    <Text Include="input\ggl.txt" />
-    <Text Include="input\ggu.txt" />
-    <Text Include="input\ig.txt" />
-    <Text Include="input\jg.txt" />
-    <Text Include="input\kuslau.txt" />
-    <Text Include="input\pr.txt" />
+    <Text Include="input\di.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="input\ggl.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="input\ggu.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="input\ig.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="input\jg.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="input\kuslau.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="input\pr.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
 </Project>
