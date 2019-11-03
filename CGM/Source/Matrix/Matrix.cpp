@@ -101,6 +101,54 @@ void MultiplyT(Matrix& A, double* vec, double* res)
 	}
 }
 
+void LUFactorization(Matrix& A, Matrix& LU)
+{
+	LU.N = A.N;
+	for (int i = 0; i < A.N + 1; i++)
+		LU.IA[i] = A.IA[i];
+
+	for (int i = 0; i < A.IA[A.N]; i++)
+		LU.JA[i] = A.JA[i];
+
+	for (int i = 0; i < A.N; i++)
+	{
+		double sumD = 0;
+		int i0 = A.IA[i], i1 = A.IA[i + 1];
+		int j = i - (i1 - i0);
+
+		for (int k = i0; k < i1; k++, j++)
+		{
+			double sumL = 0, sumU = 0;
+
+			// Calculate L[i][j], U[j][i]
+			int j0 = A.IA[j], j1 = A.IA[j + 1];
+			int size_i = k - i0, size_j = j1 - j0;
+			int diff = size_i - size_j;
+			int kl = i0, ku = j0;
+
+			(diff < 0) ? ku -= diff : kl += diff;
+
+			for (; kl < k; kl++, ku++)
+			{
+				sumL += A.AL[kl] * A.AU[ku];
+				sumU += A.AU[kl] * A.AL[ku];
+			}
+
+			LU.AL[k] = A.AL[k] - sumL;
+			LU.AU[k] = A.AU[k] - sumU;
+			LU.AU[k] /= A.DI[j];
+
+			// Calculate sum for DI[i]
+			sumD += A.AL[k] * A.AU[k];
+		}
+
+		// Calculate DI[i]
+		LU.DI[i] = A.DI[i] - sumD;
+		sumD = 0;
+	}
+
+}
+
 double DotProduct(int N, double* a, double* b)
 {
 	double sum = 0;
