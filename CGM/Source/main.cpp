@@ -1,6 +1,7 @@
-#include "Matrix/Matrix.h"
+#include "Matrix/matrix.h"
 #include "CGM/cgm.h"
 #include "LOS/los.h"
+#include "Memory/memory.h"
 #include <iostream>
 
 int main()
@@ -8,40 +9,29 @@ int main()
 	Matrix A = { };
 	int maxiter;
 	double eps;
-	ReadMatrix(A, maxiter, eps);
+	int choice;
+	ReadMatrix(A, maxiter, eps, choice);
 
-	double* f = new double[A.N];
+	Memory cache(A.N, 10);
 
-	double* x0 = new double[A.N];
-	for (int i = 0; i < A.N; i++)
-		x0[i] = 0;
+	double* f;
+	double* x;
+	cache.Allocate(&f);
+	cache.Allocate(&x);
 
-	double* r = new double[A.N];
-	double* z = new double[A.N];
-
-	double* x = new double[A.N];
 	for (int i = 0; i < A.N; i++)
 		x[i] = 1;
 
 	Multiply(A, x, f);
-
-	double* p = new double[A.N];
-	int iter = LOS(A, x0, f, r, z, p, maxiter, eps, x);
-
-	std::cout << "Number of iterations (LOS): " << iter << std::endl;
 	for (int i = 0; i < A.N; i++)
-		std::cout << x[i] << " ";
-	std::cout << std::endl << std::endl;
+		x[i] = 0;
 
-	iter = CGM(A, x0, f, r, z, maxiter, eps, x);
+	int iter;
+	if (choice == 1)
+		iter = CGM_diag(A, x, f, cache, maxiter, eps);
 
-	for (int i = 0; i < A.N; i++)
-		x0[i] = 0;
-
-	std::cout << "Number of iterations (CGM): " << iter << std::endl;
-	for (int i = 0; i < A.N; i++)
-		std::cout << x[i] << " ";
-	std::cout << std::endl << std::endl;
+	if (choice == 2)
+		iter = LOS_diag(A, x, f, cache, maxiter, eps);
 
 	system("pause");
 	return 0;
