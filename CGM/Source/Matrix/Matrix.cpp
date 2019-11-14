@@ -157,3 +157,32 @@ double DotProduct(int N, double* a, double* b)
 
 	return sum;
 }
+
+Matrix HilbertMatrix(int size)
+{
+	Matrix A = { };
+	int ALSize = size * (size - 1) / 2;
+
+	A.N = size;
+	A.DI = new double[size];
+	A.AL = new double[ALSize];
+	A.AU = new double [ALSize];
+	A.IA = new int[size + 1];
+	A.JA = new int[ALSize];
+
+	for (int i = 0; i < size; i++)
+		A.DI[i] = 1.0 / (2 * i + 1);
+
+	A.IA[0] = 0;
+	for (int i = 0; i < size; i++)
+		A.IA[i + 1] = A.IA[i] + i;
+
+	for (int i = 1; i < size; i++)
+		for (int j = 0; j < i; j++)
+		{
+			A.JA[A.IA[i] + j] = j;
+			A.AU[A.IA[i] + j] = A.AL[A.IA[i] + j] = 1.0 / (i + j + 1);
+		}
+
+	return A;
+}

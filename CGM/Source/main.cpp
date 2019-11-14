@@ -11,6 +11,8 @@ int main()
 	double eps;
 	ReadMatrix(A, maxiter, eps, choice);
 
+	A = HilbertMatrix(10);
+
 	double* f = new double[A.N];
 	double* x = new double[A.N];
 

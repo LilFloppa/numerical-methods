@@ -28,3 +28,4 @@ void Multiply(Matrix& A, double* vec, double* res);
 void MultiplyT(Matrix& A, double* vec, double* res);
 void LUFactorization(Matrix& A, Matrix& LU);
 double DotProduct(int N, double* a, double* b);
+Matrix HilbertMatrix(int size);
