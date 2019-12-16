@@ -130,6 +130,7 @@ void Display()
 	DrawAxis();
 	DrawParametric(0, 10, 0.1, [](double t) { return -1 + 2 * cos(t); }, [](double t) { return 1 + 2 * sin(t); });
 	DrawParametric(0, 10, 0.1, [](double t) { return 3 + 2 * cos(t); }, [](double t) { return 1 + 2 * sin(t); });
+	DrawFunc(-20, 20, 0.1, [](double t) { return t; });
 	DrawPoints(points);
 	glFinish();
 }
