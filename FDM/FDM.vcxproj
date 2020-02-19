@@ -150,16 +150,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Core\Core.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MeshBuilder\MeshBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="input\intervalsY.txt" />
     <Text Include="input\size.txt" />
-    <Text Include="input\intervals.txt" />
+    <Text Include="input\intervalsX.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Core\Core.h" />
     <ClInclude Include="src\MeshBuilder\MeshBuilder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

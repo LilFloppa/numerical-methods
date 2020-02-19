@@ -4,19 +4,29 @@
 
 int main()
 {
-	std::vector<Interval> intervals;
-	ReadIntervals("input/intervals.txt", intervals);
-	int kx = 0;
-	for (auto& interval : intervals)
-		kx += interval.n;
-	kx++;
+	std::vector<Interval> intervalsX, intervalsY;
+	ReadIntervals("input/intervalsX.txt", intervalsX);
+	ReadIntervals("input/intervalsY.txt", intervalsY);
+	int kx = CountBreakPoints(intervalsX);
+	int ky = CountBreakPoints(intervalsY);
 
 	double* x = new double[kx];
 	double* hx = new double[kx - 1];
-	BuildMesh(intervals, kx, x, hx);
+	BuildMesh(intervalsX, kx, x, hx);
 
-	for (int i = 0; i < kx - 1; i++)
-		std::cout << x[i] << "\t\t\t" << hx[i] << std::endl;
+	double* y = new double[ky];
+	double* hy = new double[ky - 1];
+	BuildMesh(intervalsY, ky, y, hy);
+
+	std::vector<std::vector<Node>> numbering = MeshNumbering(x, y, kx, ky);
+
+	for (auto& x : numbering)
+	{
+		for (auto& y : x)
+			std::cout << y.n << "\t";
+
+		std::cout << std::endl;
+	}
 
 	return 0;
 }
