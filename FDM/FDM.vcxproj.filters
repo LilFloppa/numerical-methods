@@ -21,14 +21,26 @@
     <ClCompile Include="src\MeshBuilder\MeshBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MatrixBuilder\MatrixBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MatrixBuilder\Matrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="input\size.txt" />
     <Text Include="input\intervalsX.txt" />
     <Text Include="input\intervalsY.txt" />
+    <Text Include="input\areaMatrix.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MeshBuilder\MeshBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MatrixBuilder\MatrixBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MatrixBuilder\Matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

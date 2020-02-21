@@ -151,14 +151,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MatrixBuilder\Matrix.cpp" />
+    <ClCompile Include="src\MatrixBuilder\MatrixBuilder.cpp" />
     <ClCompile Include="src\MeshBuilder\MeshBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="input\areaMatrix.txt" />
     <Text Include="input\intervalsY.txt" />
-    <Text Include="input\size.txt" />
     <Text Include="input\intervalsX.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\MatrixBuilder\Matrix.h" />
+    <ClInclude Include="src\MatrixBuilder\MatrixBuilder.h" />
     <ClInclude Include="src\MeshBuilder\MeshBuilder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -4,22 +4,24 @@
 #include <string>
 #include <fstream>
 
+using namespace std;
+
 struct Interval
 {
 	double begin, end;
+	int beginN, endN;
 	int n;
 };
 
-struct Node
+struct Area
 {
-	int i, j;
-	int n;
-	Node(int i, int j, int n): i(i), j(j), n(n) {}
+	Interval intervalX, intervalY;
 };
 
 const double eps = 1.0e-5;
 
-void ReadIntervals(std::string filename, std::vector<Interval>& intervals);
-int CountBreakPoints(std::vector<Interval>& intervals);
-void BuildMesh(std::vector<Interval> intervals, int k, double* x, double* hx);
-std::vector<std::vector<Node>> MeshNumbering(double* x, double* y, int kx, int ky);
+void ReadIntervals(string filename, vector<Interval>& intervals);
+void ReadAreaMatrix(string filename, vector<vector<int>>& areas);
+int CountBreakPoints(vector<Interval>& intervals);
+void IntervalNumbering(vector<Interval>& intervals);
+void BuildMesh(vector<Interval>& intervals, int k, vector<double>& x, vector<double>& h);

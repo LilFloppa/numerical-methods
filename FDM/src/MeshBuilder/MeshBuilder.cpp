@@ -1,8 +1,8 @@
 #include "MeshBuilder.h"
 
-void ReadIntervals(std::string filename, std::vector<Interval>& intervals)
+void ReadIntervals(string filename, vector<Interval>& intervals)
 {
-	std::ifstream in(filename);
+	ifstream in(filename);
 
 	int count;
 	in >> count;
@@ -13,9 +13,30 @@ void ReadIntervals(std::string filename, std::vector<Interval>& intervals)
 		in >> interval.begin >> interval.end >> interval.n;
 		intervals.push_back(interval);
 	}
+
+	in.close();
 }
 
-int CountBreakPoints(std::vector<Interval>& intervals)
+void ReadAreaMatrix(string filename, vector<vector<int>>& areas)
+{
+	ifstream in(filename);
+
+	int n, m;
+	in >> n >> m;
+	areas.resize(n, vector<int>(m));
+
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			in >> areas[i][j];
+		}
+	}
+
+	in.close();
+}
+
+int CountBreakPoints(vector<Interval>& intervals)
 {
 	int k = 0;
 	for (auto& interval : intervals)
@@ -25,7 +46,20 @@ int CountBreakPoints(std::vector<Interval>& intervals)
 	return k;
 }
 
-void BuildMesh(std::vector<Interval> intervals, int k, double* x, double* hx)
+void IntervalNumbering(vector<Interval>& intervals)
+{
+	intervals[0].beginN = 0;
+	int size = intervals.size();
+	for (int i = 0; i < size - 1; i++)
+	{
+		intervals[i].endN = intervals[i].beginN + intervals[i].n;
+		intervals[i + 1].beginN = intervals[i].endN;
+	}
+
+	intervals[size - 1].endN = intervals[size - 1].beginN + intervals[size - 1].n;
+}
+
+void BuildMesh(vector<Interval>& intervals, int k, vector<double>& x, vector<double>& hx)
 {
 	int pos = 0;
 	for (auto interval : intervals)
@@ -48,37 +82,4 @@ void BuildMesh(std::vector<Interval> intervals, int k, double* x, double* hx)
 
 	x[pos] = intervals.back().end;
 	hx[pos - 1] = x[pos] - x[pos - 1];
-}
-
-std::vector<std::vector<Node>> MeshNumbering(double* x, double* y, int kx, int ky)
-{
-	std::vector<std::vector<Node>> meshNumbering;
-	meshNumbering.resize(ky, std::vector<Node>(kx, Node(-1, -1, -1)));
-
-	int num = 0;
-	for (int i = 0; i < ky; i++)
-	{
-		for (int j = 0; j < kx; j++)
-		{
-			if (y[i] < 0.5 || abs(y[i] - 0.5) / 0.5 < eps)
-			{
-				meshNumbering[ky - i - 1][j] = Node(i, j, num);
-				num++;
-			}
-
-			if (y[i] > 0.5 && x[j] < 0.5)
-			{
-				meshNumbering[ky - i - 1][j] = Node(i, j, num);
-				num++;
-			}
-
-			if (y[i] > 0.5 && abs(x[i] - 0.5) / 0.5 < eps)
-			{
-				meshNumbering[ky - i - 1][j] = Node(i, j, num);
-				num++;
-			}
-		}
-	}
-
-	return meshNumbering;
 }
