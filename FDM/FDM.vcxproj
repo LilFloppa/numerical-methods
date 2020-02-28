@@ -99,7 +99,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SLAESolver.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SLAE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SLAESolver.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SLAE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,7 +129,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SLAESolver.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SLAE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,22 +146,21 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SLAESolver.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SLAE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\MatrixBuilder\Matrix.cpp" />
     <ClCompile Include="src\MatrixBuilder\MatrixBuilder.cpp" />
     <ClCompile Include="src\MeshBuilder\MeshBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input\areaMatrix.txt" />
+    <Text Include="input\boundary.txt" />
     <Text Include="input\intervalsY.txt" />
     <Text Include="input\intervalsX.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\MatrixBuilder\Matrix.h" />
     <ClInclude Include="src\MatrixBuilder\MatrixBuilder.h" />
     <ClInclude Include="src\MeshBuilder\MeshBuilder.h" />
   </ItemGroup>

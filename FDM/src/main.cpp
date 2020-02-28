@@ -1,8 +1,7 @@
 #include "MeshBuilder/MeshBuilder.h"
 #include "MatrixBuilder/MatrixBuilder.h"
-#include "MatrixBuilder/Matrix.h"
 
-#include <SLAE/SLAESolver.h>
+#include <SLAE/SLAE.h>
 
 #include <iostream>
 #include <vector>
@@ -18,41 +17,31 @@ int main()
 	vector<vector<int>> areas;
 	ReadAreaMatrix("input/areaMatrix.txt", areas);
 
-	int kx = CountBreakPoints(intervalsX);
-	int ky = CountBreakPoints(intervalsY);
+	vector<BoundaryCondition> conds;
+	ReadBoundaryConds("input/boundary.txt", conds);
+
+	int kx = CountNodes(intervalsX);
+	int ky = CountNodes(intervalsY);
 
 	IntervalNumbering(intervalsX);
 	IntervalNumbering(intervalsY);
 
+	BoundaryCondsNumbering(intervalsX, intervalsY, conds);
+
 	vector<double> x(kx), y(ky);
-	vector<double> hx(kx - 1), hy(ky - 1);
-	BuildMesh(intervalsX, kx, x, hx);
-	BuildMesh(intervalsY, ky, y, hy);
+	BuildMesh(intervalsX, x);
+	BuildMesh(intervalsY, y);
 
-	Matrix A;
+	SLAE::Matrix A;
 	vector<double> b(kx * ky);
-	InitMatrix(A, kx * ky, kx);
-	BuildMatrix(A, b, areas, intervalsX, intervalsY, x, y, hx, hy, kx, ky);
-	BoundaryConditions(A, b, x, y, kx, ky, intervalsX[0].endN, intervalsY[0].endN);
 
-	//PrintSLAE(A, b);
+	SLAE::InitMatrix(A, kx * ky, kx);
+	BuildMatrix(A, b, areas, intervalsX, intervalsY, conds, x, y, kx, ky);
+	BoundaryConditions(A, b, x, y, conds);
 
-	SLAESolver::Matrix m;
-	m.m = A.m;
-	m.N = A.N;
-	m.D = A.D.data();
-	m.L1 = A.L1.data();
-	m.U1 = A.U1.data();
-	m.L2 = A.L2.data();
-	m.U2 = A.U2.data();
-	
-	double* bb = b.data();
-	double* x0 = new double[b.size()];
-	double* r = new double[b.size()];
+	SLAE::PrintSLAEToCSV("out.csv", A, b);
+	vector<double> x0(kx * ky), r(kx * ky);
 
-	for (int i = 0; i < b.size(); i++)
-		x0[i] = 0.0;
-
-	int k = SLAESolver::Zeidel(m, bb, x0, r, 1.7);
+	int k = SLAE::Zeidel(A, b, x0, r, 1.5);
 	return 0;
 }
