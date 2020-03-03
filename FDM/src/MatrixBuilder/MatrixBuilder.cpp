@@ -19,7 +19,7 @@ void BuildMatrix(
 		{
 			int areaI = IntervalNo(intervalsX, ix);
 
-			if (areas[areaI][areaJ] != 0 && !IsOnBorder(conds, ix, iy))
+			if (areas[areaJ][areaI] != 0 && !IsOnBorder(conds, ix, iy))
 			{
 				int row = iy * kx + ix;
 

@@ -10,16 +10,18 @@ using namespace std;
 
 const double gamma = 2.0;
 
-const function<double(double, double)> f = [](double x, double y) { return gamma * x; };
+const function<double(double, double)> f = [](double x, double y) { return -4 + gamma * (x * x + y * y); };
 
 const vector<function<double(double, double)>> borderFuncs =
 {
-	[](double x, double y) { return x; },
-	[](double x, double y) { return 0.0; },
-	[](double x, double y) { return 2.0; },
-	[](double x, double y) { return x; },
-	[](double x, double y) { return x; },
-	[](double x, double y) { return 1.0; }
+	[](double x, double y) { return x * x; },
+	[](double x, double y) { return y * y; },
+	[](double x, double y) { return y * y + 0.25; },
+	[](double x, double y) { return x * x + 1.0; },
+	[](double x, double y) { return x * x + 0.25; },
+	[](double x, double y) { return y * y + 0.25; },
+	[](double x, double y) { return y * y + 1.0; },
+	[](double x, double y) { return x * x + 2.25; }
 };
 
 void BuildMatrix(

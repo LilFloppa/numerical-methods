@@ -8,6 +8,21 @@
 
 using namespace std;
 
+void PrintTest(string filename, vector<double>& x, int kx)
+{
+	ofstream out(filename);
+
+	int size = x.size();
+	int rowCount = size / kx;
+	for (int i = 0; i < rowCount; i++)
+	{
+		for (int j = 0; j < kx; j++)
+			out << x[i * kx + j] << ';';
+
+		out << endl;
+	}
+}
+
 int main()
 {
 	vector<Interval> intervalsX, intervalsY;
@@ -39,9 +54,9 @@ int main()
 	BuildMatrix(A, b, areas, intervalsX, intervalsY, conds, x, y, kx, ky);
 	BoundaryConditions(A, b, x, y, conds);
 
-	SLAE::PrintSLAEToCSV("out.csv", A, b);
 	vector<double> x0(kx * ky), r(kx * ky);
-
 	int k = SLAE::Zeidel(A, b, x0, r, 1.5);
+
+	PrintTest("result.csv", x0, kx);
 	return 0;
 }
