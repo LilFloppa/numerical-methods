@@ -1,28 +1,18 @@
 #include <vector>
 
-#include <SLAE/Matrix.h>
-#include <SLAE/LOS.h>
-
-#include "MeshBuilding/MeshBuilding.h"
-#include "FEM/Core.h"
+#include "MeshBuilder.h"
+#include "PortraitBuilder.h"
+#include "SLAEBuilder.h"
 
 int main()
 {
-	int n = 0;
-	double begin = 0.0, end = 0.0;
-	ReadMeshData("input/MeshData.txt", n, begin, end);
+	MeshBuilder mesh(2, 0.0, 1.0);
+	PortraitBuilder portrait(mesh.GetNodeCount(), mesh.Begin(), mesh.End());
+	SLAEBuilder slae(mesh.GetNodeCount(), portrait.GetJASize(), portrait.GetIA(), portrait.GetJA());
 
-	// Построение сетки
-	std::vector<double> mesh;
-	std::vector<FiniteElement> elements;
-	BuildMesh(n, begin, end, mesh, elements);
-
-	// Инициализация матрицы и построение портрета
-	int size = mesh.size();
-	SLAE::Matrix global;
-	int ALsize = MatrixALSize(size);
-	InitMatrix(global, size, ALsize);
-	BuildPortrait(global);
-
+	//TODO: На каждой итерации нужно пересчитывать матрицу и вектор правой части
+	//TODO: Передавая в SLAEBuilder начальное приближение
+	//TODO: При сборке матрицы нужно для каждой локальной матрицы пересчитывать коэффициенты лямбда
+	//TODO: локальная матрица собирается так: L = G1 * l1 + G2 * l2 + G3 * l3 + sigma * M / dt
 	return 0;
 }

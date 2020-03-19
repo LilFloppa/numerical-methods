@@ -153,9 +153,10 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\FEM\Core.h" />
-    <ClInclude Include="src\Logging\Logging.h" />
-    <ClInclude Include="src\MeshBuilding\MeshBuilding.h" />
+    <ClInclude Include="src\FEMInfo.h" />
+    <ClInclude Include="src\SLAEBuilder.h" />
+    <ClInclude Include="src\MeshBuilder.h" />
+    <ClInclude Include="src\PortraitBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input\MeshData.txt" />

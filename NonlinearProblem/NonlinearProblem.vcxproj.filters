@@ -20,13 +20,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\FEM\Core.h">
+    <ClInclude Include="src\MeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Logging\Logging.h">
+    <ClInclude Include="src\PortraitBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MeshBuilding\MeshBuilding.h">
+    <ClInclude Include="src\FEMInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SLAEBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
