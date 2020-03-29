@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SLAE/Matrix.h>
+#include <SLAE/SLAE.h>
 #include <vector>
 #include <iostream>
 
@@ -18,20 +18,12 @@ public:
 		nodeCount = info->nodeCount;
 		JASize = info->JASize;
 		IA = info->IA;
-		JA = info->JA;
 
 		A.N = nodeCount;
-		A.DI = new double[nodeCount];
-		A.AL = new double[JASize];
-		A.AU = new double[JASize];
+		A.DI.resize(nodeCount);
+		A.AL.resize(JASize);
+		A.AU.resize(JASize);
 		A.IA = IA;
-		A.JA = JA;
-
-		for (int i = 0; i < nodeCount; i++)
-			A.DI[i] = 0.0;
-
-		for (int i = 0; i < JASize; i++)
-			A.AL[i] = A.AU[i] = 0.0;
 
 		b.resize(nodeCount);
 	}
@@ -73,8 +65,7 @@ private:
 	vector<double> b;
 
 	int nodeCount, JASize;
-	int* IA;
-	int* JA;
+	vector<int>* IA;
 
 	vector<vector<double>> buildLocal(FiniteElement e, vector<double>& qGlobal, double dt)
 	{
@@ -125,18 +116,17 @@ private:
 		{
 			for (int j = i + 1; j < 3; j++)
 			{
-				int begin = IA[e.v[j]];
-				int end = IA[e.v[j] + 1];
-				int index = -1;
-				for (int k = begin; k < end; k++)
-					if (e.v[i] == JA[k]) 
-						index = k;
+				int row = e.v[j];
+				int width = IA[row + 1] - IA[row];
 
-				if (index != -1)
-				{
-					A.AL[index] += local[i][j];
-					A.AU[index] += local[i][j];
-				}
+				int begin = row - width;
+				int end = row;
+				for (int k = begin; k < end; k++)
+					if (k == e.v[i])
+					{
+						A.AL[IA[row] + k - begin] += local[i][j];
+						A.AU[IA[row] + k - begin] += local[i][j];
+					}
 			}
 		}
 	}

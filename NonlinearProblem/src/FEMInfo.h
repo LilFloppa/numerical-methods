@@ -15,8 +15,7 @@ struct SLAEInfo
 {
 	FEIterator begin, end;
 	int nodeCount, JASize;
-	int* IA;
-	int* JA;
+	std::vector<int> IA;
 };
 
 std::vector<std::vector<double>> M = {
@@ -61,10 +60,10 @@ const double sigma = 1.0;
 
 double Lamdba(double x, double du)
 {
-	return 1;
+	return du;
 }
 
 double F(double x)
 {
-	return sigma;
+	return 2 * sigma - 8 * x;
 }
