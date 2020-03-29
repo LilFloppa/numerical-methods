@@ -15,17 +15,17 @@ public:
 			FiniteElement element;
 			element.begin = begin + h * i;
 			element.end = begin + h * (i + 1);
-			element.v1 = nodeCount++;
-			element.v2 = nodeCount++;
-			element.v3 = nodeCount;
+			element.v.push_back(nodeCount++);
+			element.v.push_back(nodeCount++);
+			element.v.push_back(nodeCount);
 			elements.push_back(element);
 		}
 
 		nodeCount++;
 	}
 
-	FiniteElementIterator Begin() { return elements.begin(); }
-	FiniteElementIterator End() { return elements.end(); }
+	FEIterator Begin() { return elements.begin(); }
+	FEIterator End() { return elements.end(); }
 
 	int GetNodeCount() { return nodeCount; }
 

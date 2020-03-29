@@ -7,7 +7,7 @@
 class PortraitBuilder
 {
 public:
-	PortraitBuilder(int nodeCount, FiniteElementIterator begin, FiniteElementIterator end): nodeCount(nodeCount), begin(begin), end(end)
+	PortraitBuilder(int nodeCount, FEIterator begin, FEIterator end): nodeCount(nodeCount), begin(begin), end(end)
 	{
 		connections.resize(nodeCount);
 		BuildConnections();
@@ -22,7 +22,7 @@ public:
 
 private:
 	int nodeCount, JASize;
-	FiniteElementIterator begin, end;
+	FEIterator begin, end;
 	std::vector <std::vector<int>> connections;
 
 	int* IA;
@@ -30,12 +30,12 @@ private:
 
 	void BuildConnections()
 	{
-		for (FiniteElementIterator iter = begin; iter != end; iter++)
+		for (FEIterator iter = begin; iter != end; iter++)
 		{
 			FiniteElement e = *iter;
-			connections[e.v3].push_back(e.v1);
-			connections[e.v3].push_back(e.v2);
-			connections[e.v2].push_back(e.v1);
+			connections[e.v[2]].push_back(e.v[0]);
+			connections[e.v[2]].push_back(e.v[1]);
+			connections[e.v[1]].push_back(e.v[0]);
 		}
 	}
 
