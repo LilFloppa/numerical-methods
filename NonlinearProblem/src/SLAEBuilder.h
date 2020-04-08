@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SLAE/SLAE.h>
 #include <vector>
 #include <iostream>
 
@@ -11,61 +10,46 @@ using namespace std;
 class SLAEBuilder
 {
 public:
-	SLAEBuilder(SLAEInfo* info)
-	{
-		begin = info->begin;
-		end = info->end;
-		nodeCount = info->nodeCount;
-		JASize = info->JASize;
-		IA = info->IA;
+	SLAEBuilder(int nodeCount, FEIterator begin, FEIterator end): nodeCount(nodeCount), begin(begin), end(end)
+	{ }
 
-		A.N = nodeCount;
-		A.DI.resize(nodeCount);
-		A.AL.resize(JASize);
-		A.AU.resize(JASize);
-		A.IA = IA;
-
-		b.resize(nodeCount);
-	}
-
-	void BuildGlobal(vector<double>& q, double dt)
+	void BuildGlobal(Matrix& A, vector<double>& q, double dt)
 	{
 		for (FEIterator iter = begin; iter != end; iter++)
 		{
-			vector<vector<double>> local = buildLocal(*iter , q, dt);
-			AddLocalToGlobal(*iter, local);
+			FiniteElement e = *iter;
+			vector<vector<double>> local = buildLocal(e , q, dt);
+			
+			for (int i = 0; i < 3; i++)
+				for (int j = 0; j < 3; j++)
+					A(e.v[i], e.v[j]) += local[i][j];
 		}
 	}
 
-	void BuildGlobalB(vector<double>& q, double dt)
+	void BuildGlobalB(vector<double>& b, vector<double>& q, double t, double dt)
 	{
 		for (FEIterator iter = begin; iter != end; iter++)
 		{
-			vector<double> local = buildLocalB(*iter, q, dt);
-			AddLocalBToGlobalB(*iter, local);
+			FiniteElement e = *iter;
+			vector<double> local = buildLocalB(e, q, t, dt);
+
+			for (int i = 0; i < 3; i++)
+				b[e.v[i]] += local[i];
 		}
 	}
 
-	void Boundary(double u1, double u2)
+	void Boundary(Matrix& A, vector<double>& b, double u1, double u2)
 	{
-		A.DI[0] = 10e+50;
-		b[0] = u1 * 10e+50;
+		A(0, 0) = 1.0e+50;
+		b[0] = u1 * 1.0e+50;
 
-		A.DI[nodeCount - 1] = 10e+50;
-		b[nodeCount - 1] = u2 * 10e+50;
+		A(nodeCount - 1, nodeCount - 1) = 1.0e+50;
+		b[nodeCount - 1] = u2 * 1.0e+50;
 	}
-
-	SLAE::Matrix GetMatrix() { return A; }
-	vector<double>* GetB() { return &b; }
 
 private:
 	FEIterator begin, end;
-
-	SLAE::Matrix A;
-	vector<double> b;
-
-	int nodeCount, JASize;
-	vector<int>* IA;
+	int nodeCount;
 
 	vector<vector<double>> buildLocal(FiniteElement e, vector<double>& qGlobal, double dt)
 	{
@@ -87,12 +71,12 @@ private:
 		return local;
 	}
 
-	vector<double> buildLocalB(FiniteElement e, vector<double>& qGlobal, double dt)
+	vector<double> buildLocalB(FiniteElement e, vector<double>& qGlobal, double t, double dt)
 	{
 		vector<double> f, q;
-		f.push_back(F(e.begin));
-		f.push_back(F((e.begin + e.end) / 2));
-		f.push_back(F(e.end));
+		f.push_back(F(e.begin, t));
+		f.push_back(F((e.begin + e.end) / 2, t));
+		f.push_back(F(e.end, t));
 
 		for (auto v : e.v)
 			q.push_back(qGlobal[v]);
@@ -105,36 +89,6 @@ private:
 				b[i] += h * (f[j] * M[i][j] + sigma * q[j] * M[i][j] / dt);
 
 		return b;
-	}
-
-	void AddLocalToGlobal(FiniteElement e, vector<vector<double>> local)
-	{
-		for (int i = 0; i < 3; i++)
-			A.DI[e.v[i]] += local[i][i];
-
-		for (int i = 0; i < 3; i++)
-		{
-			for (int j = i + 1; j < 3; j++)
-			{
-				int row = e.v[j];
-				int width = IA[row + 1] - IA[row];
-
-				int begin = row - width;
-				int end = row;
-				for (int k = begin; k < end; k++)
-					if (k == e.v[i])
-					{
-						A.AL[IA[row] + k - begin] += local[i][j];
-						A.AU[IA[row] + k - begin] += local[i][j];
-					}
-			}
-		}
-	}
-
-	void AddLocalBToGlobalB(FiniteElement e, vector<double> local)
-	{
-		for (int i = 0; i < 3; i++)
-			b[e.v[i]] += local[i];
 	}
 
 	double lambda(double b, double x, double h, vector<double> q)

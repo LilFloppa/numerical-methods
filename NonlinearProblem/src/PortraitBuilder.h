@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "FEMInfo.h"
+#include "Matrix.h"
 
 class PortraitBuilder
 {
@@ -11,19 +12,21 @@ public:
 	{
 		connections.resize(nodeCount);
 		BuildConnections();
-		FillIA();
 	}
 
+	void Build(Matrix& A)
+	{
+		A.IA.resize(nodeCount + 1);
+		A.IA[0] = A.IA[1] = 0;
 
-	std::vector<int> GetIA() { return IA; }
-	int GetJASize() { return IA.back(); }
+		for (int i = 2; i < nodeCount + 1; i++)
+			A.IA[i] = A.IA[i - 1] + connections[i - 1].size();
+	}
 
 private:
 	int nodeCount, JASize;
 	FEIterator begin, end;
 	std::vector <std::vector<int>> connections;
-
-	std::vector<int> IA;
 
 	void BuildConnections()
 	{
@@ -34,14 +37,5 @@ private:
 			connections[e.v[2]].push_back(e.v[1]);
 			connections[e.v[1]].push_back(e.v[0]);
 		}
-	}
-
-	void FillIA()
-	{
-		IA.resize(nodeCount + 1);
-		IA[0] = IA[1] = 0;
-
-		for (int i = 2; i < nodeCount + 1; i++)
-			IA[i] = IA[i - 1] + connections[i - 1].size();
 	}
 };

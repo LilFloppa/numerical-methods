@@ -2,25 +2,43 @@
 
 #include <vector>
 #include "FEMInfo.h"
+#include "Interval.h"
 
 class MeshBuilder
 {
 public:
-	MeshBuilder(int intervalCount, double begin, double end) : intervalCount(intervalCount), begin(begin), end(end)
+	MeshBuilder(std::vector<Interval>& intervals)
 	{
-		double h = (end - begin) / intervalCount;
-
-		for (int i = 0; i < intervalCount; i++)
+		for (auto interval : intervals)
 		{
-			FiniteElement element;
-			element.begin = begin + h * i;
-			element.end = begin + h * (i + 1);
-			element.v.push_back(nodeCount++);
-			element.v.push_back(nodeCount++);
-			element.v.push_back(nodeCount);
-			elements.push_back(element);
-		}
+			double begin = interval.begin;
+			double end = interval.end;
+			int n = interval.n;
+			double q = interval.q;
 
+			double h = (q == 1.0) ? ((end - begin) / n) : ((end - begin) * (1.0 - q) / (1.0 - pow(q, n)));
+
+			FiniteElement e;
+			e.begin = begin;
+			e.end = begin + h;
+			e.v.push_back(nodeCount++);
+			e.v.push_back(nodeCount++);
+			e.v.push_back(nodeCount);
+			elements.push_back(e);
+
+			for (int i = 1; i < n; i++)
+			{
+				h *= q;
+
+				FiniteElement e;
+				e.begin = elements.back().end;
+				e.end = elements.back().end + h;
+				e.v.push_back(nodeCount++);
+				e.v.push_back(nodeCount++);
+				e.v.push_back(nodeCount);
+				elements.push_back(e);
+			}
+		}
 		nodeCount++;
 	}
 
@@ -30,7 +48,6 @@ public:
 	int GetNodeCount() { return nodeCount; }
 
 private:
-	int intervalCount = 0, nodeCount = 0;
-	double begin = 0.0, end = 0.0;
+	int nodeCount = 0;
 	std::vector<FiniteElement> elements;
 };

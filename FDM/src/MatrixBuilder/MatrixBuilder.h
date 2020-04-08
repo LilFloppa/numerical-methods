@@ -10,7 +10,7 @@ using namespace std;
 
 const double gamma = 2.0;
 
-const function<double(double, double)> f = [](double x, double y) { return -4 + gamma * (x * x + y * y); };
+const function<double(double, double)> f = [](double x, double y) { return gamma * 2; };
 
 const vector<function<double(double, double)>> borderFuncs =
 {

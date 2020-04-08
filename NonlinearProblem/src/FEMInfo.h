@@ -11,13 +11,6 @@ struct FiniteElement
 
 using FEIterator = std::vector<FiniteElement>::iterator;
 
-struct SLAEInfo
-{
-	FEIterator begin, end;
-	int nodeCount, JASize;
-	std::vector<int> IA;
-};
-
 std::vector<std::vector<double>> M = {
 	{ 2.0 / 15, 1.0 / 15, -1.0 / 30 },
 	{ 1.0 / 15, 8.0 / 15, 1.0 / 15 },
@@ -56,14 +49,16 @@ std::vector<std::function<double(double, double)>> basisDirs =
 	[](double x, double h) { return 4 * x / (h * h) - 1 / h; }
 };
 
-const double sigma = 1.0;
+const double sigma = 0.0;
 
 double Lamdba(double x, double du)
 {
-	return du;
+	return 1.0;
 }
 
-double F(double x)
+double F(double x, double t)
 {
-	return 2 * sigma - 8 * x;
+	return -4 * 12 * x * x;
 }
+
+const double PI = 3.14159265359;
