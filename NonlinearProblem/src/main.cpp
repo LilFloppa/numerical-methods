@@ -14,14 +14,13 @@
 
 std::vector<double> _ = { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0 };
 std::vector<double> __ = { 0.0, 4.0156862745098039, 6.0235294117647058, 7.0274509803921568, 7.5294117647058822, 7.7803921568627450, 7.9058823529411768, 7.9686274509803923, 8.0 };
-//std::vector<double> __ = { 0.0, 2.6666666666666665, 5.3333333333333330, 6.6666666666666661, 8.0000000000000000 };
 
 std::vector<double> _t = { 0.0, 0.5, 1.0, 1.5, 2.0 };
 std::vector<double> __t = { 0.0, 1.0666666666666667, 1.6000000000000001, 1.8666666666666667, 2.0 };
 
 double u(double x, double t)
 {
-	return  4 * x * x * x * x;
+	return x * x;
 }
 
 int main()
@@ -86,15 +85,15 @@ int main()
 	TimeIterator time_end = time.End();
 
 	for (int i = 0; i < n; i++)
-		q0.push_back(u(x[i], *time_begin));
+		q0.push_back(u(x[i] - 0.5, *time_begin));
 
 	// CSV writer
-	CSV csv(1000, 1000);
+	CSV csv(15, 100000);
 	int col = 0;
 
 	for (int i = 0, j = 0; i < n; i++)
-		for (int k = 0; k < __.size(); k++)
-			if (abs(x[i] - __[k]) < 1.0e-9)
+		for (int k = 0; k < _.size(); k++)
+			if (abs(x[i] - _[k]) < 1.0e-9)
 			{
 				csv(j + 1, col, x[i]);
 				j++;
@@ -102,15 +101,15 @@ int main()
 	
 	col += 2;
 
-	for (int k = 0; k < __t.size(); k++)
+	for (int k = 0; k < _t.size(); k++)
 	{
-		if (abs(0.0 - __t[k]) < 1.0e-7)
+		if (abs(0.0 - _t[k]) < 1.0e-7)
 		{
 			csv(0, col, "t = ");
 			csv(0, col, 0.0);
 			for (int i = 0, j = 0; i < n; i++)
-				for (int k = 0; k < __.size(); k++)
-					if (abs(x[i] - __[k]) < 1.0e-9)
+				for (int k = 0; k < _.size(); k++)
+					if (abs(x[i] - _[k]) < 1.0e-9)
 					{
 						csv(j + 1, col, q0[i]);
 						j++;
@@ -129,10 +128,10 @@ int main()
 		double tPrev = *(i - 1);
 		double dt = t - tPrev;
 
-		double eps = 10e-6;
+		double eps = 10e-9;
 		double diff = 1;
 
-		double delta = 10e-5;
+		double delta = 10e-9;
 		double diff1 = 1;
 
 		while (diff >= eps && diff1 >= delta)
@@ -150,9 +149,15 @@ int main()
 
 			slae.BuildGlobal(A, q1, dt);
 			slae.BuildGlobalB(b, q0, t, dt);
-			//slae.Boundary(A, b, u(x[0], t), u(x[n - 1], t));
 
 			Multiply(A, q1, Aq);
+
+			Aq[0] = u(x[0], t);
+			Aq[n - 1] = u(x[n - 1], t);
+
+			b[0] = u(x[0], t);
+			b[n - 1] = u(x[n - 1], t);
+
 			diff = 0;
 			double norm = 0;
 			for (int i = 0; i < n; i++)
@@ -173,27 +178,31 @@ int main()
 
 			q0 = q1;
 
+			for (int k = 0; k < _t.size(); k++)
+			{
+				if (abs(t - _t[k]) < 1.0e-7)
+				{
+					csv(0, col, "t = ");
+					csv(0, col, t);
+					int j = 0;
+					for (int i = 0; i < n; i++)
+						for (int k = 0; k < _.size(); k++)
+							if (abs(x[i] - _[k]) < 1.0e-9)
+							{
+								csv(j + 1, col, q0[i]);
+								j++;
+							}
+
+					csv(j + 1, col, diff);
+					csv(j + 2, col, diff1);
+
+					col += 2;
+				}
+			}
+
 			A.Clear();
 			for (auto& bi : b)
 				bi = 0;
-		}
-
-		for (int k = 0; k < __t.size(); k++)
-		{
-			if (abs(t - __t[k]) < 1.0e-7)
-			{
-				csv(0, col, "t = ");
-				csv(0, col, t);
-				for (int i = 0, j = 0; i < n; i++)
-					for (int k = 0; k < __.size(); k++)
-						if (abs(x[i] - __[k]) < 1.0e-9)
-						{
-							csv(j + 1, col, q0[i]);
-							j++;
-						}
-
-				col += 2;
-			}
 		}
 	}
 

@@ -53,12 +53,12 @@ const double sigma = 0.0;
 
 double Lamdba(double x, double du)
 {
-	return 1.0;
+	return 1 + x + du;
 }
 
 double F(double x, double t)
 {
-	return -4 * 12 * x * x;
+	return -2.0 - 12.0 * x;
 }
 
 const double PI = 3.14159265359;
