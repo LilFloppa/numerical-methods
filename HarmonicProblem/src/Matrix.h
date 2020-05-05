@@ -18,34 +18,17 @@ public:
 		if (i == j)
 			return DI[i];
 
-		if (j > i)
+		if (i > j)
 		{
-			int width = IA[j + 1] - IA[j];
-
-			int begin = j - width;
-			int end = j;
-			for (int k = begin; k < end; k++)
-			{
-				if (k == i)
-				{
-					return AU[IA[j] + k - begin];
-				}
-			}
-
+			for (int col = IA[i]; col < IA[i + 1]; col++)
+				if (JA[col] == j)
+					return AL[col];
 		}
 		else
 		{
-			int width = IA[i + 1] - IA[i];
-
-			int begin = i - width;
-			int end = i;
-			for (int k = begin; k < end; k++)
-			{
-				if (k == j)
-				{
-					return AL[IA[i] + k - begin];
-				}
-			}
+			for (int line = IA[j]; line < IA[j + 1]; line++)
+				if (JA[line] == i)
+					return AU[line];
 		}
 
 		throw std::out_of_range("Bad index for matrix");
