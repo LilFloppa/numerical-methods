@@ -8,7 +8,7 @@ class SparseSLAEBuilder
 public:
 	SparseSLAEBuilder(FEIterator begin, FEIterator end) : begin(begin), end(end) {}
 
-	void BuildMatrix(Matrix& A) 
+	void BuildMatrix(SparseMatrix& A)
 	{
 		for (FEIterator iter = begin; iter < end; iter++)
 		{

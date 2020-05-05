@@ -153,6 +153,7 @@
     <ClCompile Include="src\IntervalBuilder.h" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MeshBuilder.h" />
+    <ClCompile Include="src\SLAESolver\LOS.cpp" />
     <ClCompile Include="src\SLAESolver\SLAESolver.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
   </ItemGroup>
@@ -161,6 +162,7 @@
     <ClInclude Include="src\Matrix.h" />
     <ClInclude Include="src\PortraitBuilder.h" />
     <ClInclude Include="src\SLAEBuilder.h" />
+    <ClInclude Include="src\SLAESolver\LOS.h" />
     <ClInclude Include="src\SLAESolver\SLAESolver.h" />
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>

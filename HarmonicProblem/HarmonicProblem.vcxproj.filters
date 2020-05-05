@@ -30,6 +30,9 @@
     <ClCompile Include="src\SLAESolver\SLAESolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SLAESolver\LOS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FEMInfo.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\SLAESolver\SLAESolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SLAESolver\LOS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

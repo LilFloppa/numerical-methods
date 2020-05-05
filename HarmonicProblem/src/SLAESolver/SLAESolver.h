@@ -2,6 +2,6 @@
 #include "../stdafx.h"
 #include "../Matrix.h"
 
-void LUDecomposition(Matrix& mat);
-void Solve(Matrix& mat, std::vector<double>& x, std::vector<double>& b);
-void Multiply(Matrix& mat, std::vector<double>& vec, std::vector<double>& res);
+void LUDecomposition(SparseMatrix& mat);
+void Solve(SparseMatrix& mat, std::vector<double>& x, std::vector<double>& b);
+void Multiply(SparseMatrix& mat, std::vector<double>& vec, std::vector<double>& res);

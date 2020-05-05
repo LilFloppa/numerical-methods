@@ -4,6 +4,7 @@
 #include "PortraitBuilder.h"
 #include "SLAEBuilder.h"
 #include "Matrix.h"
+#include "SLAESolver/LOS.h"
 
 void IntervalsFromFile(std::string filename, std::vector<RawInterval>& intervals)
 {
@@ -49,7 +50,7 @@ int main()
 	int n = 2 * XBuilder.Count() * YBuilder.Count() * ZBuilder.Count();
 
 	// Matrix 
-	Matrix A(n);
+	SparseMatrix A(n);
 
 	// Vector
 	std::vector<double> b(n);
@@ -150,6 +151,8 @@ int main()
 		}
 	}
 
+	std::vector<double> x;
+	LOS(A, x, b);
 	
 	std::cout << "Hello, World!" << std::endl;
 	return 0;

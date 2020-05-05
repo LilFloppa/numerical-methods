@@ -12,7 +12,7 @@ public:
 		BuildConnections();
 	}
 
-	void Build(Matrix& A)
+	void Build(SparseMatrix& A)
 	{
 		A.IA.resize(n + 1);
 		A.IA[0] = A.IA[1] = 0;

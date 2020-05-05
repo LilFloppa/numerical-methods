@@ -1,10 +1,10 @@
 #pragma once
 #include "stdafx.h"
 
-class Matrix
+class SparseMatrix
 {
 public:
-	Matrix(int n) : N(n)
+	SparseMatrix(int n) : N(n)
 	{
 		DI.resize(n, 0.0);
 		IA.resize(n + 1, 0);

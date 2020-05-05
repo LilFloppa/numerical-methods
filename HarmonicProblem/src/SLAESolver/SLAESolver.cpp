@@ -1,6 +1,6 @@
 ﻿#include "SLAESolver.h"
 
-void LUDecomposition(Matrix& A)
+void LUDecomposition(SparseMatrix& A)
 {
 	for (int i = 0; i < A.N; i++)
 	{
@@ -38,7 +38,7 @@ void LUDecomposition(Matrix& A)
 
 }
 
-void Solve(Matrix& A, std::vector<double>& x, std::vector<double>& b)
+void Solve(SparseMatrix& A, std::vector<double>& x, std::vector<double>& b)
 {
 
 	std::vector<double>& y = b;
@@ -63,7 +63,7 @@ void Solve(Matrix& A, std::vector<double>& x, std::vector<double>& b)
 	}
 }
 
-void Multiply(Matrix& A, std::vector<double>& vector, std::vector<double>& res)
+void Multiply(SparseMatrix& A, std::vector<double>& vector, std::vector<double>& res)
 {
 
 	for (int i = 0; i < A.N; i++)
