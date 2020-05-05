@@ -2,6 +2,7 @@
 #include "IntervalBuilder.h"
 #include "MeshBuilder.h"
 #include "PortraitBuilder.h"
+#include "SLAEBuilder.h"
 #include "Matrix.h"
 
 void IntervalsFromFile(std::string filename, std::vector<RawInterval>& intervals)
@@ -22,6 +23,7 @@ void IntervalsFromFile(std::string filename, std::vector<RawInterval>& intervals
 	}
 }
 
+
 int main()
 {
 	// Intervals reading
@@ -34,6 +36,7 @@ int main()
 
 	// Intervals building
 	IntervalBuilder XBuilder(X), YBuilder(Y), ZBuilder(Z);
+
 
 	// Mesh building
 	MeshBuilder MBuilder(
@@ -48,9 +51,17 @@ int main()
 	// Matrix 
 	Matrix A(n);
 
+	// Vector
+	std::vector<double> b(n);
+
 	// Portrait building
 	SparsePortraitBuilder PBuilder(n, MBuilder.Begin(), MBuilder.End());
 	PBuilder.Build(A);
+
+	// SLAE building
+	SparseSLAEBuilder SLAEBuilder(MBuilder.Begin(), MBuilder.End());
+	SLAEBuilder.BuildMatrix(A);
+	SLAEBuilder.BuildB(b);
 
 	std::cout << "Hello, World!" << std::endl;
 	return 0;

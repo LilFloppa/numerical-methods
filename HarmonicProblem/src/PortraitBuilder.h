@@ -27,6 +27,9 @@ public:
 				A.JA.push_back(j);
 			}
 		}
+
+		A.AL.resize(A.IA.back());
+		A.AU.resize(A.IA.back());
 	}
 
 private:

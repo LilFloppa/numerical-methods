@@ -18,36 +18,25 @@ public:
 
 			double h = (q == 1.0) ? ((end - begin) / n) : ((end - begin) * (1.0 - q) / (1.0 - pow(q, n)));
 
-			Interval parsed;
-			parsed.begin = begin;
-			parsed.end = begin + h;
-			parsed.n[0] = nodeCount++;
-			parsed.n[1] = nodeCount;
-			parsedIntervals.push_back(parsed);
-
-			for (int i = 1; i < n; i++)
+			double point = begin;
+			for (int i = 0; i < n; i++)
 			{
+				points.push_back({ point, count++ });
 				h *= q;
-
-				Interval parsed;
-				parsed.begin = parsedIntervals.back().end;
-				parsed.end = parsed.begin + h;
-				parsed.n[0] = nodeCount++;
-				parsed.n[1] = nodeCount;
-
-				parsedIntervals.push_back(parsed);
+				point += h;
 			}
 		}
 
-		nodeCount++;
+		points.push_back({ intervals.back().end, count });
+		count++;
 	}
 
-	IIterator Begin() { return parsedIntervals.begin(); }
-	IIterator End() { return parsedIntervals.end(); }
+	PI Begin() { return points.begin(); }
+	PI End() { return points.end(); }
 
-	int NodeCount() { return nodeCount; }
+	int NodeCount() { return count; }
 
 private:
-	std::vector<Interval> parsedIntervals;
-	int nodeCount = 0;
+	std::vector<Point> points;
+	int count = 0;
 };
