@@ -18,6 +18,16 @@ inline double fcos(double x, double y, double z)
 {
 	return 0;
 }
+
+inline double usin(double x, double y, double z)
+{
+	return x;
+}
+
+inline double ucos(double x, double y, double z)
+{
+	return x;
+}
 #pragma endregion
 
 #pragma region Raw interval from file

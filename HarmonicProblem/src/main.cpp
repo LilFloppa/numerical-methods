@@ -40,13 +40,13 @@ int main()
 
 	// Mesh building
 	MeshBuilder MBuilder(
-		XBuilder.Begin(), XBuilder.End(), XBuilder.NodeCount(),
-		YBuilder.Begin(), YBuilder.End(), YBuilder.NodeCount(),
-		ZBuilder.Begin(), ZBuilder.End(), ZBuilder.NodeCount()
+		XBuilder.Begin(), XBuilder.End(), XBuilder.Count(),
+		YBuilder.Begin(), YBuilder.End(), YBuilder.Count(),
+		ZBuilder.Begin(), ZBuilder.End(), ZBuilder.Count()
 	);
 
 	// Matrix size
-	int n = 2 * XBuilder.NodeCount() * YBuilder.NodeCount() * ZBuilder.NodeCount();
+	int n = 2 * XBuilder.Count() * YBuilder.Count() * ZBuilder.Count();
 
 	// Matrix 
 	Matrix A(n);
@@ -63,6 +63,94 @@ int main()
 	SLAEBuilder.BuildMatrix(A);
 	SLAEBuilder.BuildB(b);
 
+	int xCount = XBuilder.Count(), yCount = YBuilder.Count(), zCount = ZBuilder.Count();
+
+	// Boundary conditions
+	for (int i = 0; i < yCount; i++)
+	{
+		for (int j = 0; j < xCount; j++)
+		{
+			int line = i * xCount + j;
+
+			A(2 * line, 2 * line) = 1.0e+50;
+			b[2 * line] = 1.0e+50 * usin(XBuilder[j], YBuilder[i], ZBuilder[0]);
+
+			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
+			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[j], YBuilder[i], ZBuilder[0]);
+		}
+	}
+
+	for (int i = 0; i < zCount; i++)
+	{
+		for (int j = 0; j < xCount; j++)
+		{
+			int line = i * yCount * xCount + j;
+
+			A(2 * line, 2 * line) = 1.0e+50;
+			b[2 * line] = 1.0e+50 * usin(XBuilder[j], YBuilder[0], ZBuilder[i]);
+
+			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
+			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[j], YBuilder[0], ZBuilder[i]);
+		}
+	}
+
+	for (int i = 0; i < zCount; i++)
+	{
+		for (int j = 0; j < yCount; j++)
+		{
+			int line = i * yCount * xCount + j * xCount + xCount - 1;
+
+			A(2 * line, 2 * line) = 1.0e+50;
+			b[2 * line] = 1.0e+50 * usin(XBuilder.Back().value, YBuilder[j], ZBuilder[i]);
+
+			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
+			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder.Back().value, YBuilder[j], ZBuilder[i]);
+		}
+	}
+
+	for (int i = 0; i < zCount; i++)
+	{
+		for (int j = 0; j < xCount; j++)
+		{
+			int line = i * yCount * xCount + (yCount - 1) * xCount + j;
+
+			A(2 * line, 2 * line) = 1.0e+50;
+			b[2 * line] = 1.0e+50 * usin(XBuilder[j], YBuilder.Back().value, ZBuilder[i]);
+
+			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
+			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[j], YBuilder.Back().value, ZBuilder[i]);
+		}
+	}
+
+	for (int i = 0; i < zCount; i++)
+	{
+		for (int j = 0; j < yCount; j++)
+		{
+			int line = i * yCount * xCount + j * xCount;
+
+			A(2 * line, 2 * line) = 1.0e+50;
+			b[2 * line] = 1.0e+50 * usin(XBuilder[0], YBuilder[j], ZBuilder[i]);
+
+			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
+			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[0], YBuilder[j], ZBuilder[i]);
+		}
+	}
+
+	for (int i = 0; i < yCount; i++)
+	{
+		for (int j = 0; j < xCount; j++)
+		{
+			int line = (zCount - 1) * xCount * yCount + i * xCount + j;
+
+			A(2 * line, 2 * line) = 1.0e+50;
+			b[2 * line] = 1.0e+50 * usin(XBuilder[j], YBuilder[i], ZBuilder.Back().value);
+
+			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
+			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[j], YBuilder[i], ZBuilder.Back().value);
+		}
+	}
+
+	
 	std::cout << "Hello, World!" << std::endl;
 	return 0;
 }

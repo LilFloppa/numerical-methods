@@ -34,7 +34,14 @@ public:
 	PI Begin() { return points.begin(); }
 	PI End() { return points.end(); }
 
-	int NodeCount() { return count; }
+	int Count() { return count; }
+
+	int operator[](int i)
+	{
+		return points[i].i;
+	}
+
+	Point Back() { return points.back(); }
 
 private:
 	std::vector<Point> points;
