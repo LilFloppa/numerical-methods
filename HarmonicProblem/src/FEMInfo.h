@@ -11,12 +11,12 @@ const double sigma = 1.0;
 #pragma region Functions
 inline double fsin(double x, double y, double z)
 {
-	return -2 * x;
+	return -0 * lambda - w * sigma * y - w * w * chi * x;
 }
 
 inline double fcos(double x, double y, double z)
 {
-	return 0;
+	return -0 * lambda + w * sigma * x - w * w * chi * y;
 }
 
 inline double usin(double x, double y, double z)
@@ -26,7 +26,7 @@ inline double usin(double x, double y, double z)
 
 inline double ucos(double x, double y, double z)
 {
-	return x;
+	return y;
 }
 #pragma endregion
 

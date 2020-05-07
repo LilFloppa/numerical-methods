@@ -36,9 +36,9 @@ public:
 
 	int Count() { return count; }
 
-	int operator[](int i)
+	double operator[](int i)
 	{
-		return points[i].i;
+		return points[i].value;
 	}
 
 	Point Back() { return points.back(); }

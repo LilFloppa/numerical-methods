@@ -152,7 +152,7 @@ int main()
 	}
 
 	std::vector<double> x;
-	LOS(A, x, b);
+	int k = LOS(A, x, b);
 	
 	std::cout << "Hello, World!" << std::endl;
 	return 0;
