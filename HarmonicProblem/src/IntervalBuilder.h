@@ -41,7 +41,7 @@ public:
 		return points[i].value;
 	}
 
-	Point Back() { return points.back(); }
+	double Back() { return points.back().value; }
 
 private:
 	std::vector<Point> points;

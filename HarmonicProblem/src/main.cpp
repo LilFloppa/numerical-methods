@@ -3,8 +3,15 @@
 #include "MeshBuilder.h"
 #include "PortraitBuilder.h"
 #include "SLAEBuilder.h"
+#include "Boundary.h"
 #include "Matrix.h"
 #include "SLAESolver/LOS.h"
+#include "SLAESolver/LU.h"
+
+#include <iostream>
+#include <ctime>
+#include <ratio>
+#include <chrono>
 
 void IntervalsFromFile(std::string filename, std::vector<RawInterval>& intervals)
 {
@@ -23,7 +30,6 @@ void IntervalsFromFile(std::string filename, std::vector<RawInterval>& intervals
 		}
 	}
 }
-
 
 int main()
 {
@@ -50,110 +56,43 @@ int main()
 	int n = 2 * XBuilder.Count() * YBuilder.Count() * ZBuilder.Count();
 
 	// Matrix 
-	SparseMatrix A(n);
+	ProfileMatrix A(n);
+	SparseMatrix B(n);
 
 	// Vector
 	std::vector<double> b(n);
 
 	// Portrait building
-	SparsePortraitBuilder PBuilder(n, MBuilder.Begin(), MBuilder.End());
-	PBuilder.Build(A);
+	PortraitBuilder PBuilder(n, MBuilder.Begin(), MBuilder.End());
+	PBuilder.BuildProfile(A);
+	PBuilder.BuildSparse(B);
 
 	// SLAE building
-	SparseSLAEBuilder SLAEBuilder(MBuilder.Begin(), MBuilder.End());
-	SLAEBuilder.BuildMatrix(A);
+	SLAEBuilder SLAEBuilder(MBuilder.Begin(), MBuilder.End());
+	SLAEBuilder.BuildProfileMatrix(A);
+	SLAEBuilder.BuildSparseMatrix(B);
 	SLAEBuilder.BuildB(b);
 
-	int xCount = XBuilder.Count(), yCount = YBuilder.Count(), zCount = ZBuilder.Count();
-
 	// Boundary conditions
-	for (int i = 0; i < yCount; i++)
-	{
-		for (int j = 0; j < xCount; j++)
-		{
-			int line = i * xCount + j;
+	SetBoundary(A, b, XBuilder, YBuilder, ZBuilder);
+	SetBoundary(B, b, XBuilder, YBuilder, ZBuilder);
 
-			A(2 * line, 2 * line) = 1.0e+50;
-			b[2 * line] = 1.0e+50 * usin(XBuilder[j], YBuilder[i], ZBuilder[0]);
+	std::vector<double> LUx, LOSx;
 
-			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
-			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[j], YBuilder[i], ZBuilder[0]);
-		}
-	}
+	auto LOSs = std::chrono::high_resolution_clock::now();
+	int k = LOS::LOS(B, LOSx, b);
+	auto LOSf = std::chrono::high_resolution_clock::now();
 
-	for (int i = 0; i < zCount; i++)
-	{
-		for (int j = 0; j < xCount; j++)
-		{
-			int line = i * yCount * xCount + j;
+	auto LUs = std::chrono::high_resolution_clock::now();
+	LU::LU(A, LUx, b);
+	auto LUf = std::chrono::high_resolution_clock::now();
 
-			A(2 * line, 2 * line) = 1.0e+50;
-			b[2 * line] = 1.0e+50 * usin(XBuilder[j], YBuilder[0], ZBuilder[i]);
+	std::chrono::duration<double> LUspan = LUf - LUs;
+	std::chrono::duration<double> LOSspan = LOSf - LOSs;
 
-			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
-			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[j], YBuilder[0], ZBuilder[i]);
-		}
-	}
+	std::cout << "LU: " << LUspan.count() << std::endl;
+	std::cout << "LOS: " << LOSspan.count() << std::endl;
 
-	for (int i = 0; i < zCount; i++)
-	{
-		for (int j = 0; j < yCount; j++)
-		{
-			int line = i * yCount * xCount + j * xCount + xCount - 1;
-
-			A(2 * line, 2 * line) = 1.0e+50;
-			b[2 * line] = 1.0e+50 * usin(XBuilder.Back().value, YBuilder[j], ZBuilder[i]);
-
-			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
-			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder.Back().value, YBuilder[j], ZBuilder[i]);
-		}
-	}
-
-	for (int i = 0; i < zCount; i++)
-	{
-		for (int j = 0; j < xCount; j++)
-		{
-			int line = i * yCount * xCount + (yCount - 1) * xCount + j;
-
-			A(2 * line, 2 * line) = 1.0e+50;
-			b[2 * line] = 1.0e+50 * usin(XBuilder[j], YBuilder.Back().value, ZBuilder[i]);
-
-			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
-			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[j], YBuilder.Back().value, ZBuilder[i]);
-		}
-	}
-
-	for (int i = 0; i < zCount; i++)
-	{
-		for (int j = 0; j < yCount; j++)
-		{
-			int line = i * yCount * xCount + j * xCount;
-
-			A(2 * line, 2 * line) = 1.0e+50;
-			b[2 * line] = 1.0e+50 * usin(XBuilder[0], YBuilder[j], ZBuilder[i]);
-
-			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
-			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[0], YBuilder[j], ZBuilder[i]);
-		}
-	}
-
-	for (int i = 0; i < yCount; i++)
-	{
-		for (int j = 0; j < xCount; j++)
-		{
-			int line = (zCount - 1) * xCount * yCount + i * xCount + j;
-
-			A(2 * line, 2 * line) = 1.0e+50;
-			b[2 * line] = 1.0e+50 * usin(XBuilder[j], YBuilder[i], ZBuilder.Back().value);
-
-			A(2 * line + 1, 2 * line + 1) = 1.0e+50;
-			b[2 * line + 1] = 1.0e+50 * ucos(XBuilder[j], YBuilder[i], ZBuilder.Back().value);
-		}
-	}
-
-	std::vector<double> x;
-	int k = LOS(A, x, b);
-	
-	std::cout << "Hello, World!" << std::endl;
+	std::cin.get();
 	return 0;
 }

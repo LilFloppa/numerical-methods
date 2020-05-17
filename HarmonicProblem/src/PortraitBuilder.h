@@ -3,16 +3,16 @@
 #include "FEMInfo.h"
 #include "Matrix.h"
 
-class SparsePortraitBuilder
+class PortraitBuilder
 {
 public:
-	SparsePortraitBuilder(int n, FEIterator begin, FEIterator end) : n(n), begin(begin), end(end)
+	PortraitBuilder(int n, FEIterator begin, FEIterator end) : n(n), begin(begin), end(end)
 	{
 		connections.resize(n);
 		BuildConnections();
 	}
 
-	void Build(SparseMatrix& A)
+	void BuildSparse(SparseMatrix& A)
 	{
 		A.IA.resize(n + 1);
 		A.IA[0] = A.IA[1] = 0;
@@ -27,6 +27,22 @@ public:
 				A.JA.push_back(j);
 			}
 		}
+
+		A.AL.resize(A.IA.back());
+		A.AU.resize(A.IA.back());
+	}
+
+	void BuildProfile(ProfileMatrix& A)
+	{
+		A.IA.resize(n + 1);
+		A.IA[0] = A.IA[1] = 0;
+
+		for (int i = 2; i < n + 1; i++)
+		{
+			int width = i - *(connections[i - 1].begin()) - 1;
+			A.IA[i] = A.IA[i - 1] + width;
+		}
+
 
 		A.AL.resize(A.IA.back());
 		A.AU.resize(A.IA.back());

@@ -154,16 +154,16 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MeshBuilder.h" />
     <ClCompile Include="src\SLAESolver\LOS.cpp" />
-    <ClCompile Include="src\SLAESolver\SLAESolver.cpp" />
-    <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\SLAESolver\LU.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Boundary.h" />
     <ClInclude Include="src\FEMInfo.h" />
     <ClInclude Include="src\Matrix.h" />
     <ClInclude Include="src\PortraitBuilder.h" />
     <ClInclude Include="src\SLAEBuilder.h" />
     <ClInclude Include="src\SLAESolver\LOS.h" />
-    <ClInclude Include="src\SLAESolver\SLAESolver.h" />
+    <ClInclude Include="src\SLAESolver\LU.h" />
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
