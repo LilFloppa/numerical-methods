@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{cb129ef8-dd2e-41ee-8eaa-8c50a2b38ea4}</ProjectGuid>
-    <RootNamespace>HarmonicProblem</RootNamespace>
+    <ProjectGuid>{ff5b3d7d-3a50-4367-b52c-65692143160c}</ProjectGuid>
+    <RootNamespace>BCG</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -95,7 +95,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,7 +107,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,7 +121,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,7 +137,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,26 +146,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\IntervalBuilder.h" />
+    <ClCompile Include="src\BCG.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\MeshBuilder.h" />
-    <ClCompile Include="src\SLAESolver\Solvers.cpp" />
-    <ClCompile Include="src\SLAESolver\LU.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Boundary.h" />
-    <ClInclude Include="src\FEMInfo.h" />
+    <ClInclude Include="src\BCG.h" />
     <ClInclude Include="src\Matrix.h" />
-    <ClInclude Include="src\PortraitBuilder.h" />
-    <ClInclude Include="src\SLAEBuilder.h" />
-    <ClInclude Include="src\SLAESolver\Solvers.h" />
-    <ClInclude Include="src\SLAESolver\LU.h" />
-    <ClInclude Include="src\stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="input\X.txt" />
-    <Text Include="input\Y.txt" />
-    <Text Include="input\Z.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

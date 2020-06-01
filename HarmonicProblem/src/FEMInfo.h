@@ -2,31 +2,31 @@
 #include "stdafx.h"
 
 #pragma region Constants
-const double lambda = 100;
-const double w = 1.0e-4;
-const double chi = 1.0;
-const double sigma = 1.0;
+const double w = 1.0e+00;
+const double lambda = 1.0e+04;
+const double sigma = 1.0e+04;
+const double chi = 4.405e-11;
 #pragma endregion
 
 #pragma region Functions
 inline double usin(double x, double y, double z)
 {
-	return x;
+	return x * x * x;
 }
 
 inline double ucos(double x, double y, double z)
 {
-	return x;
+	return x * x * x;
 }
 
 inline double divgrad_usin(double x, double y, double z)
 {
-	return 0;
+	return 3 * 2 * x;
 }
 
 inline double divgrad_ucos(double x, double y, double z)
 {
-	return 0;
+	return 3 * 2 * x;
 }
 
 inline double fsin(double x, double y, double z)

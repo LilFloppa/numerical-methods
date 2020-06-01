@@ -31,8 +31,9 @@ public:
 					return AU[line];
 		}
 
-		double a = 0;
-		return a;
+		double* a = new double;
+		*a = 0.0;
+		return *a;
 		throw std::out_of_range("Bad index for matrix");
 	}
 

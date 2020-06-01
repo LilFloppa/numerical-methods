@@ -5,7 +5,7 @@
 #include "SLAEBuilder.h"
 #include "Boundary.h"
 #include "Matrix.h"
-#include "SLAESolver/LOS.h"
+#include "SLAESolver/Solvers.h"
 #include "SLAESolver/LU.h"
 
 #include <iostream>
@@ -30,6 +30,7 @@ void IntervalsFromFile(std::string filename, std::vector<RawInterval>& intervals
 		}
 	}
 }
+
 
 int main()
 {
@@ -56,35 +57,61 @@ int main()
 	int n = 2 * XBuilder.Count() * YBuilder.Count() * ZBuilder.Count();
 
 	// Matrix 
-	ProfileMatrix A(n);
-	SparseMatrix B(n);
+	ProfileMatrix* A = new ProfileMatrix(n);
+	SparseMatrix* B = new SparseMatrix(n);
 
 	// Vector
 	std::vector<double> b(n);
 
 	// Portrait building
 	PortraitBuilder PBuilder(n, MBuilder.Begin(), MBuilder.End());
-	PBuilder.BuildProfile(A);
-	PBuilder.BuildSparse(B);
+	PBuilder.BuildProfile(*A);
+	PBuilder.BuildSparse(*B);
 
 	// SLAE building
 	SLAEBuilder SLAEBuilder(MBuilder.Begin(), MBuilder.End());
-	SLAEBuilder.BuildProfileMatrix(A);
-	SLAEBuilder.BuildSparseMatrix(B);
+	SLAEBuilder.BuildProfileMatrix(*A);
+	SLAEBuilder.BuildSparseMatrix(*B);
 	SLAEBuilder.BuildB(b);
 
 	// Boundary conditions
-	SetBoundary(A, b, XBuilder, YBuilder, ZBuilder);
-	SetBoundary(B, b, XBuilder, YBuilder, ZBuilder);
+	SetBoundary(*A, b, XBuilder, YBuilder, ZBuilder);
+	SetBoundary(*B, b, XBuilder, YBuilder, ZBuilder);
+
+	//for (int i = 20000; i < 20010; i++)
+	//{
+	//	double res = 0;
+	//	double di = 0;
+	//	for (int j = 0; j < B->N; j++)
+	//	{
+	//		double value = (*B)(i, j);
+
+	//		if (abs(value) > 1.0e-10)
+	//		{
+	//			std::cout << std::setprecision(2) << std::scientific << value << "\t\t" << j << std::endl;
+
+	//			if (i != j)
+	//			{
+	//				res += abs(value);
+	//			}
+	//			else
+	//			{
+	//				di = value;
+	//			}
+	//		}
+	//	}
+
+	//	std::cout << std::endl << "non-di: " << res << std::endl << "di: " << di << std::endl << std::endl << std::endl;
+	//}
 
 	std::vector<double> LUx, LOSx;
 
 	auto LOSs = std::chrono::high_resolution_clock::now();
-	int k = LOS::LOS(B, LOSx, b);
+	int k = Solvers::BCG(*B, LOSx, b);
 	auto LOSf = std::chrono::high_resolution_clock::now();
 
 	auto LUs = std::chrono::high_resolution_clock::now();
-	LU::LU(A, LUx, b);
+	//LU::LU(*A, LUx, b);
 	auto LUf = std::chrono::high_resolution_clock::now();
 
 	std::chrono::duration<double> LUspan = LUf - LUs;
@@ -92,6 +119,7 @@ int main()
 
 	std::cout << "LU: " << LUspan.count() << std::endl;
 	std::cout << "LOS: " << LOSspan.count() << std::endl;
+	std::cout << k << std::endl;
 
 	std::cin.get();
 	return 0;

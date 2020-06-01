@@ -6,17 +6,23 @@ namespace LU
 {
 	void LUDecomposition(ProfileMatrix& A)
 	{
-		for (int i = 0; i < A.N; i++)
+		int N = A.N;
+		double* DI = A.DI.data();
+		double* AL = A.AL.data();
+		double* AU = A.AU.data();
+		int* IA = A.IA.data();
+
+		for (int i = 0; i < N; i++)
 		{
 			double sumD = 0;
-			int i0 = A.IA[i], i1 = A.IA[i + 1];
+			int i0 = IA[i], i1 = IA[i + 1];
 			int j = i - (i1 - i0);
 
 			for (int k = i0; k < i1; k++, j++)
 			{
 				double sumL = 0, sumU = 0;
 
-				int j0 = A.IA[j], j1 = A.IA[j + 1];
+				int j0 = IA[j], j1 = IA[j + 1];
 				int size_i = k - i0, size_j = j1 - j0;
 				int diff = size_i - size_j;
 				int kl = i0, ku = j0;
@@ -25,18 +31,18 @@ namespace LU
 
 				for (; kl < k; kl++, ku++)
 				{
-					sumL += A.AL[kl] * A.AU[ku];
-					sumU += A.AU[kl] * A.AL[ku];
+					sumL += AL[kl] * AU[ku];
+					sumU += AU[kl] * AL[ku];
 				}
 
-				A.AL[k] -= sumL;
-				A.AU[k] -= sumU;
-				A.AU[k] /= A.DI[j];
+				AL[k] -= sumL;
+				AU[k] -= sumU;
+				AU[k] /= DI[j];
 
-				sumD += A.AL[k] * A.AU[k];
+				sumD += AL[k] * AU[k];
 			}
 
-			A.DI[i] -= sumD;
+			DI[i] -= sumD;
 			sumD = 0;
 		}
 

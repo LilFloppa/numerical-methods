@@ -1,7 +1,7 @@
-#include "los.h"
+#include "Solvers.h"
 #include <cmath>
 
-namespace LOS
+namespace Solvers
 {
 	struct AuxVectors
 	{
@@ -11,6 +11,10 @@ namespace LOS
 		double* p = nullptr;
 		double* LU = nullptr;
 		double* temp = nullptr;
+		double* r0 = nullptr;
+		double* y = nullptr;
+		double* Ap = nullptr;
+		double* Az = nullptr;
 	};
 
 	struct Matrix
@@ -24,6 +28,7 @@ namespace LOS
 	};
 
 	int LOS_LU(Matrix& A, double* x, double* f, Matrix& LU, AuxVectors& aux, int maxiter, double eps, double& lastdiff);
+	int BCG_LU(Matrix& A, double* x, double* f, Matrix& LU, AuxVectors& aux, int maxiter, double eps);
 	void LUFactorization(Matrix& A, Matrix& LU);
 
 	int LOS(SparseMatrix& A, std::vector<double>& x, std::vector<double>& b)
@@ -52,6 +57,35 @@ namespace LOS
 		x.resize(A.N);
 		return LOS_LU(Raw, x.data(), Braw.data(), LU, aux, 20000, 1.0e-7, lastdiff);
 
+	}
+
+	int BCG(SparseMatrix& A, std::vector<double>& x, std::vector<double>& b)
+	{
+		Matrix Raw;
+		Raw.N = A.N;
+		Raw.DI = A.DI.data();
+		Raw.AL = A.AL.data();
+		Raw.AU = A.AU.data();
+		Raw.IA = A.IA.data();
+		Raw.JA = A.JA.data();
+
+		AuxVectors aux;
+
+		aux.Ax = new double[A.N]{ 0.0 };
+		aux.Ap = new double[A.N]{ 0.0 };
+		aux.Az = new double[A.N]{ 0.0 };
+		aux.r = new double[A.N]{ 0.0 };
+		aux.z = new double[A.N]{ 0.0 };
+		aux.p = new double[A.N]{ 0.0 };
+		aux.y = new double[A.N]{ 0.0 };
+		aux.r0 = new double[A.N]{ 0.0 };
+
+		Matrix LU;
+		LUFactorization(Raw, LU);
+		double lastdiff = 0;
+
+		x.resize(A.N);
+		return BCG_LU(Raw, x.data(), b.data(), LU, aux, 20000, 1.0e-7);
 	}
 
 	void Multiply(Matrix& A, double* vec, double* res)
@@ -165,7 +199,7 @@ namespace LOS
 
 				LU.AL[k] = A.AL[k] - sumL;
 				LU.AU[k] = A.AU[k] - sumU;
-				LU.AU[k] /= A.DI[j];
+				LU.AU[k] /= LU.DI[j];
 
 				// Calculate sum for DI[i]
 				sumD += LU.AL[k] * LU.AU[k];
@@ -326,6 +360,83 @@ namespace LOS
 		}
 
 		lastdiff = diff;
+		return k;
+	}
+
+	int BCG_LU(Matrix& A, double* x, double* f, Matrix& LU, AuxVectors& aux, int maxiter, double eps)
+	{
+		double* r0 = aux.r0;
+		double* r = aux.r;
+		double* z = aux.z;
+		double* p = aux.p;
+		double* y = aux.y;
+		double* Ax = aux.Ax;
+		double* Ap = aux.Ap;
+		double* Az = aux.Az;
+
+		int N = A.N;
+
+		// r(0)
+		Multiply(A, x, Ax);
+		for (int i = 0; i < N; i++)
+			r0[i] = f[i] - Ax[i];
+		Forward(LU, r0, r0, false);
+
+		// z(0)
+		Backward(LU, z, r0, false);
+
+		// r = r(0)
+		for (int i = 0; i < N; i++)
+			r[i] = r0[i];
+
+		// diff
+		double diff = DotProduct(N, r0, r0);
+
+		int k = 0;
+		for (; k < maxiter && diff >= eps; k++)
+		{
+			// L(-1) * A * U(-1) * z(k - 1)
+			Backward(LU, Ax, z, false);
+			Multiply(A, Ax, Az);
+			Forward(LU, Az, Az, false);
+
+			// alpha(k)
+			double dotP = DotProduct(N, r, r0);
+			double a = dotP / DotProduct(N, Az, r0);
+
+			// p(k)
+			for (int i = 0; i < N; i++)
+				p[i] = r[i] - a * Az[i];
+
+			// L(-1) * A * U(-1) * p(k)
+			Backward(LU, Ax, p, false);
+			Multiply(A, Ax, Ap);
+			Forward(LU, Ap, Ap, false);
+
+			// gamma(k)
+			double g = DotProduct(N, p, Ap) / DotProduct(N, Ap, Ap);
+
+			// y(k)
+			for (int i = 0; i < N; i++)
+				y[i] = y[i] + a * z[i] + g * p[i];
+
+			// r(k)
+			for (int i = 0; i < N; i++)
+				r[i] = p[i] - g * Ap[i];
+
+			// beta(k)
+			double b = a * DotProduct(N, r, r0) / (g * dotP);
+
+			// z(k)
+			for (int i = 0; i < N; i++)
+				z[i] = r[i] + b * z[i] - b * g * Az[i];
+
+			// diff
+			diff = DotProduct(N, r, r);
+		}
+
+		// solution
+		Backward(LU, x, y, false);
 		return k;
 	}
 }
