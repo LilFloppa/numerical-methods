@@ -11,6 +11,9 @@
 #include "Matrix.h"
 #include "SLAESolver/SLAESolver.h"
 
+#include "NewtonSLAEBuilder.h"
+
+#include <memory>
 
 std::vector<double> _ = { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0 };
 std::vector<double> __ = { 0.0, 4.0156862745098039, 6.0235294117647058, 7.0274509803921568, 7.5294117647058822, 7.7803921568627450, 7.9058823529411768, 7.9686274509803923, 8.0 };
@@ -63,6 +66,7 @@ int main()
 	A.AL.resize(A.IA.back());
 	A.AU.resize(A.IA.back());
 
+	NewtonSLAEBuilder newton(mesh.GetNodeCount(), mesh.Begin(), mesh.End());
 	SLAEBuilder slae(mesh.GetNodeCount(), mesh.Begin(), mesh.End());
 
 	// Preparing for fixed-point iteration
@@ -85,42 +89,14 @@ int main()
 	TimeIterator time_end = time.End();
 
 	for (int i = 0; i < n; i++)
-		q0.push_back(u(x[i] - 0.5, *time_begin));
-
-	// CSV writer
-	CSV csv(15, 100000);
-	int col = 0;
-
-	for (int i = 0, j = 0; i < n; i++)
-		for (int k = 0; k < _.size(); k++)
-			if (abs(x[i] - _[k]) < 1.0e-9)
-			{
-				csv(j + 1, col, x[i]);
-				j++;
-			}
-	
-	col += 2;
-
-	for (int k = 0; k < _t.size(); k++)
-	{
-		if (abs(0.0 - _t[k]) < 1.0e-7)
-		{
-			csv(0, col, "t = ");
-			csv(0, col, 0.0);
-			for (int i = 0, j = 0; i < n; i++)
-				for (int k = 0; k < _.size(); k++)
-					if (abs(x[i] - _[k]) < 1.0e-9)
-					{
-						csv(j + 1, col, q0[i]);
-						j++;
-					}
-			col += 2;
-		}
-	}
+		q0.push_back(u(x[i] + 0.123, *time_begin));
 
 	// Start fixed-point iteration
 	vector<double> b(n);
 	vector<double> Aq(n);
+
+	double eps = 10e-12;
+	double delta = 10e-12;
 
 	for (TimeIterator i = time_begin + 1; i != time_end; i++)
 	{
@@ -128,35 +104,31 @@ int main()
 		double tPrev = *(i - 1);
 		double dt = t - tPrev;
 
-		double eps = 10e-9;
 		double diff = 1;
-
-		double delta = 10e-9;
 		double diff1 = 1;
 
+		double u0 = u(x[0], t);
+		double un = u(x[n - 1], t);
+
+		int k = 0;
 		while (diff >= eps && diff1 >= delta)
 		{
-			slae.BuildGlobal(A, q0, dt);
-			slae.BuildGlobalB(b, q0, t, dt);
-			slae.Boundary(A, b, u(x[0], t), u(x[n - 1], t));
+			newton.BuildGlobal(A, q0, dt);
+			newton.BuildGlobalB(b, q0, t, dt);
+			newton.Boundary(A, b, u0, un);
 
-			LUDecomposition(A);
-			Solve(A, q1, b);
+			LU(A, q1, b);
 
 			A.Clear();
-			for (auto& bi : b)
-				bi = 0;
+			fill(b.begin(), b.end(), 0.0);
 
 			slae.BuildGlobal(A, q1, dt);
 			slae.BuildGlobalB(b, q0, t, dt);
 
 			Multiply(A, q1, Aq);
 
-			Aq[0] = u(x[0], t);
-			Aq[n - 1] = u(x[n - 1], t);
-
-			b[0] = u(x[0], t);
-			b[n - 1] = u(x[n - 1], t);
+			Aq[0] = b[0] = u0;
+			Aq[n - 1] = b[n - 1] = un;
 
 			diff = 0;
 			double norm = 0;
@@ -178,36 +150,21 @@ int main()
 
 			q0 = q1;
 
-			for (int k = 0; k < _t.size(); k++)
-			{
-				if (abs(t - _t[k]) < 1.0e-7)
-				{
-					csv(0, col, "t = ");
-					csv(0, col, t);
-					int j = 0;
-					for (int i = 0; i < n; i++)
-						for (int k = 0; k < _.size(); k++)
-							if (abs(x[i] - _[k]) < 1.0e-9)
-							{
-								csv(j + 1, col, q0[i]);
-								j++;
-							}
-
-					csv(j + 1, col, diff);
-					csv(j + 2, col, diff1);
-
-					col += 2;
-				}
-			}
-
 			A.Clear();
-			for (auto& bi : b)
-				bi = 0;
+			fill(b.begin(), b.end(), 0.0);
+
+			k++;
 		}
+
+		cout << "iterations: " << k << endl;
 	}
 
-	csv.Write("result.csv");
-	system("result.csv");
+	cout << endl << endl;
+	for (auto qi : q1)
+	{
+		cout << qi << endl;
+	}
 
+	cin.get();
 	return 0;
 }

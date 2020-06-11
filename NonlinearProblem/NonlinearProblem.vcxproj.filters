@@ -50,6 +50,9 @@
     <ClInclude Include="src\SLAESolver\SLAESolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\NewtonSLAEBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input\time_intervals.txt" />

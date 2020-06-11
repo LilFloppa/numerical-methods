@@ -158,6 +158,7 @@
     <ClInclude Include="src\FEMInfo.h" />
     <ClInclude Include="src\Interval.h" />
     <ClInclude Include="src\Matrix.h" />
+    <ClInclude Include="src\NewtonSLAEBuilder.h" />
     <ClInclude Include="src\SLAEBuilder.h" />
     <ClInclude Include="src\MeshBuilder.h" />
     <ClInclude Include="src\PortraitBuilder.h" />

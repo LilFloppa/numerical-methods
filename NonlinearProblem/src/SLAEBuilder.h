@@ -66,7 +66,7 @@ private:
 
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
-				local[i][j] = (l1 * G1[i][j] + l2 * G2[i][j]+ l3 * G3[i][j]) / h /*h * sigma * M[i][j] / dt*/;
+				local[i][j] = (l1 * G1[i][j] + l2 * G2[i][j] + l3 * G3[i][j]) / h; /*h * sigma * M[i][j] / dt;*/
 
 		return local;
 	}
@@ -86,16 +86,17 @@ private:
 
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
-				b[i] += h * (f[j] * M[i][j] + sigma * q[j] * M[i][j] / dt);
+				b[i] += h * (f[j] * M[i][j] /*+sigma * q[j] * M[i][j] / dt*/);
 
 		return b;
 	}
 
-	double lambda(double b, double x, double h, vector<double> q)
+	double lambda(double a, double x, double h, vector<double> q)
 	{
-		double du1 = basisDirs[0](x - b, h) * q[0];
-		double du2 = basisDirs[1](x - b, h) * q[1];
-		double du3 = basisDirs[2](x - b, h) * q[2];
+		double du1 = basisDirs[0](x - a, h) * q[0];
+		double du2 = basisDirs[1](x - a, h) * q[1];
+		double du3 = basisDirs[2](x - a, h) * q[2];
+
 		return Lamdba(x, du1 + du2 + du3);
 	}
 };

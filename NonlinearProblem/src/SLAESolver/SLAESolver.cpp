@@ -1,5 +1,15 @@
 #include "SLAESolver.h"
 
+
+void LUDecomposition(Matrix& mat);
+void Solve(Matrix& mat, std::vector<double>& x, std::vector<double>& b);
+
+void LU(Matrix A, std::vector<double>& x, std::vector<double> b)
+{
+	LUDecomposition(A);
+	Solve(A, x, b);
+}
+
 void LUDecomposition(Matrix& A)
 {
 	for (int i = 0; i < A.N; i++)
@@ -43,7 +53,6 @@ void LUDecomposition(Matrix& A)
 
 void Solve(Matrix& A, std::vector<double>& x, std::vector<double>& b)
 {
-
 	std::vector<double>& y = b;
 
 	// Прямой обход

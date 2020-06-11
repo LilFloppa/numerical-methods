@@ -42,6 +42,13 @@ std::vector<std::function<double(double, double)>> basis =
 	[](double x, double h) { return 2 * x * (x - h / 2) / (h * h); }
 };
 
+std::vector<std::function<double(double, double)>> Nbasis =
+{
+	[](double x, double h) { return 2 * (x - 1) * (x - 0.5); },
+	[](double x, double h) { return 4 * x * (1 - x); },
+	[](double x, double h) { return 2 * x * (x - 0.5); }
+};
+
 std::vector<std::function<double(double, double)>> basisDirs =
 {
 	[](double x, double h) { return 4 * x / (h * h) - 3 / h; },
@@ -49,16 +56,24 @@ std::vector<std::function<double(double, double)>> basisDirs =
 	[](double x, double h) { return 4 * x / (h * h) - 1 / h; }
 };
 
+std::vector<std::function<double(double)>> NbasisDirs =
+{
+	[](double x) { return 4 * x - 3; },
+	[](double x) { return 4 - 8 * x; },
+	[](double x) { return 4 * x - 1; }
+};
+
+
 const double sigma = 0.0;
 
 double Lamdba(double x, double du)
 {
-	return 1 + x + du;
+	return 1 + du;
 }
 
 double F(double x, double t)
 {
-	return -2.0 - 12.0 * x;
+	return -(2 + 8 * x);
 }
 
 const double PI = 3.14159265359;
