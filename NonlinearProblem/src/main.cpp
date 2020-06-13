@@ -23,7 +23,7 @@ std::vector<double> __t = { 0.0, 1.0666666666666667, 1.6000000000000001, 1.86666
 
 double u(double x, double t)
 {
-	return x * x;
+	return x * x * t;
 }
 
 int main()
@@ -89,7 +89,7 @@ int main()
 	TimeIterator time_end = time.End();
 
 	for (int i = 0; i < n; i++)
-		q0.push_back(u(x[i] + 0.123, *time_begin));
+		q0.push_back(u(x[i], *time_begin));
 
 	// Start fixed-point iteration
 	vector<double> b(n);
@@ -97,6 +97,35 @@ int main()
 
 	double eps = 10e-12;
 	double delta = 10e-12;
+
+	int key = 0;
+	std::cout << "Newton - 1\n" << "Simple - 2\n" << endl;
+	cin >> key;
+
+	CSV csv(15, 100000);
+	int col = 0;
+
+	csv(0, col, "x");
+	for (int i = 0, j = 0; i < n; i++)
+		for (int k = 0; k < _.size(); k++)
+			if (abs(x[i] - _[k]) < 1.0e-9)
+			{
+				csv(j + 1, col, x[i]);
+				j++;
+			}
+
+	col++;
+
+	csv(0, col, "t = ");
+	csv(0, col, 0.0);
+	for (int i = 0, j = 0; i < n; i++)
+		for (int k = 0; k < _.size(); k++)
+			if (abs(x[i] - _[k]) < 1.0e-9)
+			{
+				csv(j + 1, col, q0[i]);
+				j++;
+			}
+	col++;
 
 	for (TimeIterator i = time_begin + 1; i != time_end; i++)
 	{
@@ -113,9 +142,18 @@ int main()
 		int k = 0;
 		while (diff >= eps && diff1 >= delta)
 		{
-			newton.BuildGlobal(A, q0, dt);
-			newton.BuildGlobalB(b, q0, t, dt);
-			newton.Boundary(A, b, u0, un);
+			if (key == 1)
+			{
+				newton.BuildGlobal(A, q0, dt);
+				newton.BuildGlobalB(b, q0, t, dt);
+				newton.Boundary(A, b, u0, un);
+			}
+			else
+			{
+				slae.BuildGlobal(A, q0, dt);
+				slae.BuildGlobalB(b, q0, t, dt);
+				slae.Boundary(A, b, u0, un);
+			}
 
 			LU(A, q1, b);
 
@@ -156,14 +194,26 @@ int main()
 			k++;
 		}
 
-		cout << "iterations: " << k << endl;
+		csv(0, col, "t = ");
+		csv(0, col, t);
+		int j = 0;
+		for (int i = 0; i < n; i++)
+			for (int k = 0; k < _.size(); k++)
+				if (abs(x[i] - _[k]) < 1.0e-9)
+				{
+					csv(j + 1, col, q0[i]);
+					j++;
+				}
+
+		csv(j + 1, col, diff);
+		csv(j + 2, col, diff1);
+		csv(j + 3, col, k);
+
+		col++;
 	}
 
-	cout << endl << endl;
-	for (auto qi : q1)
-	{
-		cout << qi << endl;
-	}
+	csv.Write("result.csv");
+	system("result.csv");
 
 	cin.get();
 	return 0;

@@ -64,16 +64,16 @@ std::vector<std::function<double(double)>> NbasisDirs =
 };
 
 
-const double sigma = 0.0;
+const double sigma = 1.0;
 
 double Lamdba(double x, double du)
 {
-	return 1 + du;
+	return 1 + x + du;
 }
 
 double F(double x, double t)
 {
-	return -(2 + 8 * x);
+	return -1.0 + 2.0;
 }
 
 const double PI = 3.14159265359;
