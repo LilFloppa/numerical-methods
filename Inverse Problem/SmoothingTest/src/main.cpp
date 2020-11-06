@@ -52,8 +52,8 @@ void CreateInitialParameters(std::vector<Element>& init_parameters, std::vector<
 		init_parameters.emplace_back(grid[i], 0.0);
 
 	init_parameters[49].value = 1.0;
-	init_parameters[50].value = 1.5;
-	init_parameters[69].value = 1.5;
+	init_parameters[50].value = 1.0;
+	init_parameters[69].value = 1.0;
 	init_parameters[70].value = 1.0;
 }
 
@@ -125,12 +125,12 @@ void TestWithSmoothingRegularization()
 	info.grid = &grid;
 
 	std::vector<double> dp;
-	RegularizedInverseProblem(init_g, real_g, grid, dp, 1.0e-17);
-	// Get new parameters
-	for (int i = 0; i < ElementCount; i++)
-		changed_elements[i].value = init_Element[i].value + dp[i];
+	//regularizedinverseproblem(init_g, real_g, grid, dp, 1.0e-17);
+	//// get new parameters
+	//for (int i = 0; i < elementcount; i++)
+	//	changed_elements[i].value = init_element[i].value + dp[i];
 
-	CSV::PrintElements("Result (Without Smoothing).csv", changed_elements, ElementCountX, ElementCountZ);
+	//csv::printelements("result (without smoothing).csv", changed_elements, elementcountx, elementcountz);
 
 	do
 	{
@@ -144,7 +144,7 @@ void TestWithSmoothingRegularization()
 
 		// Get new parameters
 		for (int i = 0; i < ElementCount; i++)
-			changed_elements[i].value = init_Element[i].value + dp[i];
+			changed_elements[i].value += dp[i];
 
 		std::stringstream stream;
 		stream << "Result (" << iter++ << ").csv";
@@ -158,6 +158,14 @@ void TestWithSmoothingRegularization()
 		badConds = CheckSmoothingCondition(changed_elements, badCondsCoords, ElementCountX, 0.1);
 
 		ChangeGammas(gammaInfo, badCondsCoords);
+
+		// Calculate new g
+		std::vector<Receiver>* new_g = new std::vector<Receiver>();
+		CreateReceivers(*new_g);
+		DirectProblem(changed_elements, *new_g);
+
+		info.g0 = new_g;
+
 	} while (badConds);
 }
 
