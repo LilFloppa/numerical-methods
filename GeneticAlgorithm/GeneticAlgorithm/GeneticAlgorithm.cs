@@ -8,7 +8,7 @@ namespace GeneticAlgorithm
 		public int PopulationCount { get; set; }
 		public int GenesCount { get; set; }
 
-		public double[] TrueGenes { get; set; }
+		public double[] TrueValues { get; set; }
 
 		public int MaxIterCount { get; set; }
 		public double Eps { get; set; }
@@ -125,7 +125,14 @@ namespace GeneticAlgorithm
 			if (p < Info.MutationProbability)
 			{
 				int i = Random.Next(Info.GenesCount);
-				individual.Genes[i] = Info.minGeneValue + Random.NextDouble() * (Info.maxGeneValue - Info.minGeneValue);
+				//individual.Genes[i] = Info.minGeneValue + Random.NextDouble() * (Info.maxGeneValue - Info.minGeneValue);
+				individual.Genes[i] += 0.3 * (Info.minGeneValue + Random.NextDouble() * (Info.maxGeneValue - Info.minGeneValue));
+
+				if (individual.Genes[i] < Info.minGeneValue)
+					individual.Genes[i] = Info.minGeneValue;
+
+				if (individual.Genes[i] > Info.maxGeneValue)
+					individual.Genes[i] = Info.maxGeneValue;
 			}
 		}
 
@@ -158,25 +165,12 @@ namespace GeneticAlgorithm
 		{
 			double result = 0.0;
 
-			double h = (Info.MaxPoint - Info.MinPoint) / Info.PointsCount;
+			double[] values = Polynom.PolynomValues(Info.PointsCount, Info.MinPoint, Info.MaxPoint, individual.Genes);
+
 			for (int i = 0; i < Info.PointsCount; i++)
-			{
-				double point = Info.MinPoint + h * i;
-				double value1 = Polynom(point, Info.TrueGenes);
-				double value2 = Polynom(point, individual.Genes);
-				result += (value1 - value2) * (value1 - value2) / (value1 * value1 + 1);
-			}
+				result += (Info.TrueValues[i] - values[i]) * (Info.TrueValues[i] - values[i]) / (values[i] * values[i] + 1);
 
 			individual.FunctionalValue = Math.Sqrt(result);
-		}
-
-		double Polynom(double point, double[] coeffs)
-		{
-			double result = 0.0;
-			for (int i = 0; i < Info.GenesCount; i++)
-				result = result * point + coeffs[i];
-
-			return result;
 		}
 	}
 
