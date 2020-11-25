@@ -123,15 +123,22 @@ namespace GeneticAlgorithm
 			if (p < Info.MutationProbability)
 			{
 				int i = Random.Next(Info.GenesCount);
-				//individual.Genes[i] = Info.minGeneValue + Random.NextDouble() * (Info.maxGeneValue - Info.minGeneValue);
-				individual.Genes[i] += 0.3 * (Info.minGeneValue + Random.NextDouble() * (Info.maxGeneValue - Info.minGeneValue));
+				individual.Genes[i] = Info.minGeneValue + Random.NextDouble() * (Info.maxGeneValue - Info.minGeneValue);
 
-				if (individual.Genes[i] < Info.minGeneValue)
-					individual.Genes[i] = Info.minGeneValue;
+				//if (p < Info.MutationProbability / 2.0)
+				//	individual.Genes[i] += 0.1 * individual.Genes[i];
 
-				if (individual.Genes[i] > Info.maxGeneValue)
-					individual.Genes[i] = Info.maxGeneValue;
+				//if (p > Info.MutationProbability / 2.0 && p < Info.MutationProbability)
+				//	individual.Genes[i] -= 0.1 * individual.Genes[i];
 			}
+		}
+
+		void CrossingOver(Individual i1, Individual i2)
+		{
+			int i = Random.Next(Info.GenesCount);
+
+			for (int j = 0; j < i; j++)
+				(i1.Genes[j], i2.Genes[j]) = (i2.Genes[j], i1.Genes[j]);
 		}
 
 		Population Selection()
@@ -168,7 +175,8 @@ namespace GeneticAlgorithm
 			for (int i = 0; i < Info.Points.Length; i++)
 				result += (Info.TrueValues[i] - values[i]) * (Info.TrueValues[i] - values[i]) / (values[i] * values[i] + 1);
 
-			individual.FunctionalValue = Math.Sqrt(result);
+
+			individual.FunctionalValue = result / Info.Points.Length;
 		}
 	}
 
