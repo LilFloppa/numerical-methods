@@ -19,9 +19,7 @@ namespace GeneticAlgorithm
 		public double MutationProbability { get; set; }
 		public double MaxParentCount { get; set; }
 
-		public int PointsCount { get; set; }
-		public double MinPoint { get; set; }
-		public double MaxPoint { get; set; }
+		public double[] Points;
 	}
 
 	class GeneticAlgorithm
@@ -165,9 +163,9 @@ namespace GeneticAlgorithm
 		{
 			double result = 0.0;
 
-			double[] values = Polynom.PolynomValues(Info.PointsCount, Info.MinPoint, Info.MaxPoint, individual.Genes);
+			double[] values = Polynom.PolynomValues(Info.Points, individual.Genes);
 
-			for (int i = 0; i < Info.PointsCount; i++)
+			for (int i = 0; i < Info.Points.Length; i++)
 				result += (Info.TrueValues[i] - values[i]) * (Info.TrueValues[i] - values[i]) / (values[i] * values[i] + 1);
 
 			individual.FunctionalValue = Math.Sqrt(result);

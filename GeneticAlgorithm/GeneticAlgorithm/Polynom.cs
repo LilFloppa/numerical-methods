@@ -15,20 +15,14 @@ namespace GeneticAlgorithm
 			return result;
 		}
 
-		static public double[] PolynomValues(int n, double min, double max, double[] coeffs)
+		static public double[] PolynomValues(double[] points, double[] coeffs)
 		{
-			double[] values = new double[n];
+			double[] values = new double[points.Length];
 
-			double h = (max - min) / n;
-
-			for (int i = 0; i < n; i++)
-			{
-				double point = min + h * i;
-				values[i] = PolynomValue(point, coeffs);
-			}
+			for (int i = 0; i < points.Length; i++)
+				values[i] = PolynomValue(points[i], coeffs);
 
 			return values;
 		}
-
 	}
 }
