@@ -1,44 +1,67 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 
 namespace GeneticAlgorithm
 {
 	class Program
 	{
+		static void WriteCSV(string filename, GeneticAlgorithm algorithm, double[] trueGenes)
+		{
+			using (StreamWriter stream = new StreamWriter(filename))
+			{
+				stream.Write($"Вероятность мутации; {algorithm.Info.MutationProbability}\n");
+				stream.Write($"Численность популяции; {algorithm.Info.PopulationCount}\n");
+				stream.Write($"Количество генов; {algorithm.Info.GenesCount}\n");
+				//stream.Write($"Лучшее значение функционала; {algorithm.BestFuctionalValues[algorithm.BestFuctionalValues.Count - 1]}\n");
+
+				for (int i = 0; i < algorithm.Info.GenesCount; i++)
+					stream.Write($"{trueGenes[i]};");
+
+				stream.Write("\n");
+
+				for (int i = 0; i < algorithm.Info.GenesCount; i++)
+					stream.Write($"{algorithm.BestGenotype[i]};");
+
+				stream.Write("\n");
+
+				int iter = 0;
+				foreach (double value in algorithm.BestFuctionalValues)
+				{
+					stream.Write($"{iter};{value}\n");
+					iter++;
+				}
+			}
+		}
+
 		static void Main(string[] args)
 		{
-			double[] TrueGenes = new double[11] { -2, 0.5, 0, 0, 1, 0.8, -1.5, -2, 4, -0.25, 0.8 };
-
-			List<double> Points = new List<double>();
-			double h = 2.0 / 10;
-			for (int i = 0; i < 10; i++)
-				Points.Add(-1.0 + i * h);
-			
-			double[] values = Polynom.PolynomValues(Points.ToArray(), TrueGenes);
-
 			GeneticAlgorithmInfo info = new GeneticAlgorithmInfo();
 			info.PopulationCount = 1000;
-			info.GenesCount = 11;
-			info.MaxIterCount = 10000;
-			info.Eps = 0.0001;
-			info.minGeneValue = -2.0;
-			info.maxGeneValue = 4.0;
-			info.MaxParentCount = 5;
-			info.MutationProbability = 0.5;
-			info.Points = Points.ToArray();
-			info.TrueValues = values;
+			info.GenesCount = 50;
+			info.MaxIterCount = 5000;
+			info.Eps = 1.0e-15;
+			info.minGeneValue = -10.0;
+			info.maxGeneValue = 10.0;
+			info.MaxParentCount = 20;
+			info.MutationProbability = 0.3;
 
 			GeneticAlgorithm algorithm = new GeneticAlgorithm(info);
 			algorithm.Solve();
 
 			Console.WriteLine();
+			
 
-			for (int i = 0; i < info.GenesCount; i++)
-				Console.WriteLine($"{algorithm.BestGenotype[i]} - {TrueGenes[i]}");
+			double[] trueGenes = new double[info.GenesCount];
+			for (int i = 0, k = 0; i < info.GenesCount; i++, k++)
+			{
+				if (k == Constants.Offsets.Length)
+					k = 0;
+				trueGenes[i] = Constants.Offsets[k];
+			}
 
+
+			WriteCSV("result1.csv", algorithm, trueGenes);
 			Console.WriteLine();
 		}
-	}
-
-	
+	}	
 }

@@ -8,8 +8,6 @@ namespace GeneticAlgorithm
 		public int PopulationCount { get; set; }
 		public int GenesCount { get; set; }
 
-		public double[] TrueValues { get; set; }
-
 		public int MaxIterCount { get; set; }
 		public double Eps { get; set; }
 
@@ -18,8 +16,6 @@ namespace GeneticAlgorithm
 
 		public double MutationProbability { get; set; }
 		public double MaxParentCount { get; set; }
-
-		public double[] Points;
 	}
 
 	class GeneticAlgorithm
@@ -34,6 +30,7 @@ namespace GeneticAlgorithm
 		public int Iteration { get; set; } = 0;
 
 		public double[] BestGenotype { get; set; } = null;
+		public List<double> FunctionalValues { get; set; } = new List<double>();
 
 		public GeneticAlgorithm(GeneticAlgorithmInfo info) => Info = info;
 
@@ -44,6 +41,7 @@ namespace GeneticAlgorithm
 			BestFuctionalValues.Add(PreviousPopulation.Individuals[0].FunctionalValue);
 
 			double bestFunctionalValue = BestFuctionalValues[0];
+			FunctionalValues.Add(bestFunctionalValue);
 			Iteration = 0;
 			while (Iteration < Info.MaxIterCount && bestFunctionalValue >= Info.Eps)
 			{
@@ -51,12 +49,13 @@ namespace GeneticAlgorithm
 				CurrentPopulation.SortIndividuals();
 				BestFuctionalValues.Add(CurrentPopulation.Individuals[0].FunctionalValue);
 				bestFunctionalValue = CurrentPopulation.Individuals[0].FunctionalValue;
+				FunctionalValues.Add(bestFunctionalValue);
 
 				PreviousPopulation = Selection();
 				CurrentPopulation = null;
 				Iteration++;
 
-				Console.WriteLine(bestFunctionalValue);
+				Console.WriteLine($"{bestFunctionalValue, 20}\t\t {Iteration}");
 			}
 
 			BestGenotype = PreviousPopulation.Individuals[0].Genes;
@@ -73,6 +72,7 @@ namespace GeneticAlgorithm
 				for (int j = 0; j < Info.GenesCount; j++)
 					individual.Genes[j] = Info.minGeneValue + Random.NextDouble() * (Info.maxGeneValue - Info.minGeneValue);
 
+				individual.CaluclatePhenotype();
 				SetFunctionalValue(individual);
 				population.Individuals[i] = individual;
 			}
@@ -93,7 +93,13 @@ namespace GeneticAlgorithm
 					Individual mother = PreviousPopulation.GetRandomIndividual(Random);
 
 					Individual child = CreateChild(father, mother);
-					Mutation(child);
+
+					if (BestFuctionalValues[BestFuctionalValues.Count - 1] >= 1.0e-5)
+						Mutation2(child);
+					else
+						Mutation1(child);
+
+					child.CaluclatePhenotype();
 					SetFunctionalValue(child);
 					population.Individuals[n] = child;
 					n++;
@@ -117,25 +123,35 @@ namespace GeneticAlgorithm
 			return child;		
 		}
 
-		void Mutation(Individual individual)
+		void Mutation1(Individual individual)
 		{
 			double p = Random.NextDouble();
-			if (p < Info.MutationProbability)
+			if (p <= Info.MutationProbability)
+			{
+				int i = Random.Next(Info.GenesCount);
+				double p1 = Random.NextDouble();
+				double p2 = Random.NextDouble() * 0.1;
+
+				if (p1 >= 0.5)
+					individual.Genes[i] *= 1.0 + p2;
+				else
+					individual.Genes[i] *= 1.0 - p2;
+			}
+		}
+
+		void Mutation2(Individual individual)
+		{
+			double p = Random.NextDouble();
+			if (p <= Info.MutationProbability)
 			{
 				int i = Random.Next(Info.GenesCount);
 				individual.Genes[i] = Info.minGeneValue + Random.NextDouble() * (Info.maxGeneValue - Info.minGeneValue);
-
-				//if (p < Info.MutationProbability / 2.0)
-				//	individual.Genes[i] += 0.1 * individual.Genes[i];
-
-				//if (p > Info.MutationProbability / 2.0 && p < Info.MutationProbability)
-				//	individual.Genes[i] -= 0.1 * individual.Genes[i];
 			}
 		}
 
 		void CrossingOver(Individual i1, Individual i2)
 		{
-			int i = Random.Next(Info.GenesCount);
+			int i = Random.Next(Info.GenesCount / 2);
 
 			for (int j = 0; j < i; j++)
 				(i1.Genes[j], i2.Genes[j]) = (i2.Genes[j], i1.Genes[j]);
@@ -169,22 +185,33 @@ namespace GeneticAlgorithm
 		void SetFunctionalValue(Individual individual)
 		{
 			double result = 0.0;
+			foreach (double value in individual.Phenotype)
+				result += value * value;
 
-			double[] values = Polynom.PolynomValues(Info.Points, individual.Genes);
-
-			for (int i = 0; i < Info.Points.Length; i++)
-				result += (Info.TrueValues[i] - values[i]) * (Info.TrueValues[i] - values[i]) / (values[i] * values[i] + 1);
-
-
-			individual.FunctionalValue = result / Info.Points.Length;
+			individual.FunctionalValue = Math.Sqrt(result);
 		}
 	}
 
 	class Individual
 	{
 		public double[] Genes { get; set; }
+		public double[] Phenotype { get; set; }
 		public double FunctionalValue { get; set; }
-		public Individual(int genesCount) => Genes = new double[genesCount];
+		public Individual(int genesCount)
+		{
+			Genes = new double[genesCount];
+			Phenotype = new double[genesCount];
+		}
+
+		public void CaluclatePhenotype()
+		{
+			for (int i = 0, k = 0; i < Genes.Length; i++, k++)
+			{
+				if (k == Constants.Offsets.Length) 
+					k = 0;
+				Phenotype[i] = (Genes[i] - Constants.Offsets[k]) * (Genes[i] - Constants.Offsets[k]);
+			}
+		}
 	}
 
 	class Population
@@ -196,5 +223,6 @@ namespace GeneticAlgorithm
 		public void SortIndividuals() => Array.Sort(Individuals, (Individual x, Individual y) => x.FunctionalValue.CompareTo(y.FunctionalValue));
 
 		public Individual GetRandomIndividual(Random random) => Individuals[random.Next(Individuals.Length)];
+
 	}
 }
