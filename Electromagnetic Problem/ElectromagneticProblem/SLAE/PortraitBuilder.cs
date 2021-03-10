@@ -1,17 +1,19 @@
-﻿using System.Collections.Generic;
-using SlaeSolver;
+﻿using ElectromagneticProblem.Enviroment;
+using ElectromagneticProblem.FEM;
+using ElectromagneticProblem.Matrix;
+using System.Collections.Generic;
 
-namespace FEM
+namespace ElectromagneticProblem.SLAE
 {
 	public class PortraitBuilder
 	{
 		public int NodeCount { get; set; }
 		public SortedSet<int>[] connections { get; set; }
 
-		public PortraitBuilder(int nodeCount, Mesh mesh)
+		public PortraitBuilder(Mesh mesh)
 		{
-			NodeCount = nodeCount;
-			connections = new SortedSet<int>[nodeCount];
+			NodeCount = mesh.NodeCount;
+			connections = new SortedSet<int>[NodeCount];
 			for (int i = 0; i < NodeCount; i++)
 				connections[i] = new SortedSet<int>();
 
@@ -43,8 +45,8 @@ namespace FEM
 
 		void BuildConnections(Mesh mesh)
 		{
-			foreach (FiniteElement e in mesh)
-				for (int i = 1; i < FEMInfo.BasisSize; i++)
+			foreach (FiniteElement e in mesh.Elements)
+				for (int i = 1; i < FEMParameters.BasisSize; i++)
 					for (int j = 0; j < i; j++)
 					{
 						int a = e.Vertices[i];
