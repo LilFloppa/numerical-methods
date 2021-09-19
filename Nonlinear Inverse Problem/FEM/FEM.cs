@@ -40,6 +40,10 @@ namespace FEM
 					Solver = new LOSLU();
 					break;
 
+				case SolverTypes.LOSLUParallel:
+					Solver = new LOSLUParallel();
+					break;
+
 				default:
 					Solver = new LOSLU();
 					break;
