@@ -18,7 +18,7 @@ namespace SlaeSolver
 
 	public class LOSLU : ISolver
 	{
-		public int MaxIterCount { get; set; } = 1000;
+		public int MaxIterCount { get; set; } = 800;
 		public int IterCount { get; set; } = 0;
 
 		public double Eps { get; set; } = 1.0e-15;
@@ -99,15 +99,10 @@ namespace SlaeSolver
 
 				// Calculate difference
 				Difference = Utilities.DotProduct(r, r);
-
-				if (IterCount % 100 == 0)
-					Console.WriteLine($"Текущая невязка: {Difference}");
-
 				IterCount++;
 			}
 
-			Console.WriteLine();
-			Console.WriteLine();
+			Console.WriteLine($"Последняя невязка: {Difference}");
 
 			return x;
 		}

@@ -72,46 +72,32 @@ namespace NonlinearInverseProblem
 			return fem;
 		}
 
-		public static double[] FEMDerivative(ProblemInfo info, double dh, double eps)
+		public static double[] FEMDerivativeS(ProblemInfo info, double ds, double eps)
 		{
-			Console.WriteLine($"Start to calculate derivatives for {info.h}");
-
+			Console.WriteLine("Вычисление производных...");
 			int n = info.Receivers.Count;
 
 			FEMrz fem1 = FEM(info.SolverType, info.Source.I, info.sigma1, info.sigma2, info.h, eps);
-			FEMrz fem2 = FEM(info.SolverType, info.Source.I, info.sigma1, info.sigma2, info.h + dh, eps);
+			FEMrz fem2 = FEM(info.SolverType, info.Source.I, info.sigma1 + ds, info.sigma2, info.h, eps);
 
-			//double[] V1 = new double[n];
-			//for (int i = 0; i < n; i++)
-			//{
-			//	Vector3 M = info.Receivers[i].M;
-			//	Vector3 N = info.Receivers[i].N;
+            double[] V1 = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                Vector2 M = info.Receivers[i].M;
+                V1[i] = fem1.U(new Point(M.X - 100.0, M.Y)) - fem1.U(new Point(M.X, M.Y));
+            }
 
-			//	double vABM = fem1.U(new Point(M.X - 100.0, M.Y)) - fem1.U(new Point(M.X, M.Y));
-			//	double vABN = fem1.U(new Point(N.X - 100.0, N.Y)) - fem1.U(new Point(N.X, N.Y));
+            double[] V2 = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                Vector2 M = info.Receivers[i].M;
+                V2[i] = fem2.U(new Point(M.X - 100.0, M.Y)) - fem2.U(new Point(M.X, M.Y));
+            }
 
-			//	V1[i] = vABM - vABN;
-			//}
+            double[] dV = new double[3];
+			for (int i = 0; i < n; i++)
+				dV[i] = (V2[i] - V1[i]) / ds;
 
-			//double[] V2 = new double[n];
-			//for (int i = 0; i < n; i++)
-			//{
-			//	Vector3 M = info.Receivers[i].M;
-			//	Vector3 N = info.Receivers[i].N;
-
-			//	double vABM = fem2.U(new Point(M.X - 100.0, M.Y)) - fem2.U(new Point(M.X, M.Y));
-			//	double vABN = fem2.U(new Point(N.X - 100.0, N.Y)) - fem2.U(new Point(N.X, N.Y));
-
-			//	V2[i] = vABM - vABN;
-			//}
-
-			double[] dV = new double[3];
-			//for (int i = 0; i < n; i++)
-			//	dV[i] = (V2[i] - V1[i]) / dh;
-
-
-			//Console.WriteLine("Finished to calculate derivatives");
-			//Console.WriteLine();
 			return dV;
 		}
 
@@ -164,9 +150,9 @@ namespace NonlinearInverseProblem
 			return V;
 		}
 
-		public static double InverseProblem(ProblemInfo info, double[] v, double[] trueV, double eps, double dh)
+		public static double InverseProblem(ProblemInfo info, double[] v, double[] trueV, double eps, double ds)
 		{
-			double[] derivatives = FEMDerivative(info, dh, eps);
+			double[] derivatives = FEMDerivativeS(info, ds, eps);
 
 			double A = 0.0;
 
