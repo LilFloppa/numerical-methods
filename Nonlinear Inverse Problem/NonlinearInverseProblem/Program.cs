@@ -28,7 +28,7 @@ namespace NonlinearInverseProblem
             using (var writer = new StreamWriter(File.OpenWrite("I.txt")))
             {
                 double[] TrueV = Problem.DirectProblem(info, eps);
-                TrueV[0] += TrueV[0] * 0.0;
+                TrueV[0] += TrueV[0] * 0.09;
 
                 double I0 = 5.0;
                 info.Source.I = I0;
