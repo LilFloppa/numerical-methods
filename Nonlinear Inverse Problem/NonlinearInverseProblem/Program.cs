@@ -96,20 +96,24 @@ namespace NonlinearInverseProblem
                 SolverType = SlaeSolver.SolverTypes.LOSLU
             };
 
-
-            double[] TrueV = Problem.DirectProblem(info, eps);
-
-            double sigma0 = 4.0;
-
-
-            Console.WriteLine($"new sigma { sigma0 }");
-            info.sigma1 = sigma0;
-            double[] V0 = Problem.DirectProblem(info, eps);
-
-            double J = Problem.Functional(V0, TrueV);
             using (var writer = new StreamWriter(File.OpenWrite("sigma.txt")))
             {
-                writer.WriteLine(sigma0);
+                double[] TrueV = Problem.DirectProblem(info, eps);
+                TrueV[0] += TrueV[0] * 0.0;
+
+                double sigma0 = 4.0;
+
+                Console.WriteLine($"new sigma { sigma0 }");
+                info.sigma1 = sigma0;
+                double[] V0 = Problem.DirectProblem(info, eps);
+
+                double J = Problem.Functional(V0, TrueV);
+
+
+                writer.WriteLine("I; V0; V1; J");
+                writer.WriteLine($"{ trueSigma }; { TrueV[0] }; { TrueV[1] }; 0");
+                writer.WriteLine($"{ sigma0 }; { V0[0] }; { V0[1] }; { J }");
+
                 while (Math.Abs(sigma0 - trueSigma) > sigmaEps)
                 {
                     double ds = Problem.InverseProblem(info, V0, TrueV, eps, 0.05 * sigma0);
@@ -140,11 +144,12 @@ namespace NonlinearInverseProblem
                     {
                         Console.WriteLine($"New sigma: { sigmaI }");
                         sigma0 = sigmaI;
-                        writer.WriteLine(sigma0);
+                        J = Problem.Functional(V0, TrueV);
+                        writer.WriteLine($"{ sigma0 }; { V0[0] }; { V0[1] }; { J }");
                     }
                 }
             }
-        }
+        } 
 
         static void Main(string[] args)
         {
@@ -154,7 +159,7 @@ namespace NonlinearInverseProblem
             System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
             System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
 
-            LinearProblem();
+            NonlinearProblem();
         }
     }
 }
