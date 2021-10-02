@@ -9,7 +9,6 @@ namespace NonlinearInverseProblem
     {
         static void LinearProblem()
         {
-            Random random = new Random();
             double trueI = 1.66;
             double iEps = 0.1;
             double eps = 1.0e-15;
@@ -26,17 +25,21 @@ namespace NonlinearInverseProblem
                 sigma2 = 2.0,
                 SolverType = SlaeSolver.SolverTypes.LOSLU
             };
-
-            double[] TrueV = Problem.DirectProblem(info, eps);
-            TrueV[0] += TrueV[0] * (0.01 + 0.9 * random.NextDouble());
-
-            double I0 = 5.0;
-            info.Source.I = I0;
-            double[] V0 = Problem.DirectProblem(info, eps);
-
-            double J = Problem.Functional(V0, TrueV);
             using (var writer = new StreamWriter(File.OpenWrite("I.txt")))
             {
+                double[] TrueV = Problem.DirectProblem(info, eps);
+                TrueV[0] += TrueV[0] * 0.0;
+
+                double I0 = 5.0;
+                info.Source.I = I0;
+                double[] V0 = Problem.DirectProblem(info, eps);
+
+                double J = Problem.Functional(V0, TrueV);
+
+                writer.WriteLine("I; V0; V1; J");
+                writer.WriteLine($"{ trueI }; { TrueV[0] }; { TrueV[1] }; 0");
+                writer.WriteLine($"{ I0 }; { V0[0] }; { V0[1] }; { J }");
+
                 writer.WriteLine(I0);
                 while (Math.Abs(I0 - trueI) > iEps)
                 {
@@ -68,7 +71,8 @@ namespace NonlinearInverseProblem
                     {
                         Console.WriteLine($"New I: { Ii }");
                         I0 = Ii;
-                        writer.WriteLine(I0);
+                        J = Problem.Functional(V0, TrueV);
+                        writer.WriteLine($"{ I0 }; { V0[0] }; { V0[1] }; { J }");
                     }
                 }
             }
