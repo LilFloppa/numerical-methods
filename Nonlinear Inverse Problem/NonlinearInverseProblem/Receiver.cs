@@ -4,13 +4,10 @@ namespace NonlinearInverseProblem
 {
 	public class Receiver
 	{
-		public Vector3 M { get; set; }
-		public Vector3 N { get; set; }
-
-		public Receiver(Vector3 M, Vector3 N)
+		public Vector2 M { get; set; }
+		public Receiver(Vector2 M)
 		{
 			this.M = M;
-			this.N = N;
 		}
 	}
 }

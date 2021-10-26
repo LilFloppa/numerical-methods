@@ -13,14 +13,13 @@ namespace NonlinearInverseProblem
 		{
 			public Source Source;
 			public List<Receiver> Receivers;
-			public double[] V;
-			public double[] TrueV;
 			public double h;
 			public double sigma1;
 			public double sigma2;
+			public SolverTypes SolverType;
 		}
 
-		public static FEMrz FEM(double sigma1, double sigma2, double h1, double eps)
+		public static FEMrz FEM(SolverTypes solverType, double I, double sigma1, double sigma2, double h, double eps)
 		{
 			Dictionary<int, Material> materials = new Dictionary<int, Material>()
 			{
@@ -39,8 +38,8 @@ namespace NonlinearInverseProblem
 			areainfo.R0 = 0.0;
 			areainfo.Z0 = 0.0;
 			areainfo.Width = 10000;
-			areainfo.FirstLayerHeight = h1;
-			areainfo.SecondLayerHeight = 10000 - h1;
+			areainfo.FirstLayerHeight = h;
+			areainfo.SecondLayerHeight = 10000 - h;
 
 			areainfo.HorizontalStartStep = 0.2;
 			areainfo.HorizontalCoefficient = 1.1;
@@ -55,7 +54,7 @@ namespace NonlinearInverseProblem
 			gb.Build();
 
 			foreach (Edge edge in gb.SB.Edges)
-				edge.Function = (double r, double z) => 1.0 / (Math.PI * gb.ClosestSplitPoint * gb.ClosestSplitPoint);
+				edge.Function = (double r, double z) => I / (Math.PI * gb.ClosestSplitPoint * gb.ClosestSplitPoint);
 
 			FEMProblemInfo info = new FEMProblemInfo();
 			info.Points = gb.Points.ToArray();
@@ -64,7 +63,7 @@ namespace NonlinearInverseProblem
 			info.FB = gb.FB;
 			info.SB = gb.SB;
 			info.F = (double r, double z) => 0.0;
-			info.SolverType = SolverTypes.LOSLU;
+			info.SolverType = solverType;
 
 			FEMrz fem = new FEMrz(info);
 			fem.Solver.Eps = eps;
@@ -73,42 +72,61 @@ namespace NonlinearInverseProblem
 			return fem;
 		}
 
-		public static double[] FEMDerivative(ProblemInfo info, double dh, double eps)
+		public static double[] FEMDerivativeS(ProblemInfo info, double ds, double eps)
 		{
-			Console.WriteLine($"Start to calculate derivatives for {info.h}");
+			Console.WriteLine("Вычисление производных...");
+			int n = info.Receivers.Count;
+
+			FEMrz fem1 = FEM(info.SolverType, info.Source.I, info.sigma1, info.sigma2, info.h, eps);
+			FEMrz fem2 = FEM(info.SolverType, info.Source.I, info.sigma1 + ds, info.sigma2, info.h, eps);
+
+            double[] V1 = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                Vector2 M = info.Receivers[i].M;
+                V1[i] = fem1.U(new Point(M.X - 100.0, M.Y)) - fem1.U(new Point(M.X, M.Y));
+            }
+
+            double[] V2 = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                Vector2 M = info.Receivers[i].M;
+                V2[i] = fem2.U(new Point(M.X - 100.0, M.Y)) - fem2.U(new Point(M.X, M.Y));
+            }
+
+            double[] dV = new double[3];
+			for (int i = 0; i < n; i++)
+				dV[i] = (V2[i] - V1[i]) / ds;
+
+			return dV;
+		}
+
+		public static double[] FEMDerivativeI(ProblemInfo info, double dI, double eps)
+		{
+			Console.WriteLine($"Start to calculate derivatives for I");
 
 			int n = info.Receivers.Count;
 
-			FEMrz fem1 = FEM(info.sigma1, info.sigma2, info.h, eps);
-			FEMrz fem2 = FEM(info.sigma1, info.sigma2, info.h + dh, eps);
+			FEMrz fem1 = FEM(info.SolverType, info.Source.I, info.sigma1, info.sigma2, info.h, eps);
+			FEMrz fem2 = FEM(info.SolverType, info.Source.I + dI, info.sigma1, info.sigma2, info.h, eps);
 
 			double[] V1 = new double[n];
 			for (int i = 0; i < n; i++)
 			{
-				Vector3 M = info.Receivers[i].M;
-				Vector3 N = info.Receivers[i].N;
-
-				double vABM = fem1.U(new Point(M.X - 100.0, M.Y)) - fem1.U(new Point(M.X, M.Y));
-				double vABN = fem1.U(new Point(N.X - 100.0, N.Y)) - fem1.U(new Point(N.X, N.Y));
-
-				V1[i] = vABM - vABN;
+				Vector2 M = info.Receivers[i].M;
+				V1[i] = fem1.U(new Point(M.X - 100.0, M.Y)) - fem1.U(new Point(M.X, M.Y));
 			}
 
-			double[] V2 = new double[n];
+            double[] V2 = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                Vector2 M = info.Receivers[i].M;
+				V2[i] = fem2.U(new Point(M.X - 100.0, M.Y)) - fem2.U(new Point(M.X, M.Y));
+            }
+
+            double[] dV = new double[3];
 			for (int i = 0; i < n; i++)
-			{
-				Vector3 M = info.Receivers[i].M;
-				Vector3 N = info.Receivers[i].N;
-
-				double vABM = fem2.U(new Point(M.X - 100.0, M.Y)) - fem2.U(new Point(M.X, M.Y));
-				double vABN = fem2.U(new Point(N.X - 100.0, N.Y)) - fem2.U(new Point(N.X, N.Y));
-
-				V2[i] = vABM - vABN;
-			}
-
-			double[] dV = new double[3];
-			for (int i = 0; i < n; i++)
-				dV[i] = (V2[i] - V1[i]) / dh;
+				dV[i] = (V2[i] - V1[i]) / dI;
 
 
 			Console.WriteLine("Finished to calculate derivatives");
@@ -118,35 +136,30 @@ namespace NonlinearInverseProblem
 
 		public static double[] DirectProblem(ProblemInfo info, double eps)
 		{
-			FEMrz fem = FEM(info.sigma1, info.sigma2, info.h, eps);
+			FEMrz fem = FEM(info.SolverType, info.Source.I, info.sigma1, info.sigma2, info.h, eps);
 
 			int n = info.Receivers.Count;
 			double[] V = new double[n];
 
 			for (int i = 0; i < n; i++)
 			{
-				Vector3 M = info.Receivers[i].M;
-				Vector3 N = info.Receivers[i].N;
-
-				double vABM = fem.U(new Point(M.X - 100.0, M.Y)) - fem.U(new Point(M.X, M.Y));
-				double vABN = fem.U(new Point(N.X - 100.0, N.Y)) - fem.U(new Point(N.X, N.Y));
-
-				V[i] = vABM - vABN;
+				Vector2 M = info.Receivers[i].M;
+				V[i] = fem.U(new Point(M.X - 100.0, M.Y)) - fem.U(new Point(M.X, M.Y));
 			}
 
 			return V;
 		}
 
-		public static double InverseProblem(ProblemInfo info, double eps, double dh)
+		public static double InverseProblem(ProblemInfo info, double[] v, double[] trueV, double eps, double ds)
 		{
-			double[] derivatives = FEMDerivative(info, dh, eps);
+			double[] derivatives = FEMDerivativeS(info, ds, eps);
 
 			double A = 0.0;
 
 			int k = 0;
 			foreach (var receiver in info.Receivers)
 			{
-				double w = 1.0 / info.TrueV[k];
+				double w = 1.0 / trueV[k];
 				A += (w * derivatives[k]) * (w * derivatives[k]);
 				k++;
 			}
@@ -155,8 +168,34 @@ namespace NonlinearInverseProblem
 			k = 0;
 			foreach (var receiver in info.Receivers)
 			{
-				double w = 1.0 / info.TrueV[k];
-				B -= w * w * derivatives[k] * (info.V[k] - info.TrueV[k]);
+				double w = 1.0 / trueV[k];
+				B -= w * w * derivatives[k] * (v[k] - trueV[k]);
+				k++;
+			}
+
+			return B / A;
+		}
+
+		public static double InverseProblemLinear(ProblemInfo info, double[] v, double[] trueV, double eps, double dI)
+		{
+			double[] derivatives = FEMDerivativeI(info, dI, eps);
+
+			double A = 0.0;
+
+			int k = 0;
+			foreach (var receiver in info.Receivers)
+			{
+				double w = 1.0;
+				A += w * derivatives[k] * w * derivatives[k];
+				k++;
+			}
+
+			double B = 0.0;
+			k = 0;
+			foreach (var receiver in info.Receivers)
+			{
+				double w = 1.0;
+				B -= w * w * derivatives[k] * (v[k] - trueV[k]);
 				k++;
 			}
 

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MathUtilities
 {
@@ -19,13 +22,53 @@ namespace MathUtilities
 			double result = 0.0;
 			int N = a.Length;
 
+
 			for (int i = 0; i < N; i++)
 				result += a[i] * b[i];
 
 			return result;
 		}
 
-		public static int Factorial(int n)
+        public static double DotProductParallel(double[] a, double[] b)
+        {
+			if (a.Length != b.Length)
+				throw new Exception("vectors have different length");
+
+			double result = 0.0;
+			int n = a.Length;
+
+			int taskCount = 6;
+            int taskRange = n / taskCount;
+
+            Task<double>[] tasks = new Task<double>[taskCount];
+
+            Func<int, int, double[], double[], double> func = (start, end, a, b) =>
+            {
+                double subresult = 0.0;
+                for (int i = start; i < end; i++)
+                    subresult += a[i] * b[i];
+
+                return subresult;
+            };
+
+            tasks[0] = new Task<double>(() => func(0 * taskRange, 1 * taskRange, a, b));
+            tasks[1] = new Task<double>(() => func(1 * taskRange, 2 * taskRange, a, b));
+            tasks[2] = new Task<double>(() => func(2 * taskRange, 3 * taskRange, a, b));
+            tasks[3] = new Task<double>(() => func(3 * taskRange, 4 * taskRange, a, b));
+            tasks[4] = new Task<double>(() => func(4 * taskRange, 5 * taskRange, a, b));
+            tasks[5] = new Task<double>(() => func(5 * taskRange, a.Length, a, b));
+
+            for (int k = 0; k < taskCount; k++)
+                tasks[k].Start();
+
+            Task.WhenAll(tasks).Wait();
+            for (int k = 0; k < taskCount; k++)
+                result += tasks[k].Result;
+
+			return result;
+        }
+
+        public static int Factorial(int n)
 		{
 			int result = 1;
 			for (int i = 2; i <= n; i++)
@@ -188,6 +231,45 @@ namespace MathUtilities
 				result += (a[i] - b[i]) * (a[i] - b[i]);
 
 			return Math.Sqrt(result);
+		}
+
+		public static double ErrorParallel(double[] a, double[] b)
+        {
+			if (a.Length != b.Length)
+				throw new Exception("vectors have different length");
+
+			double result = 0.0;
+			int n = a.Length;
+
+			int taskCount = 6;
+			int taskRange = n / taskCount;
+
+			Task<double>[] tasks = new Task<double>[taskCount];
+
+			Func<int, int, double[], double[], double> func = (start, end, a, b) =>
+			{
+				double subresult = 0.0;
+				for (int i = start; i < end; i++)
+					subresult += (a[i] - b[i]) * (a[i] - b[i]);
+
+				return subresult;
+			};
+
+			tasks[0] = new Task<double>(() => func(0 * taskRange, 1 * taskRange, a, b));
+			tasks[1] = new Task<double>(() => func(1 * taskRange, 2 * taskRange, a, b));
+			tasks[2] = new Task<double>(() => func(2 * taskRange, 3 * taskRange, a, b));
+			tasks[3] = new Task<double>(() => func(3 * taskRange, 4 * taskRange, a, b));
+			tasks[4] = new Task<double>(() => func(4 * taskRange, 5 * taskRange, a, b));
+			tasks[5] = new Task<double>(() => func(5 * taskRange, a.Length, a, b));
+
+			for (int k = 0; k < taskCount; k++)
+				tasks[k].Start();
+
+			Task.WhenAll(tasks).Wait();
+			for (int k = 0; k < taskCount; k++)
+				result += tasks[k].Result;
+
+			return result;
 		}
 	}
 }
