@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 
 namespace MultiDimInverseProblem
 {
-	public class Receiver
+    public class Receiver
 	{
 		public Vector2 M { get; set; }
-		public Receiver(Vector2 M)
+		public Vector2 N { get; set; }
+		public Receiver(Vector2 M, Vector2 N)
 		{
 			this.M = M;
+			this.N = N;
 		}
 	}
 }

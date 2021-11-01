@@ -26,7 +26,11 @@ namespace MultiDimInverseProblem
 			double BM = solution.U(new Point(r.M.X - B.X, r.M.Y));
 			double ABM = I * (BM - AM);
 
-			return I * (BM - AM);
+			double AN = solution.U(new Point(r.N.X - A.X, r.M.Y));
+			double BN = solution.U(new Point(r.N.X - B.X, r.M.Y));
+			double ABN = I * (BN - AN);
+
+			return ABN - ABM;
 		}
 	}
 }

@@ -39,21 +39,28 @@ namespace MultiDimInverseProblem
             {
                 Receivers = new Receiver[5]
                 { 
-                    new Receiver(new Vector2(600, 0)), 
-                    new Receiver(new Vector2(700, 0)), 
-                    new Receiver(new Vector2(800, 0)), 
-                    new Receiver(new Vector2(900, 0)),
-                    new Receiver(new Vector2(1000, 0)),
+                    new Receiver(new Vector2(600, 0), new Vector2(610, 0)),
+                    new Receiver(new Vector2(700, 0), new Vector2(710, 0)), 
+                    new Receiver(new Vector2(800, 0), new Vector2(810, 0)), 
+                    new Receiver(new Vector2(900, 0), new Vector2(910, 0)),
+                    new Receiver(new Vector2(1000, 0), new Vector2(1010, 0)),
                 },
-                Sources = new Source[4]
+                Sources = new Source[10]
                 {
                     new Source(new Vector2(0, 0), new Vector2(30, 0), 2.5, fem),
                     new Source(new Vector2(50, 0), new Vector2(80, 0), 0.0, fem),
                     new Source(new Vector2(110, 0), new Vector2(140, 0), 0.0, fem),
                     new Source(new Vector2(180, 0), new Vector2(210, 0), 0.0, fem),
+                    new Source(new Vector2(220, 0), new Vector2(250, 0), 0.0, fem),
+                    new Source(new Vector2(260, 0), new Vector2(290, 0), 0.0, fem),
+                    new Source(new Vector2(320, 0), new Vector2(350, 0), 0.0, fem),
+                    new Source(new Vector2(370, 0), new Vector2(400, 0), 0.0, fem),
+                    new Source(new Vector2(430, 0), new Vector2(460, 0), 0.0, fem),
+                    new Source(new Vector2(500, 0), new Vector2(530, 0), 0.0, fem),
                 }
-
             };
+
+            info.PivotI = new double[10] { 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0 };
 
             info.RealV = DirectProblem(info);
             for (int i = 0; i < info.Sources.Length; i++)

@@ -14,6 +14,7 @@ namespace MultiDimInverseProblem
 			public Receiver[] Receivers;
 			public double[] CurrentV;
 			public double[] RealV;
+			public double[] PivotI;
 		}
 
 		public static FEMrz FEM(SolverTypes solverType, double I, double sigma1, double sigma2, double h, double eps)
@@ -148,7 +149,7 @@ namespace MultiDimInverseProblem
             for (int i = 0; i < m; i++)
             {
                 A[i, i] += 0.001;
-                B[i] -= 0.001 * (info.Sources[i].I - 2.0);
+                B[i] -= 0.001 * (info.Sources[i].I - info.PivotI[i]);
             }
 
             // Solve SLAE
