@@ -142,7 +142,7 @@ namespace MultiDimInverseProblem
                 }
 
 			double alpha = GetAlpha(info);
-			alpha = 0.1 * alpha;
+			alpha = 1.0 * alpha;
             for (int i = 0; i < m; i++)
             {
 				A[i, i] += alpha;

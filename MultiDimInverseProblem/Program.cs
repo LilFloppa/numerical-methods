@@ -56,30 +56,28 @@ namespace MultiDimInverseProblem
 
             ProblemInfo info = new ProblemInfo
             {
-                Receivers = new Receiver[5]
+                Receivers = new Receiver[3]
                 { 
-                    new Receiver(new Vector2(1100, 0), new Vector2(1110, 0)),
-                    new Receiver(new Vector2(1200, 0), new Vector2(1210, 0)), 
-                    new Receiver(new Vector2(1300, 0), new Vector2(1310, 0)), 
-                    new Receiver(new Vector2(1400, 0), new Vector2(1410, 0)),
-                    new Receiver(new Vector2(1500, 0), new Vector2(1510, 0)),
+                    new Receiver(new Point(100, 100), new Point(110, 100)),
+                    new Receiver(new Point(210, 100), new Point(220, 100)), 
+                    new Receiver(new Point(150, 70), new Point(160, 70)), 
                 },
                 Sources = new Source[10]
                 {
-                    new Source(new Vector2(0, 0), new Vector2(10, 0), 10.0, fem),
-                    new Source(new Vector2(110, 0), new Vector2(120, 0), 0.0, fem),
-                    new Source(new Vector2(220, 0), new Vector2(230, 0), 0.0, fem),
-                    new Source(new Vector2(330, 0), new Vector2(340, 0), 0.0, fem),
-                    new Source(new Vector2(440, 0), new Vector2(450, 0), 0.0, fem),
-                    new Source(new Vector2(550, 0), new Vector2(560, 0), 0.0, fem),
-                    new Source(new Vector2(660, 0), new Vector2(670, 0), 0.0, fem),
-                    new Source(new Vector2(770, 0), new Vector2(780, 0), 0.0, fem),
-                    new Source(new Vector2(880, 0), new Vector2(890, 0), 0.0, fem),
-                    new Source(new Vector2(990, 0), new Vector2(1000, 0), 0.0, fem),
+                    new Source(new Point(0, 0), 2.5, fem),
+                    new Source(new Point(30, 0), 0.0, fem),
+                    new Source(new Point(60, 0), 0.0, fem),
+                    new Source(new Point(90, 0), 0.0, fem),
+                    new Source(new Point(120, 0), 0.0, fem),
+                    new Source(new Point(150, 0), 0.0, fem),
+                    new Source(new Point(180, 0), 0.0, fem),
+                    new Source(new Point(210, 0), 0.0, fem),
+                    new Source(new Point(240, 0), 0.0, fem),
+                    new Source(new Point(270, 0), 0.0, fem),
                 }
             };
 
-            info.PivotI = new double[10] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+            info.PivotI = new double[10] { 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
             info.RealV = DirectProblem(info);
             for (int i = 0; i < info.Sources.Length; i++)
