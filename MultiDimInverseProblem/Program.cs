@@ -1,6 +1,7 @@
 ﻿using FEM;
 using MathUtilities;
 using SlaeSolver;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
@@ -31,48 +32,77 @@ namespace MultiDimInverseProblem
             File.WriteAllText("C:/repos/Points.txt", JsonSerializer.Serialize(fem.Info.Points));
         }
 
+        static void PrintV(double[] V)
+        {
+            foreach (var v in V)
+                Console.Write("{0:E2}\t", v);
+
+            Console.WriteLine();
+            Console.WriteLine();
+        }
+
+        static void PrintI(ProblemInfo info)
+        {
+            foreach (var s in info.Sources)
+                Console.Write("{0:E2}\t", s.I);
+
+            Console.WriteLine();
+            Console.WriteLine();
+        }
+
         static void Main(string[] args)
         {
             var fem = LoadSolution();
 
             ProblemInfo info = new ProblemInfo
             {
-                Receivers = new Receiver[5]
+                Receivers = new Receiver[6]
                 { 
-                    new Receiver(new Vector2(600, 0), new Vector2(610, 0)),
-                    new Receiver(new Vector2(700, 0), new Vector2(710, 0)), 
-                    new Receiver(new Vector2(800, 0), new Vector2(810, 0)), 
-                    new Receiver(new Vector2(900, 0), new Vector2(910, 0)),
-                    new Receiver(new Vector2(1000, 0), new Vector2(1010, 0)),
+                    new Receiver(new Vector2(1100, 0), new Vector2(1110, 0)),
+                    new Receiver(new Vector2(1200, 0), new Vector2(1210, 0)), 
+                    new Receiver(new Vector2(1300, 0), new Vector2(1310, 0)), 
+                    new Receiver(new Vector2(1400, 0), new Vector2(1410, 0)),
+                    new Receiver(new Vector2(1500, 0), new Vector2(1510, 0)),
+                    new Receiver(new Vector2(1600, 0), new Vector2(1610, 0)),
                 },
                 Sources = new Source[10]
                 {
-                    new Source(new Vector2(0, 0), new Vector2(30, 0), 2.5, fem),
-                    new Source(new Vector2(50, 0), new Vector2(80, 0), 0.0, fem),
-                    new Source(new Vector2(110, 0), new Vector2(140, 0), 0.0, fem),
-                    new Source(new Vector2(180, 0), new Vector2(210, 0), 0.0, fem),
-                    new Source(new Vector2(220, 0), new Vector2(250, 0), 0.0, fem),
-                    new Source(new Vector2(260, 0), new Vector2(290, 0), 0.0, fem),
-                    new Source(new Vector2(320, 0), new Vector2(350, 0), 0.0, fem),
-                    new Source(new Vector2(370, 0), new Vector2(400, 0), 0.0, fem),
-                    new Source(new Vector2(430, 0), new Vector2(460, 0), 0.0, fem),
-                    new Source(new Vector2(500, 0), new Vector2(530, 0), 0.0, fem),
+                    new Source(new Vector2(0, 0), new Vector2(10, 0), 10.0, fem),
+                    new Source(new Vector2(110, 0), new Vector2(120, 0), 0.0, fem),
+                    new Source(new Vector2(220, 0), new Vector2(230, 0), 0.0, fem),
+                    new Source(new Vector2(330, 0), new Vector2(340, 0), 0.0, fem),
+                    new Source(new Vector2(440, 0), new Vector2(450, 0), 0.0, fem),
+                    new Source(new Vector2(550, 0), new Vector2(560, 0), 0.0, fem),
+                    new Source(new Vector2(660, 0), new Vector2(670, 0), 0.0, fem),
+                    new Source(new Vector2(770, 0), new Vector2(780, 0), 0.0, fem),
+                    new Source(new Vector2(880, 0), new Vector2(890, 0), 0.0, fem),
+                    new Source(new Vector2(990, 0), new Vector2(1000, 0), 0.0, fem),
                 }
             };
 
-            info.PivotI = new double[10] { 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0 };
+            info.PivotI = new double[10] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
             info.RealV = DirectProblem(info);
             for (int i = 0; i < info.Sources.Length; i++)
-                info.Sources[i].I = 5.0;
+                info.Sources[i].I = info.PivotI[i];
             info.CurrentV = DirectProblem(info);
 
-            double J = Functional(info.CurrentV, info.RealV);
+            double J = Functional(info, info.RealV);
+
+            Console.WriteLine("Real V:");
+            PrintV(info.RealV);
 
             bool flag = true;
+            PrintI(info);
+            Console.WriteLine("Current V:");
+            PrintV(info.CurrentV);
+
             while (flag && J > 1.0e-9)
             {
                 (J, flag) = InverseProblemStep(info, J);
+                PrintI(info);
+                Console.WriteLine("Current V:");
+                PrintV(info.CurrentV);
             }
         }
     }

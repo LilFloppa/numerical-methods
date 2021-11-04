@@ -72,8 +72,6 @@ namespace MultiDimInverseProblem
 
 		public static double[,] FEMDerivativeI(ProblemInfo info)
 		{
-			Console.WriteLine($"Start to calculate derivatives for I");
-
 			int m = info.Sources.Length;
 			int n = info.Receivers.Length;
 
@@ -98,9 +96,6 @@ namespace MultiDimInverseProblem
 					s.I = I;
 				}
 			}
-
-			Console.WriteLine("Finished to calculate derivatives");
-			Console.WriteLine();
 			return dirs;
 		}
 
@@ -146,11 +141,13 @@ namespace MultiDimInverseProblem
 					B[i] -= w * w * dirs[i, k] * (info.CurrentV[k] - info.RealV[k]);
                 }
 
+			double alpha = GetAlpha(info);
+			alpha = 0.1 * alpha;
             for (int i = 0; i < m; i++)
             {
-                A[i, i] += 0.001;
-                B[i] -= 0.001 * (info.Sources[i].I - info.PivotI[i]);
-            }
+				A[i, i] += alpha;
+				B[i] -= alpha * (info.Sources[i].I - info.PivotI[i]);
+			}
 
             // Solve SLAE
             double[] dI = Gauss.Solve(A, B);
@@ -158,20 +155,15 @@ namespace MultiDimInverseProblem
 			// Try make step
 			double b = 1.0;
 			double[] I0 = info.Sources.Select(s => s.I).ToArray();
-			double[] Ii = new double[m];
 
 			for (int i = 0; i < m; i++)
 				info.Sources[i].I = I0[i] + b * dI[i];
 
-			double[] V0 = DirectProblem(info);
-
-			while (b > 1.0e-5 && Functional(V0, info.RealV) >= J)
+			while (b > 1.0e-5 && Functional(info, info.RealV) >= J)
             {
 				b /= 2;
 				for (int i = 0; i < m; i++)
 					info.Sources[i].I = I0[i] + b * dI[i];
-
-				V0 = DirectProblem(info);
 			}
 
 			if (b <= 1.0e-5)
@@ -183,16 +175,17 @@ namespace MultiDimInverseProblem
             }
             else
             {
-				info.CurrentV = V0;
-				J = Functional(info.CurrentV, info.RealV);
+				info.CurrentV = DirectProblem(info);
+				J = Functional(info, info.RealV);
 
 				return (J, true);
 			}		
 		}
 
-		public static double Functional(double[] currentV, double[] realV)
+		public static double Functional(ProblemInfo info, double[] realV)
 		{
 			double result = 0.0;
+			double[] currentV = DirectProblem(info);
 			int N = currentV.Length;
 
 			for (int i = 0; i < N; i++)
@@ -203,5 +196,36 @@ namespace MultiDimInverseProblem
 
 			return result;
 		}
+
+		private static double FunctionalI(double[] I0, double[] pivotI)
+        {
+			double result = 0.0;
+			int M = I0.Length;
+
+			for (int i = 0; i < M; i++)
+				result += (I0[i] - pivotI[i]) * (I0[i] - pivotI[i]);
+
+			return result;
+		}
+
+		public static double GetAlpha(ProblemInfo info)
+        {
+			double[] I0 = info.Sources.Select(s => s.I).ToArray();
+
+			double Ji = FunctionalI(I0, info.PivotI);
+			double Ju = Functional(info, info.RealV);
+
+			if (Math.Abs(Ji) < 1.0e-5)
+			{
+				I0 = I0.Select(I => I + 0.5 * I).ToArray();
+				Ji = FunctionalI(I0, info.PivotI);
+			}
+
+			double gamma = 1.0e-3;
+			double right = (1 + gamma) * Ju;
+			double alpha = (right - Ju) / Ji;
+
+			return alpha;
+        }
 	}
 }
