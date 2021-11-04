@@ -56,14 +56,13 @@ namespace MultiDimInverseProblem
 
             ProblemInfo info = new ProblemInfo
             {
-                Receivers = new Receiver[6]
+                Receivers = new Receiver[5]
                 { 
                     new Receiver(new Vector2(1100, 0), new Vector2(1110, 0)),
                     new Receiver(new Vector2(1200, 0), new Vector2(1210, 0)), 
                     new Receiver(new Vector2(1300, 0), new Vector2(1310, 0)), 
                     new Receiver(new Vector2(1400, 0), new Vector2(1410, 0)),
                     new Receiver(new Vector2(1500, 0), new Vector2(1510, 0)),
-                    new Receiver(new Vector2(1600, 0), new Vector2(1610, 0)),
                 },
                 Sources = new Source[10]
                 {

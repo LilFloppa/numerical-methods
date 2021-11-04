@@ -157,13 +157,19 @@ namespace MultiDimInverseProblem
 			double[] I0 = info.Sources.Select(s => s.I).ToArray();
 
 			for (int i = 0; i < m; i++)
-				info.Sources[i].I = I0[i] + b * dI[i];
+			{
+				double Ii = I0[i] + b * dI[i];
+				info.Sources[i].I = Ii < 0 ? 0 : Ii;
+			}
 
 			while (b > 1.0e-5 && Functional(info, info.RealV) >= J)
             {
 				b /= 2;
 				for (int i = 0; i < m; i++)
-					info.Sources[i].I = I0[i] + b * dI[i];
+				{
+					double Ii = I0[i] + b * dI[i];
+					info.Sources[i].I = Ii < 0 ? 0 : Ii;
+				}
 			}
 
 			if (b <= 1.0e-5)
