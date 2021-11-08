@@ -44,63 +44,81 @@ namespace MultiDimInverseProblem
         static void PrintI(ProblemInfo info)
         {
             foreach (var s in info.Sources)
-                Console.Write("{0:E2}\t", s.I);
+                Console.Write("{0:F4}  ", s.I);
 
             Console.WriteLine();
             Console.WriteLine();
         }
 
-        static void Main(string[] args)
+        static void SolveReverseProblem(ProblemInfo info)
         {
-            var fem = LoadSolution();
+            double J = Functional(info, info.RealV);
 
+            // Console.WriteLine("Real V:");
+            // PrintV(info.RealV);
+
+            bool flag = true;
+            // PrintI(info);
+            // Console.WriteLine("Current V:");
+            // PrintV(info.CurrentV);
+
+            while (flag && J > 8.0e-7)
+            {
+                (J, flag) = InverseProblemStep(info, J);
+                // PrintI(info);
+                // Console.WriteLine("Current V:");
+                // PrintV(info.CurrentV);
+            }
+
+            Console.WriteLine($"Alpha = {info.Alpha}");
+            PrintI(info);
+        }
+
+        static ProblemInfo BulidProblemInfo(FEMrz fem, double[] I0, double alpha)
+        {
             ProblemInfo info = new ProblemInfo
             {
-                Receivers = new Receiver[3]
-                { 
-                    new Receiver(new Point(100, 100), new Point(110, 100)),
-                    new Receiver(new Point(210, 100), new Point(220, 100)), 
-                    new Receiver(new Point(150, 70), new Point(160, 70)), 
+                Receivers = new Receiver[4]
+                {
+                    new Receiver(new Point(10, 15), new Point(20, 25)),
+                    new Receiver(new Point(25, 35), new Point(35, 45)),
+                    new Receiver(new Point(30, -5), new Point(40, 5)),
+                    new Receiver(new Point(10, 15), new Point(20, 5)),
                 },
                 Sources = new Source[10]
                 {
-                    new Source(new Point(0, 0), 2.5, fem),
-                    new Source(new Point(30, 0), 0.0, fem),
-                    new Source(new Point(60, 0), 0.0, fem),
-                    new Source(new Point(90, 0), 0.0, fem),
-                    new Source(new Point(120, 0), 0.0, fem),
-                    new Source(new Point(150, 0), 0.0, fem),
-                    new Source(new Point(180, 0), 0.0, fem),
-                    new Source(new Point(210, 0), 0.0, fem),
-                    new Source(new Point(240, 0), 0.0, fem),
-                    new Source(new Point(270, 0), 0.0, fem),
-                }
+                    new Source(new Point(0, 10), 0.0, fem),
+                    new Source(new Point(0, 30), 10.0, fem),
+                    new Source(new Point(0, 50), 0.0, fem),
+                    new Source(new Point(0, 70), 0.0, fem),
+                    new Source(new Point(0, 90), 0.0, fem),
+                    new Source(new Point(0, 110), 0.0, fem),
+                    new Source(new Point(0, 130), 0.0, fem),
+                    new Source(new Point(0, 150), 0.0, fem),
+                    new Source(new Point(0, 170), 0.0, fem),
+                    new Source(new Point(0, 190), 0.0, fem),
+                },
+                Alpha = alpha
             };
-
-            info.PivotI = new double[10] { 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
             info.RealV = DirectProblem(info);
             for (int i = 0; i < info.Sources.Length; i++)
-                info.Sources[i].I = info.PivotI[i];
+                info.Sources[i].I = I0[i];
             info.CurrentV = DirectProblem(info);
 
-            double J = Functional(info, info.RealV);
+            return info;
+        }
 
-            Console.WriteLine("Real V:");
-            PrintV(info.RealV);
+        static void Main(string[] args)
+        {
+            var fem = LoadSolution();
+            double[] I0 = new double[10] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
 
-            bool flag = true;
-            PrintI(info);
-            Console.WriteLine("Current V:");
-            PrintV(info.CurrentV);
-
-            while (flag && J > 1.0e-9)
+            for (double alpha = 1.0e-14; alpha < 1.0; alpha *= 10)
             {
-                (J, flag) = InverseProblemStep(info, J);
-                PrintI(info);
-                Console.WriteLine("Current V:");
-                PrintV(info.CurrentV);
-            }
+                var info = BulidProblemInfo(fem, I0, alpha);
+                SolveReverseProblem(info);
+            }           
         }
     }
 }

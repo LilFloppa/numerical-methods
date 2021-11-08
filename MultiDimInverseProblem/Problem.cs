@@ -14,7 +14,7 @@ namespace MultiDimInverseProblem
 			public Receiver[] Receivers;
 			public double[] CurrentV;
 			public double[] RealV;
-			public double[] PivotI;
+			public double Alpha;
 		}
 
 		public static FEMrz FEM(SolverTypes solverType, double I, double sigma1, double sigma2, double h, double eps)
@@ -141,13 +141,9 @@ namespace MultiDimInverseProblem
 					B[i] -= w * w * dirs[i, k] * (info.CurrentV[k] - info.RealV[k]);
                 }
 
-			double alpha = GetAlpha(info);
-			alpha = 1.0 * alpha;
+			double alpha = info.Alpha;
             for (int i = 0; i < m; i++)
-            {
 				A[i, i] += alpha;
-				B[i] -= alpha * (info.Sources[i].I - info.PivotI[i]);
-			}
 
             // Solve SLAE
             double[] dI = Gauss.Solve(A, B);
@@ -159,7 +155,7 @@ namespace MultiDimInverseProblem
 			for (int i = 0; i < m; i++)
 			{
 				double Ii = I0[i] + b * dI[i];
-				info.Sources[i].I = Ii < 0 ? 0 : Ii;
+				info.Sources[i].I = Ii;
 			}
 
 			while (b > 1.0e-5 && Functional(info, info.RealV) >= J)
@@ -168,7 +164,7 @@ namespace MultiDimInverseProblem
 				for (int i = 0; i < m; i++)
 				{
 					double Ii = I0[i] + b * dI[i];
-					info.Sources[i].I = Ii < 0 ? 0 : Ii;
+					info.Sources[i].I = Ii;
 				}
 			}
 
@@ -202,36 +198,5 @@ namespace MultiDimInverseProblem
 
 			return result;
 		}
-
-		private static double FunctionalI(double[] I0, double[] pivotI)
-        {
-			double result = 0.0;
-			int M = I0.Length;
-
-			for (int i = 0; i < M; i++)
-				result += (I0[i] - pivotI[i]) * (I0[i] - pivotI[i]);
-
-			return result;
-		}
-
-		public static double GetAlpha(ProblemInfo info)
-        {
-			double[] I0 = info.Sources.Select(s => s.I).ToArray();
-
-			double Ji = FunctionalI(I0, info.PivotI);
-			double Ju = Functional(info, info.RealV);
-
-			if (Math.Abs(Ji) < 1.0e-5)
-			{
-				I0 = I0.Select(I => I + 0.5 * I).ToArray();
-				Ji = FunctionalI(I0, info.PivotI);
-			}
-
-			double gamma = 1.0e-3;
-			double right = (1 + gamma) * Ju;
-			double alpha = (right - Ju) / Ji;
-
-			return alpha;
-        }
 	}
 }
