@@ -63,7 +63,7 @@ namespace HermiteSpline
             {
                 X1 = 0.0,
                 X2 = 1.0,
-                XN = 3,
+                XN = 2,
                 Y1 = 0.0,
                 Y2 = 1.0,
                 YN = 2
@@ -73,13 +73,15 @@ namespace HermiteSpline
             var points = FunctionDataGenerator(50, 0.0, 1.0, 0.0, 1.0, (double x, double y) => x);
 
             splineBuilder.Mesh = builder.Build(options);
+            splineBuilder.Alpha = 0.0;
+            splineBuilder.Beta = 0.001;
             splineBuilder.SetData(points);
 
-            ISpline spline = splineBuilder.BuildSpline();
+            ISpline spline = splineBuilder.Build();
 
             for (int i = 0; i < 10; i++)
             {
-                Point p = new Point { X = 1.0, Y = 1.0 };
+                Point p = new Point { X = i * 0.1, Y = 1.0 };
                 Console.WriteLine($"({p.X:0.####}, {p.Y:0.####}): {spline.GetValue(p):0.####}");
             }
         }

@@ -11,6 +11,10 @@ namespace HermiteSpline.Spline
         public  Mesh Mesh { get; set; }
 
         private (Point p, double f)[] data;
+        public double Alpha { get; set; } = 0.0;
+        public double Beta { get; set; } = 0.0;
+        
+
         public void SetData((Point p, double f)[] data)
         {
             this.data = data;
@@ -35,9 +39,10 @@ namespace HermiteSpline.Spline
             }
         }
 
-        public HermiteSpline BuildSpline()
+
+        public HermiteSpline Build()
         {
-            SLAEInfo info = new SLAEInfo { Data = data, Mesh = Mesh };
+            SLAEInfo info = new SLAEInfo { Data = data, Mesh = Mesh, Alpha = Alpha, Beta = Beta };
             SLAEBuilder builder = new SLAEBuilder(info);
             IMatrix A = new FullSparseMatrix(Mesh.NodeCount * 4);
             double[] b = new double[Mesh.NodeCount * 4];
