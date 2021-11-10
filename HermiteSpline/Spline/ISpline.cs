@@ -28,12 +28,15 @@ namespace HermiteSpline.Spline
 
             double result = 0;
 
+            double ksi = (p.X - e.X1) / hx;
+            double etta = (p.Y - e.Y1) / hy;
+
             for (int i = 0; i < HermiteBasis.Size; i++)
             {
                 int index = e.Indices[i];
                 Func<double, double, double> psi = HermiteBasis.GetPsi(i, hx, hy);
 
-                result += q[index] * psi(p.X, p.Y);
+                result += q[index] * psi(ksi, etta);
             }
 
             return result;

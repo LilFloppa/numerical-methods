@@ -60,8 +60,12 @@ namespace HermiteSpline.SLAE
                     foreach (var index in e.DataIndices)
                     {
                         Point p = Info.Data[index].p;
+
+                        double ksi = (p.X - e.X1) / hx;
+                        double etta = (p.Y - e.Y1) / hy;
+
                         localM[i, j] += 
-                            psiI(p.X, p.Y) * psiJ(p.X, p.Y) + 
+                            psiI(ksi, etta) * psiJ(ksi, etta) + 
                             Info.Alpha * Quadratures.Gauss7((double x, double y) => D2psiI(x, y) * D2psiJ(x, y), e.X1, e.X2, e.Y1, e.Y2) +
                             Info.Beta * Quadratures.Gauss7((double x, double y) => D1psiI(x, y) * D1psiJ(x, y), e.X1, e.X2, e.Y1, e.Y2);
                     }
@@ -81,7 +85,11 @@ namespace HermiteSpline.SLAE
                 {
                     Point p = Info.Data[index].p;
                     double f = Info.Data[index].f;
-                    localB[i] += psi(p.X, p.Y) * f;
+
+                    double ksi = (p.X - e.X1) / hx;
+                    double etta = (p.Y - e.Y1) / hy;
+
+                    localB[i] += psi(ksi, etta) * f;
                 }
             }
         }
