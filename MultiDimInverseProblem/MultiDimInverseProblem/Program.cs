@@ -4,6 +4,7 @@ using SlaeSolver;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text.Json;
 using static MultiDimInverseProblem.Problem;
@@ -52,38 +53,74 @@ namespace MultiDimInverseProblem
 
         static void SolveReverseProblem(ProblemInfo info)
         {
-            double J = Functional(info, info.RealV);
-
-            // Console.WriteLine("Real V:");
-            // PrintV(info.RealV);
-
-            bool flag = true;
-            // PrintI(info);
-            // Console.WriteLine("Current V:");
-            // PrintV(info.CurrentV);
-
-            while (flag && J > 8.0e-7)
+            using (var writer = new StreamWriter(File.OpenWrite("C:/repos/data/output.csv")))
             {
-                (J, flag) = InverseProblemStep(info, J);
+                double J = Functional(info, info.RealV);
+                writer.WriteLine($"Real J; {J:F4}");
+                writer.Write($"Real V;");
+                foreach (var v in info.RealV)
+                    writer.Write($"{v:F4};");
+
+                writer.WriteLine();
+                writer.WriteLine("I0;");
+                foreach (var i0 in info.Sources.Select(s => s.I))
+                    writer.Write($"{i0:F4};");
+
+                writer.WriteLine();
+                writer.WriteLine("V0;");
+                foreach (var v0 in info.CurrentV)
+                    writer.Write($"{v0:F4};");
+
+                writer.WriteLine();
+                writer.WriteLine();
+                writer.WriteLine();
+                writer.WriteLine();
+                // Console.WriteLine("Real V:");
+                // PrintV(info.RealV);
+
+                bool flag = true;
                 // PrintI(info);
                 // Console.WriteLine("Current V:");
                 // PrintV(info.CurrentV);
-            }
 
-            Console.WriteLine($"Alpha = {info.Alpha}");
-            PrintI(info);
+                while (flag && J > 8.0e-7)
+                {
+                    (J, flag) = InverseProblemStep(info, J);
+
+                    writer.WriteLine($"Current J; {J:F4}");
+
+                    writer.WriteLine("Current I0;");
+                    foreach (var i0 in info.Sources.Select(s => s.I))
+                        writer.Write($"{i0:F4};");
+
+                    writer.WriteLine();
+                    writer.WriteLine("Current V;");
+                    foreach (var v0 in info.CurrentV)
+                        writer.Write($"{v0:F4};");
+
+                    writer.WriteLine();
+                    writer.WriteLine();
+                    writer.WriteLine();
+                    writer.WriteLine();
+                    // PrintI(info);
+                    // Console.WriteLine("Current V:");
+                    // PrintV(info.CurrentV);
+                }
+
+                Console.WriteLine($"Alpha = {info.Alpha}");
+                PrintI(info);
+            }
         }
 
         static ProblemInfo BulidProblemInfo(FEMrz fem, double[] I0, double alpha)
         {
             ProblemInfo info = new ProblemInfo
             {
-                Receivers = new Receiver[4]
+                Receivers = new Receiver[3]
                 {
                     new Receiver(new Point(10, 15), new Point(20, 25)),
-                    new Receiver(new Point(25, 35), new Point(35, 45)),
-                    new Receiver(new Point(30, -5), new Point(40, 5)),
-                    new Receiver(new Point(10, 15), new Point(20, 5)),
+                    new Receiver(new Point(30, 35), new Point(40, 45)),
+                    new Receiver(new Point(10, 50), new Point(20, 60)),
                 },
                 Sources = new Source[10]
                 {
@@ -111,14 +148,20 @@ namespace MultiDimInverseProblem
 
         static void Main(string[] args)
         {
+            //System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
+            //culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
+            //System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+            //System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            //System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+
             var fem = LoadSolution();
             double[] I0 = new double[10] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
 
-            for (double alpha = 1.0e-14; alpha < 1.0; alpha *= 10)
-            {
-                var info = BulidProblemInfo(fem, I0, alpha);
-                SolveReverseProblem(info);
-            }           
+            //for (double alpha = 1.0e-14; alpha < 1.0e-13; alpha *= 10)
+            //{
+            var info = BulidProblemInfo(fem, I0, 1.0e-14);
+            SolveReverseProblem(info);
+            // }           
         }
     }
 }
