@@ -17,7 +17,7 @@ namespace HermiteSpline.Spline
         private static Func<double, double, double>[] D1psi = new Func<double, double, double>[]
         {
             (double x, double h) => -6 * x + 6 * x * x,
-            (double x, double h) => h * (-4 * x + 3 * x * x),
+            (double x, double h) => h * (1 - 4 * x + 3 * x * x),
             (double x, double h) => 6 * x - 6 * x * x,
             (double x, double h) => h * (-2 * x + 3 * x * x)
         };
@@ -45,10 +45,11 @@ namespace HermiteSpline.Spline
 
         public static Func<double, double, double> GetPsi(int i, double hx, double hy) =>
             (double x, double y) => Psi[XIndex(i + 1)] (x, hx) * Psi[YIndex(i + 1)] (y, hy);
+
         public static Func<double, double, double> GetPsiDxDy(int i, double hx, double hy) =>
-             (double x, double y) => D1psi[XIndex(i + 1)](x, hx) * D1psi[YIndex(i + 1)](y, hy);
+            (double x, double y) => D1psi[XIndex(i + 1)](x, hx) * Psi[YIndex(i + 1)](y, hy);
 
         public static Func<double, double, double> GetPsiDx2Dy2(int i, double hx, double hy) =>
-             (double x, double y) => D2psi[XIndex(i + 1)](x, hx) * D2psi[YIndex(i + 1)](y, hy);
+            (double x, double y) => D2psi[XIndex(i + 1)](x, hx) * Psi[YIndex(i + 1)](y, hy);
     }
 }
