@@ -68,6 +68,33 @@ namespace HermiteSpline
             };
         }
 
+        static (Point p, double f)[] ReadDataFromFile(string pointFile, string weightFile)
+        {
+            string[] pointLines = File.ReadAllLines(pointFile);
+            string[] weightLines = File.ReadAllLines(weightFile);
+
+            if (pointLines.Length != weightLines.Length)
+                throw new Exception("Invalid data");
+
+            (Point p, double f)[] data = new (Point p, double f)[pointLines.Length];
+
+            for (int i = 0; i < pointLines.Length; i++)
+            {
+                string pointLine = pointLines[i];
+                string weightLine = weightLines[i];
+
+                string[] tokens = pointLine.Split(' ');
+
+                double x = double.Parse(tokens[0], System.Globalization.NumberStyles.Any);
+                double y = double.Parse(tokens[1], System.Globalization.NumberStyles.Any);
+                double f = double.Parse(weightLine, System.Globalization.NumberStyles.Any);
+
+                data[i] = (new Point { X = x, Y = y }, f);
+            }
+
+            return data;
+        }
+
         static void Main(string[] args)
         {
             System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
@@ -82,43 +109,49 @@ namespace HermiteSpline
             {
                 X1 = 0.0,
                 X2 = 1.0,
-                XN = 2,
+                XN = 4,
                 Y1 = 0.0,
                 Y2 = 1.0,
-                YN = 2
+                YN = 4
             };
 
             HermiteSplineBuilder splineBuilder = new HermiteSplineBuilder();
-            var points = FunctionDataGenerator(12, 0.0, 1.0, 0.0, 1.0, (double x, double y) => x);
+
+            var data = ReadDataFromFile(
+                @"C:\repos\numerical-methods\HermiteSpline\Input\Points.txt",
+                @"C:\repos\numerical-methods\HermiteSpline\Input\Weights.txt");
+
+            //var points = FunctionDataGenerator(48, 0.0, 1.0, 0.0, 1.0, (double x, double y) => x);
             //var points = GetRegularData();
             //var points = RandomDataGenerator(50, 0.0, 1.0, 0.0, 0.0);
 
-            File.Delete("C:/repos/data/data.txt");
-            using (var writer = new StreamWriter(File.OpenWrite("C:/repos/data/data.txt")))
-            {
-                foreach (var p in points)
-                {
-                    Console.WriteLine($"{p.p.X} {p.f}");
-                    writer.WriteLine($"{p.p.X} {p.f}");
-                }
-            }
+            //File.Delete("C:/repos/data/data.txt");
+            //using (var writer = new StreamWriter(File.OpenWrite("C:/repos/data/data.txt")))
+            //{
+            //    foreach (var p in data)
+            //    {
+            //        Console.WriteLine($"{p.p.X} {p.f}");
+            //        writer.WriteLine($"{p.p.X} {p.f}");
+            //    }
+            //}
 
             splineBuilder.Mesh = builder.Build(options);
             splineBuilder.Alpha = 0.001;
             splineBuilder.Beta = 0.001;
-            splineBuilder.SetData(points);
+            splineBuilder.SetData(data);
 
             ISpline spline = splineBuilder.Build();
-            File.Delete("C:/repos/data/spline.txt");
-            using (var writer = new StreamWriter(File.OpenWrite("C:/repos/data/spline.txt")))
-            {
-                for (int i = 0; i < 1000; i++)
-                {
-                    Point p = new Point { X = i * 0.001, Y = 0.1 };
-                    Console.WriteLine($"{p.X}, {spline.GetValue(p)}");
-                    writer.WriteLine($"{p.X} {spline.GetValue(p)}");
-                }
-            }
+            Console.WriteLine(spline.GetValue(new Point { X = 0.25, Y = 0.1 }));
+            //File.Delete("C:/repos/data/spline.txt");
+            //using (var writer = new StreamWriter(File.OpenWrite("C:/repos/data/spline.txt")))
+            //{
+            //    for (int i = 0; i < 1000; i++)
+            //    {
+            //        Point p = new Point { X = i * 0.001, Y = 0.1 };
+            //        Console.WriteLine($"{p.X}, {spline.GetValue(p)}");
+            //        writer.WriteLine($"{p.X} {spline.GetValue(p)}");
+            //    }
+            //}
         }
     }
 }
