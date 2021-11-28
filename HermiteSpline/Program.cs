@@ -89,7 +89,7 @@ namespace HermiteSpline
             };
 
             HermiteSplineBuilder splineBuilder = new HermiteSplineBuilder();
-            var points = FunctionDataGenerator(10, 0.0, 1.0, 0.0, 1.0, (double x, double y) => x);
+            var points = FunctionDataGenerator(12, 0.0, 1.0, 0.0, 1.0, (double x, double y) => x);
             //var points = GetRegularData();
             //var points = RandomDataGenerator(50, 0.0, 1.0, 0.0, 0.0);
 
@@ -104,8 +104,8 @@ namespace HermiteSpline
             }
 
             splineBuilder.Mesh = builder.Build(options);
-            splineBuilder.Alpha = 1.0;
-            splineBuilder.Beta = 0.000;
+            splineBuilder.Alpha = 0.001;
+            splineBuilder.Beta = 0.001;
             splineBuilder.SetData(points);
 
             ISpline spline = splineBuilder.Build();
