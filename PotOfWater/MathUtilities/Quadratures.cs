@@ -8,7 +8,7 @@ namespace MathUtilities
 {
     public class Quadratures
     {
-        class QuadratureNode
+        private class QuadratureNode
         {
             public QuadratureNode(Point node, double weight)
             {
@@ -19,7 +19,7 @@ namespace MathUtilities
             public double Weight { get; }
         }
 
-        static IEnumerable<QuadratureNode> TriangleOrder18()
+        private static IEnumerable<QuadratureNode> TriangleOrder18()
         {
             const int n = 66;
             double[] p1 = {0.0116731059668, 0.9810030858388, 0.0106966317092, 0.9382476983551, 0.0126627518417,
@@ -79,7 +79,7 @@ namespace MathUtilities
                 { 1, 1, 1 }
             };
 
-            double det = Math.Abs(MathUtilities.Det(t1, t2, t3));
+            double det = Math.Abs(Utilities.Det(t1, t2, t3));
 
             foreach (var node in TriangleOrder18())
             {

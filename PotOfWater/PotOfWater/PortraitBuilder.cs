@@ -44,7 +44,7 @@ namespace PotOfWater
 			return p;
 		}
 
-		void BuildConnections(Mesh mesh)
+		private void BuildConnections(Mesh mesh)
 		{
 			foreach (FiniteElement e in mesh)
 				for (int i = 1; i < info.Basis.Size; i++)

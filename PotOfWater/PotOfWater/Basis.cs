@@ -7,7 +7,6 @@ namespace PotOfWater
     {
         public int Size { get; set; }
         public IEnumerable<Func<double, double, double>> GetFuncs();
-
         public IEnumerable<Func<double, double, double>> GetDers();
     }
 

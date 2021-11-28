@@ -33,7 +33,7 @@ namespace PotOfWater
 			}
 		}
 
-		public void ClearLocals()
+		private void ClearLocals()
 		{
 			for (int i = 0; i < info.Basis.Size; i++)
 				for (int j = 0; j < info.Basis.Size; j++)
@@ -42,7 +42,7 @@ namespace PotOfWater
 			Array.Fill(localb, 0.0);
 		}
 
-		void BuildLocalMatrix(FiniteElement e)
+		private void BuildLocalMatrix(FiniteElement e)
 		{
 			// TODO: implement this method
 			Point a = points[e[0]];
@@ -60,7 +60,7 @@ namespace PotOfWater
 				}
 		}
 
-		void BuildLocalB(FiniteElement e)
+		private void BuildLocalB(FiniteElement e)
 		{
 			// TODO: implement this method
 
@@ -77,7 +77,7 @@ namespace PotOfWater
 			}
 		}
 
-		void AddLocalToGlobal(IMatrix A, double[] B, FiniteElement e)
+		private void AddLocalToGlobal(IMatrix A, double[] B, FiniteElement e)
 		{
 			var IA = A.Portrait.IA;
 			var JA = A.Portrait.JA;
