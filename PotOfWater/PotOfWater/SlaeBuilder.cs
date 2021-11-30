@@ -1,114 +1,141 @@
 ﻿using MathUtilities;
 using System;
+using System.Collections.Generic;
 
 namespace PotOfWater
 {
     public class SLAEBuilder
-	{
-		private ProblemInfo info;
+    {
+        private ProblemInfo info;
 
-		private Point[] points;
+        private Point[] points;
 
-		private double[,] local;
-		private double[] localb;
+        private double[,] local;
+        private double[] localb;
 
-		public SLAEBuilder(ProblemInfo info)
-		{
-			this.info = info;
+        private Func<double, double, double>[] psi;
+        private Dictionary<string, Func<double, double, double>[]> psiDers;
 
-			points = info.Mesh.Points;
+        private Func<double, double>[] boundaryPsi;
 
-			local = new double[info.Basis.Size, info.Basis.Size];
-			localb = new double[info.Basis.Size];
-		}
+        public SLAEBuilder(ProblemInfo info)
+        {
+            this.info = info;
 
-		public void Build(IMatrix A, double[] b)
-		{
-			foreach (FiniteElement e in info.Mesh.Elements)
-			{
-				ClearLocals();
-				BuildLocalMatrix(e);
-				BuildLocalB(e);
-				AddLocalToGlobal(A, b, e);
-			}
-		}
+            points = info.Mesh.Points;
 
-		private void ClearLocals()
-		{
-			for (int i = 0; i < info.Basis.Size; i++)
-				for (int j = 0; j < info.Basis.Size; j++)
-					local[i, j] = 0.0;
+            local = new double[info.Basis.Size, info.Basis.Size];
+            localb = new double[info.Basis.Size];
 
-			Array.Fill(localb, 0.0);
-		}
+            psi = info.Basis.GetFuncs();
+            psiDers = info.Basis.GetDers();
 
-		private void BuildLocalMatrix(FiniteElement e)
-		{
-			// TODO: implement this method
-			Point a = points[e[0]];
-			Point b = points[e[1]];
-			Point c = points[e[2]];
+            boundaryPsi = info.BondaryBasis.GetFuncs();
+        }
 
-			double D = Math.Abs(Utilities.Det(a, b, c));
+        public void Build(IMatrix A, double[] b)
+        {
+            foreach (FiniteElement e in info.Mesh.Elements)
+            {
+                ClearLocals();
+                BuildLocalMatrix(e);
+                BuildLocalB(e);
+                AddLocalToGlobal(A, b, e);
+            }
 
-			for (int i = 0; i < info.Basis.Size; i++)
-				for (int j = 0; j < info.Basis.Size; j++)
-				{
-					double M = 0.0;
-					double G = 0.0;
-					local[i, j] = (e.Material.RoCp * M + e.Material.Lambda * G) * D;
-				}
-		}
+            foreach (Edge e in info.Mesh.FirstBoundary)
+                AddFirstBoundary(A, b, e);
+        }
 
-		private void BuildLocalB(FiniteElement e)
-		{
-			// TODO: implement this method
+        private void ClearLocals()
+        {
+            for (int i = 0; i < info.Basis.Size; i++)
+                for (int j = 0; j < info.Basis.Size; j++)
+                    local[i, j] = 0.0;
 
-			Point a = points[e[0]];
-			Point b = points[e[1]];
-			Point c = points[e[2]];
+            Array.Fill(localb, 0.0);
+        }
 
-			double D = Math.Abs(Utilities.Det(a, b, c));
+        private void BuildLocalMatrix(FiniteElement e)
+        {
+            // TODO: implement this method
+            Point a = points[e[0]];
+            Point b = points[e[1]];
+            Point c = points[e[2]];
 
-			for (int i = 0; i < info.Basis.Size; i++)
-			{
-				localb[i] = 0.0;
-				localb[i] *= D;
-			}
-		}
+            double D = Math.Abs(Utilities.Det(a, b, c));
 
-		private void AddLocalToGlobal(IMatrix A, double[] B, FiniteElement e)
-		{
-			var IA = A.Portrait.IA;
-			var JA = A.Portrait.JA;
+            for (int i = 0; i < info.Basis.Size; i++)
+                for (int j = 0; j < info.Basis.Size; j++)
+                {
+                    double G = Quadratures.TriangleGauss18(a, b, c, GetGradProduct(i, j));
+                    double M = Quadratures.TriangleGauss18(a, b, c, (double ksi, double etta) => psi[i](ksi, etta) * psi[j](ksi, etta));
+                    local[i, j] = (e.Material.RoCp * M + e.Material.Lambda * G) * D;
+                }
+        }
 
-			for (int i = 0; i < info.Basis.Size; i++)
-			{
-				A.DI[e.Vertices[i]] += local[i, i];
-				B[e.Vertices[i]] += localb[i];
+        private void BuildLocalB(FiniteElement e)
+        {
+            // TODO: implement this method
 
-				for (int j = 0; j < i; j++)
-				{
-					int a = e.Vertices[i];
-					int b = e.Vertices[j];
-					if (a < b) (a, b) = (b, a);
+            Point a = points[e[0]];
+            Point b = points[e[1]];
+            Point c = points[e[2]];
 
-					if (A.Portrait.IA[a + 1] > IA[a])
-					{
-						Span<int> span = new Span<int>(JA, IA[a], IA[a + 1] - IA[a]);
+            double D = Math.Abs(Utilities.Det(a, b, c));
 
-						// TODO: test Binary Search
-						// int k = MemoryExtensions.BinarySearch(span, b);
-						int k;
-						for (k = 0; k < IA[a + 1] - IA[a]; k++)
-							if (span[k] == b)
-								break;
+            for (int i = 0; i < info.Basis.Size; i++)
+            {
+                localb[i] = 0.0;
+                localb[i] *= D;
+            }
+        }
 
-						int index = IA[a] + k;
-						A.AL[index] += local[i, j];
-					}
-				}
-			}
-		}
-	}
+        private void AddLocalToGlobal(IMatrix A, double[] b, FiniteElement e)
+        {
+            for (int i = 0; i < info.Basis.Size; i++)
+                for (int j = 0; j < info.Basis.Size; j++)
+                    A.Add(e[i], e[j], local[i, j]);
+
+            for (int i = 0; i < info.Basis.Size; i++)
+                b[e[i]] += localb[i];
+        }
+
+        private void AddFirstBoundary(IMatrix A, double[] b, Edge edge)
+        {
+            double[,] edgeM = new double[2, 2]
+            {
+                { 1.0 / 3.0,  1.0 / 6.0 },
+                { 1.0 / 6.0,  1.0 / 3.0 },
+            };
+
+            Func<double, double> Ug = edge.F;
+
+            double x0 = info.Mesh.Points[edge[0]].X;
+            double y0 = info.Mesh.Points[edge[0]].Y;
+            double x1 = info.Mesh.Points[edge[edge.NodeCount - 1]].X;
+            double y1 = info.Mesh.Points[edge[edge.NodeCount - 1]].Y;
+
+            double[] f = new double[edge.NodeCount];
+            for (int i = 0; i < edge.NodeCount; i++)
+                f[i] = Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => Ug(ksi) * boundaryPsi[i](ksi));
+
+            double[] q = new double[edge.NodeCount];
+            Gauss.Solve(edgeM, q, f);
+
+            for (int i = 0; i < edge.NodeCount; i++)
+            {
+                A.DI[edge[i]] = 1.0e+50;
+                b[edge[i]] = 1.0e+50 * q[i];
+            }
+        }
+
+        private Func<double, double, double> GetGradProduct(int i, int j)
+        {
+            Func<double, double, double> ksiDer = (double ksi, double etta) => psiDers["ksi"][i](ksi, etta) * psiDers["ksi"][j](ksi, etta);
+            Func<double, double, double> ettaDer = (double ksi, double etta) => psiDers["etta"][i](ksi, etta) * psiDers["etta"][j](ksi, etta);
+
+            return (double ksi, double etta) => ksiDer(ksi, etta) + ettaDer(ksi, etta);
+        }
+    }
 }

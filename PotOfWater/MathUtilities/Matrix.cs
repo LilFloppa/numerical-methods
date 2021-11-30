@@ -44,9 +44,11 @@ namespace MathUtilities
 				throw new ArgumentOutOfRangeException("Bad index for matrix");
 
 			if (i == j)
+            {
 				DI[i] = value;
-
-			if (j > i)
+				return;
+			}
+			else if (j > i)
 			{
 				int width = Portrait.IA[j + 1] - Portrait.IA[j];
 				int begin = j - width;
@@ -54,7 +56,10 @@ namespace MathUtilities
 
 				for (int k = begin; k < end; k++)
 					if (k == i)
+					{
 						AU[Portrait.IA[j] + k - begin] = value;
+						return;
+					}
 			}
 			else
 			{
@@ -64,7 +69,10 @@ namespace MathUtilities
 
 				for (int k = begin; k < end; k++)
 					if (k == j)
+                    {
 						AL[Portrait.IA[i] + k - begin] = value;
+						return;
+					}					
 			}
 
 			throw new ArgumentOutOfRangeException("Bad index for matrix");
@@ -75,28 +83,34 @@ namespace MathUtilities
 			if (i >= N || j >= N || i < 0 || j < 0)
 				throw new ArgumentOutOfRangeException("Bad index for matrix");
 
+			var IA = Portrait.IA;
+			var JA = Portrait.JA;
 			if (i == j)
-				DI[i] = value;
-
-			if (j > i)
 			{
-				int width = Portrait.IA[j + 1] - Portrait.IA[j];
-				int begin = j - width;
-				int end = j;
-
-				for (int k = begin; k < end; k++)
-					if (k == i)
-						AU[Portrait.IA[j] + k - begin] += value;
+				DI[i] = value;
+				return;
+			}
+			else if (j > i)
+			{
+				for (int k = IA[j]; k < IA[j + 1]; k++)
+				{
+					if (i == Portrait.JA[k])
+					{
+						AU[k] += value;
+						return;
+					}
+				}
 			}
 			else
 			{
-				int width = Portrait.IA[i + 1] - Portrait.IA[i];
-				int begin = i - width;
-				int end = i;
-
-				for (int k = begin; k < end; k++)
-					if (k == j)
-						AL[Portrait.IA[i] + k - begin] += value;
+				for (int k = IA[i]; k < IA[i + 1]; k++)
+				{
+					if (j == Portrait.JA[k])
+					{
+						AL[k] += value;
+						return;
+					}
+				}
 			}
 
 			throw new ArgumentOutOfRangeException("Bad index for matrix");

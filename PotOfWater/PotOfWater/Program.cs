@@ -31,9 +31,9 @@ namespace PotOfWater
             {
                 FiniteElement e = new FiniteElement(info.Basis.Size);
                 string[] tokens = lines[i + 1].Split(' ');
-                e.Vertices[0] = int.Parse(tokens[0]);
-                e.Vertices[1] = int.Parse(tokens[1]);
-                e.Vertices[2] = int.Parse(tokens[2]);
+                e.Vertices[0] = int.Parse(tokens[0]) - 1;
+                e.Vertices[1] = int.Parse(tokens[1]) - 1;
+                e.Vertices[2] = int.Parse(tokens[2]) - 1;
                 e.Material = info.MaterialDictionary[int.Parse(tokens[3])];
 
                 elements.Add(e);
@@ -45,10 +45,10 @@ namespace PotOfWater
 
             for (int i = 0; i < firstBoundaryCount; i++)
             {
-                Edge e = new Edge(info.Basis.EdgeNodeCount);
+                Edge e = new Edge(info.BondaryBasis.Size);
                 string[] tokens = lines[i + 1].Split(' ');
-                e.Vertices[0] = int.Parse(tokens[0]);
-                e.Vertices[info.Basis.EdgeNodeCount - 1] = int.Parse(tokens[1]);
+                e.Vertices[0] = int.Parse(tokens[0]) - 1;
+                e.Vertices[info.BondaryBasis.Size - 1] = int.Parse(tokens[1]) - 1;
                 e.F = info.FirstBoundaryDictionary[int.Parse(tokens[2])];
 
                 firstBondary.Add(e);
@@ -61,17 +61,33 @@ namespace PotOfWater
             return builder.Build();
         }
 
-        static void GaussTest()
+        static void GaussQuadratureTest()
         {
             double result = Quadratures.TriangleGauss18(new Point(1, 1), new Point(3, 1), new Point(2, 3), (double x, double y) => x * x * x * x * x * x * x * x);
             Console.WriteLine(result);
         }
 
+        static void GaussMatrixTest()
+        {
+            double[,] A = new double[3, 3]
+            {
+                { 1, 0, 2 },
+                { -2, 5, 8 },
+                { 5, 5, 0 }
+            };
+
+            double[] b = new double[3] { 3, 11, 10 };
+            double[] q = new double[3] { 0, 0, 0 };
+            Gauss.Solve(A, q, b);
+        }
+
         static void Main(string[] args)
         {
+            GaussMatrixTest();
             ProblemInfo info = new ProblemInfo
             {
-                Basis = new LinearLagrange(),
+                Basis = new TriangleLinearLagrange(),
+                BondaryBasis = new LineLinearLagrange(),
                 MaterialDictionary = AreaInfo.Materials,
                 FirstBoundaryDictionary = AreaInfo.FirstBoundary,
                 SecondBoundaryDictionary = AreaInfo.SecondBoundary
@@ -96,6 +112,9 @@ namespace PotOfWater
 
             SLAEBuilder builder = new SLAEBuilder(info);
             builder.Build(A, b);
+
+            ISolver solver = new LOSLU();
+            double[] q = solver.Solve(A, b);
         }
     }
 }

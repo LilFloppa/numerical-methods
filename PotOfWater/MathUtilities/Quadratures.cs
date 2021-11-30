@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MathUtilities
 {
-    public class Quadratures
+    public static class Quadratures
     {
         private class QuadratureNode
         {
@@ -98,5 +95,25 @@ namespace MathUtilities
 
             return result * det;
         }
+
+        public static double NewtonCotes(double a, double b, Func<double, double> f)
+        {
+            double h = (b - a) / 1000;
+            double result = f(a);
+
+            for (double x = h; x < b; x += h)
+                result += 2 * f(x);
+
+            result += f(b);
+            result *= 7;
+
+            for (double x = a; x < b; x += h)
+                result += 32 * f(x + h / 4) + 12 * f(x + h / 2) + 32 * f(x + 3 * h / 4);
+
+            result = result * 0.5 * h / 45;
+
+            return result;
+        }
+
     }
 }
