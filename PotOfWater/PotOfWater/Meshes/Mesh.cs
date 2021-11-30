@@ -1,18 +1,15 @@
 ﻿using MathUtilities;
-using System;
 using System.Collections.Generic;
 
-namespace PotOfWater
+namespace PotOfWater.Meshes
 {
     public class Mesh
 	{
 		public int NodeCount { get; set; }
 		public Point[] Points { get; set; }
 		public List<FiniteElement> Elements { get; set; }
-
-		public static Mesh FromFile()
-		{
-			throw new NotImplementedException();
-		}
+		public List<Edge> FirstBoundary { get; set; }
+		public List<Edge> SecondBoundary { get; set; }
+		public List<Edge> ThirdBoundary { get; set; }
 	}
 }

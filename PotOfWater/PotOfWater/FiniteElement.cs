@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PotOfWater
+﻿namespace PotOfWater
 {
-	public class FiniteElement
+    public class FiniteElement
 	{
 		public int[] Vertices { get; set; }
 		public Material Material { get; set; }

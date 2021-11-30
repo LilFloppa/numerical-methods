@@ -1,0 +1,12 @@
+{
+  "0": {
+    "Lambda": 1,
+    "RoCp": 20,
+    "F": "(double x, double y) => x + y"
+  },
+  "1": {
+    "Lambda": -5,
+    "RoCp": 50,
+    "F": "(double x, double y) => x + y"
+  }
+}

@@ -4,8 +4,10 @@ namespace PotOfWater
 {
     public class Edge
     {
-        public double[] Vertices { get; set; }
+        public int[] Vertices { get; set; }
 
-        public Func<double, double, double> F { get; set; }
+        public Func<double, double> F { get; set; }
+
+        public Edge(int EdgeNodeCount) => Vertices = new int[EdgeNodeCount];
     }
 }

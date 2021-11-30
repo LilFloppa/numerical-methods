@@ -9,8 +9,9 @@ namespace MathUtilities
 		public double[] DI { get; set; }
 		public double[] AL { get; set; }
 		public double[] AU { get; set; }
-		public Portrait Portrait { get; set; }
+		public Portrait Portrait { get; }
 
+		public void SetPortrait(Portrait portrait);
 		public void Set(int i, int j, double value);
 		public void Add(int i, int j, double value);
 		public void Multiply(double[] vector, double[] result);
@@ -19,10 +20,10 @@ namespace MathUtilities
 	public class SparseMatrix : IMatrix
 	{
 		public int N { get; set; } = 0;
-		public Portrait Portrait { get; set; } = null;
 		public double[] DI { get; set; } = null;
 		public double[] AL { get; set; } = null;
 		public double[] AU { get; set; } = null;
+		public Portrait Portrait { get; private set; } = null;
 
 		public SparseMatrix(int N)
 		{

@@ -1,4 +1,5 @@
 ﻿using MathUtilities;
+using PotOfWater.Meshes;
 using System.Collections.Generic;
 
 namespace PotOfWater
@@ -46,7 +47,7 @@ namespace PotOfWater
 
 		private void BuildConnections(Mesh mesh)
 		{
-			foreach (FiniteElement e in mesh)
+			foreach (FiniteElement e in mesh.Elements)
 				for (int i = 1; i < info.Basis.Size; i++)
 					for (int j = 0; j < i; j++)
 					{
