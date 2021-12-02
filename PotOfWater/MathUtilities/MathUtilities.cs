@@ -2,8 +2,8 @@
 
 namespace MathUtilities
 {
-    public static class Utilities
-    {
+	public static class Utilities
+	{
 		public static double Distance(Point a, Point b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
 
 		public static double DotProduct(double[] a, double[] b)
@@ -39,6 +39,19 @@ namespace MathUtilities
 			double y3 = c.Y;
 
 			return (x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1);
+		}
+
+		public static double[,] Invert2x2Matrix(double[,] A)
+		{
+			double[,] result = new double[2, 2];
+
+			double det = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0];
+			result[0, 0] = A[1, 1] / det;
+			result[0, 1] = -A[0, 1] / det;
+			result[1, 0] = -A[1, 0] / det;
+			result[1, 1] = A[0, 0] / det;
+
+			return result;
 		}
 
 		public static double[] Gauss(double[][] A, double[] b)

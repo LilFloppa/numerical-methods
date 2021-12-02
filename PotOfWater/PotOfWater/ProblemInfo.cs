@@ -12,7 +12,13 @@ namespace PotOfWater
             {
                 Lambda = 1.0,
                 RoCp = 0.0,
-                F = (double x, double y) => 0
+                F = (double x, double y) => 0.0
+            },
+            [1] = new Material
+            {
+                Lambda = 1.0,
+                RoCp = 0.0,
+                F = (double x, double y) => 0.0
             }
         };
 

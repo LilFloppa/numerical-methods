@@ -65,35 +65,19 @@ namespace MathUtilities
                 yield return new QuadratureNode(new Point { X = p1[i], Y = p2[i] }, 0.25 * w[i]);
         }
 
-        public static double TriangleGauss18(Point t1, Point t2, Point t3, Func<double, double, double> f)
+        public static double TriangleGauss18(Func<double, double, double> f)
         {
             double result = 0;
-
-            double[,] D = new double[3, 3]
-            {
-                { t1.X, t2.X, t3.X },
-                { t1.Y, t2.Y, t3.Y },
-                { 1, 1, 1 }
-            };
-
-            double det = Math.Abs(Utilities.Det(t1, t2, t3));
 
             foreach (var node in TriangleOrder18())
             {
                 double ksi = node.Node.X;
                 double etta = node.Node.Y;
 
-                double[] local = new double[3] { ksi, etta, 1 - ksi - etta };
-                double[] global = new double[3] { 0, 0, 0 };
-
-                for (int i = 0; i < 3; i++)
-                    for (int j = 0; j < 3; j++)
-                        global[i] += D[i, j] * local[j];
-
-                result += node.Weight * f(global[0], global[1]);
+                result += node.Weight * f(ksi, etta);
             }
 
-            return result * det;
+            return result;
         }
 
         public static double NewtonCotes(double a, double b, Func<double, double> f)

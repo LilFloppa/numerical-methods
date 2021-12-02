@@ -61,12 +61,6 @@ namespace PotOfWater
             return builder.Build();
         }
 
-        static void GaussQuadratureTest()
-        {
-            double result = Quadratures.TriangleGauss18(new Point(1, 1), new Point(3, 1), new Point(2, 3), (double x, double y) => x * x * x * x * x * x * x * x);
-            Console.WriteLine(result);
-        }
-
         static void GaussMatrixTest()
         {
             double[,] A = new double[3, 3]
@@ -83,7 +77,6 @@ namespace PotOfWater
 
         static void Main(string[] args)
         {
-            GaussMatrixTest();
             ProblemInfo info = new ProblemInfo
             {
                 Basis = new TriangleLinearLagrange(),

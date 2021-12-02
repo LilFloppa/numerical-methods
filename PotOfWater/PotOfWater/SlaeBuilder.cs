@@ -68,9 +68,9 @@ namespace PotOfWater
             for (int i = 0; i < info.Basis.Size; i++)
                 for (int j = 0; j < info.Basis.Size; j++)
                 {
-                    double G = Quadratures.TriangleGauss18(a, b, c, GetGradProduct(i, j));
-                    double M = Quadratures.TriangleGauss18(a, b, c, (double ksi, double etta) => psi[i](ksi, etta) * psi[j](ksi, etta));
-                    local[i, j] = (e.Material.RoCp * M + e.Material.Lambda * G) * D;
+                    double G = Quadratures.TriangleGauss18(GetGradProduct(i, j, a, b, c));
+                    double M = Quadratures.TriangleGauss18((double ksi, double etta) => psi[i](ksi, etta) * psi[j](ksi, etta));
+                    local[i, j] = e.Material.Lambda * G;
                 }
         }
 
@@ -130,12 +130,33 @@ namespace PotOfWater
             }
         }
 
-        private Func<double, double, double> GetGradProduct(int i, int j)
+        private Func<double, double, double> GetGradProduct(int i, int j, Point a, Point b, Point c)
         {
-            Func<double, double, double> ksiDer = (double ksi, double etta) => psiDers["ksi"][i](ksi, etta) * psiDers["ksi"][j](ksi, etta);
-            Func<double, double, double> ettaDer = (double ksi, double etta) => psiDers["etta"][i](ksi, etta) * psiDers["etta"][j](ksi, etta);
+            var J = new Matrix2x2(
+                a.X - c.X, b.X - c.X,
+                a.Y - c.Y, b.Y - c.Y);
 
-            return (double ksi, double etta) => ksiDer(ksi, etta) + ettaDer(ksi, etta);
+            var JT = J.Transpose();
+
+            var JJT = J * JT;
+            var JJTinv = JJT.Inverse();
+
+            return (double ksi, double etta) =>
+            {
+                double[] gradi = new double[2] { psiDers["ksi"][i](ksi, etta), psiDers["etta"][i](ksi, etta) };
+                double[] gradj = new double[2] { psiDers["ksi"][j](ksi, etta), psiDers["etta"][j](ksi, etta) };
+
+                double[] v = gradi * JJTinv;
+                return (v[0] * gradj[0] + v[1] * gradj[1]) * Math.Abs(J.Det());
+                //return
+                //(psiDers["ksi"][i](ksi, etta) * JJTinv.a11 + psiDers["etta"][i](ksi, etta) * JJTinv.a21) * psiDers["ksi"][j](ksi, etta) +
+                //(psiDers["ksi"][i](ksi, etta) * JJTinv.a12 + psiDers["etta"][i](ksi, etta) * JJTinv.a22) * psiDers["etta"][j](ksi, etta);
+            };
+
+            //Func<double, double, double> ksiDer = (double ksi, double etta) => psiDers["ksi"][i](ksi, etta) * psiDers["ksi"][j](ksi, etta);
+            //Func<double, double, double> ettaDer = (double ksi, double etta) => psiDers["etta"][i](ksi, etta) * psiDers["etta"][j](ksi, etta);
+
+            //return (double ksi, double etta) => ksiDer(ksi, etta) + ettaDer(ksi, etta);
         }
     }
 }
