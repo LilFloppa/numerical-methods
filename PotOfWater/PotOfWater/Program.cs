@@ -1,6 +1,5 @@
 ﻿using MathUtilities;
 using PotOfWater.Meshes;
-using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -16,13 +15,16 @@ namespace PotOfWater
             string thirdBoundaryFile,
             ProblemInfo info)
         {
+            // Points Parsing --------------------------------------------------------
             string[] lines = File.ReadAllLines(pointsFile);
             int pointCount = int.Parse(lines[0]);
             Point[] points = new Point[pointCount];
 
             for (int i = 0; i < pointCount; i++)
                 points[i] = Point.Parse(lines[i + 1]);
+            // -----------------------------------------------------------------------
 
+            // Elements Parsing ------------------------------------------------------
             lines = File.ReadAllLines(elementsFile);
             int elementsCount = int.Parse(lines[0]);
             List<FiniteElement> elements = new List<FiniteElement>();
@@ -38,26 +40,68 @@ namespace PotOfWater
 
                 elements.Add(e);
             }
+            // -----------------------------------------------------------------------
 
+            // First Boundary Parsing ------------------------------------------------
             lines = File.ReadAllLines(firstBoundaryFile);
             int firstBoundaryCount = int.Parse(lines[0]);
-            List<Edge> firstBondary = new List<Edge>();
+            List<FirstBoundaryEdge> firstBondary = new List<FirstBoundaryEdge>();
 
             for (int i = 0; i < firstBoundaryCount; i++)
             {
-                Edge e = new Edge(info.BondaryBasis.Size);
+                FirstBoundaryEdge e = new FirstBoundaryEdge(info.BoundaryBasis.Size);
                 string[] tokens = lines[i + 1].Split(' ');
                 e.Vertices[0] = int.Parse(tokens[0]) - 1;
-                e.Vertices[info.BondaryBasis.Size - 1] = int.Parse(tokens[1]) - 1;
+                e.Vertices[info.BoundaryBasis.Size - 1] = int.Parse(tokens[1]) - 1;
                 e.F = info.FirstBoundaryDictionary[int.Parse(tokens[2])];
 
                 firstBondary.Add(e);
             }
+            // -----------------------------------------------------------------------
+
+            // Second Boundary Parsing -----------------------------------------------
+            lines = File.ReadAllLines(secondBoundaryFile);
+            int secondBoundaryCount = int.Parse(lines[0]);
+            List<SecondBoundaryEdge> secondBondary = new List<SecondBoundaryEdge>();
+
+            for (int i = 0; i < secondBoundaryCount; i++)
+            {
+                SecondBoundaryEdge e = new SecondBoundaryEdge(info.BoundaryBasis.Size);
+                string[] tokens = lines[i + 1].Split(' ');
+                e.Vertices[0] = int.Parse(tokens[0]) - 1;
+                e.Vertices[info.BoundaryBasis.Size - 1] = int.Parse(tokens[1]) - 1;
+                e.Theta = info.SecondBoundaryDictionary[int.Parse(tokens[2])];
+
+                secondBondary.Add(e);
+            }
+            // -----------------------------------------------------------------------
+
+            // Third Boundary Parsing ------------------------------------------------
+            lines = File.ReadAllLines(thirdBoundaryFile);
+            int thirdBoundaryCount = int.Parse(lines[0]);
+            List<ThirdBoundaryEdge> thirdBondary = new List<ThirdBoundaryEdge>();
+
+            for (int i = 0; i < thirdBoundaryCount; i++)
+            {
+                ThirdBoundaryEdge e = new ThirdBoundaryEdge(info.BoundaryBasis.Size);
+                string[] tokens = lines[i + 1].Split(' ');
+                e.Vertices[0] = int.Parse(tokens[0]) - 1;
+                e.Vertices[info.BoundaryBasis.Size - 1] = int.Parse(tokens[1]) - 1;
+
+                int boundaryNo = int.Parse(tokens[2]);
+                e.UBeta = info.ThirdBoundaryDictionary[boundaryNo].ubeta;
+                e.Beta = info.ThirdBoundaryDictionary[boundaryNo].beta;
+
+                thirdBondary.Add(e);
+            }
+            // -----------------------------------------------------------------------
 
             IMeshBuilder builder = new LinearMeshBuilder();
             builder.AddPoints(points);
             builder.AddElements(elements);
             builder.AddFirstBoundary(firstBondary);
+            builder.AddSecondBoundary(secondBondary);
+            builder.AddThirdBoundary(thirdBondary);
             return builder.Build();
         }
 
@@ -80,10 +124,11 @@ namespace PotOfWater
             ProblemInfo info = new ProblemInfo
             {
                 Basis = new TriangleLinearLagrange(),
-                BondaryBasis = new LineLinearLagrange(),
+                BoundaryBasis = new LineLinearLagrange(),
                 MaterialDictionary = AreaInfo.Materials,
                 FirstBoundaryDictionary = AreaInfo.FirstBoundary,
-                SecondBoundaryDictionary = AreaInfo.SecondBoundary
+                SecondBoundaryDictionary = AreaInfo.SecondBoundary,
+                ThirdBoundaryDictionary = AreaInfo.ThirdBoundary
             };
 
             Mesh mesh = LoadMesh(
@@ -103,7 +148,7 @@ namespace PotOfWater
             double[] b = new double[mesh.NodeCount];
             A.SetPortrait(p);
 
-            SLAEBuilder builder = new SLAEBuilder(info);
+            LSlaeBuilder builder = new LSlaeBuilder(info);
             builder.Build(A, b);
 
             ISolver solver = new LOSLU();

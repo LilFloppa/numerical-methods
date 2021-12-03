@@ -4,21 +4,21 @@ using System.Collections.Generic;
 
 namespace PotOfWater
 {
-    public class SLAEBuilder
+    public class SlaeBuilder
     {
-        private ProblemInfo info;
+        protected ProblemInfo info;
 
-        private Point[] points;
+        protected Point[] points;
 
-        private double[,] local;
-        private double[] localb;
+        protected double[,] local;
+        protected double[] localb;
 
-        private Func<double, double, double>[] psi;
-        private Dictionary<string, Func<double, double, double>[]> psiDers;
+        protected Func<double, double, double>[] psi;
+        protected Dictionary<string, Func<double, double, double>[]> psiDers;
 
-        private Func<double, double>[] boundaryPsi;
+        protected Func<double, double>[] boundaryPsi;
 
-        public SLAEBuilder(ProblemInfo info)
+        public SlaeBuilder(ProblemInfo info)
         {
             this.info = info;
 
@@ -30,7 +30,7 @@ namespace PotOfWater
             psi = info.Basis.GetFuncs();
             psiDers = info.Basis.GetDers();
 
-            boundaryPsi = info.BondaryBasis.GetFuncs();
+            boundaryPsi = info.BoundaryBasis.GetFuncs();
         }
 
         public void Build(IMatrix A, double[] b)
@@ -43,7 +43,13 @@ namespace PotOfWater
                 AddLocalToGlobal(A, b, e);
             }
 
-            foreach (Edge e in info.Mesh.FirstBoundary)
+            foreach (var e in info.Mesh.SecondBoundary)
+                AddSecondBoundary(A, b, e);
+
+            foreach (var e in info.Mesh.ThirdBoundary)
+                AddThirdBoundary(A, b, e);
+
+            foreach (var e in info.Mesh.FirstBoundary)
                 AddFirstBoundary(A, b, e);
         }
 
@@ -56,7 +62,7 @@ namespace PotOfWater
             Array.Fill(localb, 0.0);
         }
 
-        private void BuildLocalMatrix(FiniteElement e)
+        protected virtual void BuildLocalMatrix(FiniteElement e)
         {
             // TODO: implement this method
             Point a = points[e[0]];
@@ -68,13 +74,13 @@ namespace PotOfWater
             for (int i = 0; i < info.Basis.Size; i++)
                 for (int j = 0; j < info.Basis.Size; j++)
                 {
-                    double G = Quadratures.TriangleGauss18(GetGradProduct(i, j, a, b, c));
+                    double G = Quadratures.TriangleGauss18(GetGrad(i, j, a, b, c));
                     double M = Quadratures.TriangleGauss18((double ksi, double etta) => psi[i](ksi, etta) * psi[j](ksi, etta));
-                    local[i, j] = e.Material.Lambda * G;
+                    local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * M) * D;
                 }
         }
 
-        private void BuildLocalB(FiniteElement e)
+        protected virtual void BuildLocalB(FiniteElement e)
         {
             // TODO: implement this method
 
@@ -86,8 +92,14 @@ namespace PotOfWater
 
             for (int i = 0; i < info.Basis.Size; i++)
             {
-                localb[i] = 0.0;
-                localb[i] *= D;
+                localb[i] = Quadratures.TriangleGauss18((double ksi, double etta) => 
+                {
+                    double x = a.X * ksi + b.X * etta + c.X * (1 - ksi - etta);
+                    double y = a.Y * ksi + b.Y * etta + c.Y * (1 - ksi - etta);
+
+                    return e.Material.F(x, y) * psi[i](ksi, etta);
+                });
+                localb[i] *= -D;
             }
         }
 
@@ -101,27 +113,18 @@ namespace PotOfWater
                 b[e[i]] += localb[i];
         }
 
-        private void AddFirstBoundary(IMatrix A, double[] b, Edge edge)
+        protected virtual void AddFirstBoundary(IMatrix A, double[] b, FirstBoundaryEdge edge)
         {
-            double[,] edgeM = new double[2, 2]
-            {
-                { 1.0 / 3.0,  1.0 / 6.0 },
-                { 1.0 / 6.0,  1.0 / 3.0 },
-            };
+            double[,] M = info.BoundaryBasis.MassMatrix;
 
-            Func<double, double> Ug = edge.F;
+            Func<double, double,  double> ug = edge.F;
 
             double x0 = info.Mesh.Points[edge[0]].X;
             double y0 = info.Mesh.Points[edge[0]].Y;
             double x1 = info.Mesh.Points[edge[edge.NodeCount - 1]].X;
             double y1 = info.Mesh.Points[edge[edge.NodeCount - 1]].Y;
 
-            double[] f = new double[edge.NodeCount];
-            for (int i = 0; i < edge.NodeCount; i++)
-                f[i] = Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => Ug(ksi) * boundaryPsi[i](ksi));
-
-            double[] q = new double[edge.NodeCount];
-            Gauss.Solve(edgeM, q, f);
+            double[] q = BasisHelpers.ExpandInBasis((double ksi) => ug(x0 + ksi * (x1 - x0), y0 + ksi * (y1 - y0)), info.BoundaryBasis);
 
             for (int i = 0; i < edge.NodeCount; i++)
             {
@@ -130,11 +133,54 @@ namespace PotOfWater
             }
         }
 
-        private Func<double, double, double> GetGradProduct(int i, int j, Point a, Point b, Point c)
+        protected virtual void AddSecondBoundary(IMatrix A, double[] b, SecondBoundaryEdge edge)
+        {
+            Func<double, double, double> theta = edge.Theta;
+
+            Point p1 = info.Mesh.Points[edge[0]];
+            Point p2 = info.Mesh.Points[edge[edge.NodeCount - 1]];
+
+            double x0 = p1.X;
+            double y0 = p1.Y;
+            double x1 = p2.X;
+            double y1 = p2.Y;
+
+            double h = Point.Distance(p1, p2);
+
+            for (int i = 0; i < info.BoundaryBasis.Size; i++)
+                b[edge[i]] += h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => theta(x0 + ksi * (x1 - x0), y0 + ksi * (y1 - y0)) * boundaryPsi[i](ksi));
+        }
+
+        protected virtual void AddThirdBoundary(IMatrix A, double[] b, ThirdBoundaryEdge edge)
+        {
+            double[,] M = info.BoundaryBasis.MassMatrix;
+
+            Func<double, double, double> ubeta = edge.UBeta;
+            double beta = edge.Beta;
+
+            Point p1 = info.Mesh.Points[edge[0]];
+            Point p2 = info.Mesh.Points[edge[edge.NodeCount - 1]];
+
+            double x0 = p1.X;
+            double y0 = p1.Y;
+            double x1 = p2.X;
+            double y1 = p2.Y;
+
+            double h = Point.Distance(p1, p2);
+
+            for (int i = 0; i < info.BoundaryBasis.Size; i++)
+                b[edge[i]] += beta * h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => ubeta(x0 + ksi * (x1 - x0), y0 + ksi * (y1 - y0)) * boundaryPsi[i](ksi));
+
+            for (int i = 0; i < info.BoundaryBasis.Size; i++)
+                for (int j = 0; j < info.BoundaryBasis.Size; j++)
+                    A.Add(edge[i], edge[j], beta * h * M[i, j]);
+        }
+
+        private Func<double, double, double> GetGrad(int i, int j, Point a, Point b, Point c)
         {
             var J = new Matrix2x2(
-                a.X - c.X, b.X - c.X,
-                a.Y - c.Y, b.Y - c.Y);
+                b.Y - c.Y, b.X - c.X,
+                a.Y - c.Y, a.X - c.X);
 
             var JT = J.Transpose();
 
@@ -147,7 +193,7 @@ namespace PotOfWater
                 double[] gradj = new double[2] { psiDers["ksi"][j](ksi, etta), psiDers["etta"][j](ksi, etta) };
 
                 double[] v = gradi * JJTinv;
-                return (v[0] * gradj[0] + v[1] * gradj[1]) * Math.Abs(J.Det());
+                return v[0] * gradj[0] + v[1] * gradj[1];
                 //return
                 //(psiDers["ksi"][i](ksi, etta) * JJTinv.a11 + psiDers["etta"][i](ksi, etta) * JJTinv.a21) * psiDers["ksi"][j](ksi, etta) +
                 //(psiDers["ksi"][i](ksi, etta) * JJTinv.a12 + psiDers["etta"][i](ksi, etta) * JJTinv.a22) * psiDers["etta"][j](ksi, etta);
@@ -157,6 +203,60 @@ namespace PotOfWater
             //Func<double, double, double> ettaDer = (double ksi, double etta) => psiDers["etta"][i](ksi, etta) * psiDers["etta"][j](ksi, etta);
 
             //return (double ksi, double etta) => ksiDer(ksi, etta) + ettaDer(ksi, etta);
+        }
+    }
+
+    public class LSlaeBuilder : SlaeBuilder
+    {
+        public LSlaeBuilder(ProblemInfo info) : base(info) { }
+
+        protected override void BuildLocalMatrix(FiniteElement e)
+        {
+            // TODO: implement this method
+            Point a = points[e[0]];
+            Point b = points[e[1]];
+            Point c = points[e[2]];
+
+            double D = Math.Abs(Utilities.Det(a, b, c));
+
+            double[] alpha = Alpha(a, b, c);
+
+            (double a1, double a2)[] grads = new (double, double)[3]
+            {
+                (alpha[0], alpha[1]),
+                (alpha[2], alpha[3]),
+                (alpha[4], alpha[5])
+            };
+
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    local[i, j] = e.Material.Lambda * D * (grads[i].a1 * grads[j].a1 + grads[i].a2 * grads[j].a2) / 2;
+                }
+            }
+        }
+
+        private double[] Alpha(Point a, Point b, Point c)
+        {
+            double[] alpha = new double[6];
+            double x1 = a.X;
+            double y1 = a.Y;
+            double x2 = b.X;
+            double y2 = b.Y;
+            double x3 = c.X;
+            double y3 = c.Y;
+
+            double D = Utilities.Det(a, b, c);
+
+            alpha[0] = (y2 - y3) / D;
+            alpha[1] = (x3 - x2) / D;
+            alpha[2] = (y3 - y1) / D;
+            alpha[3] = (x1 - x3) / D;
+            alpha[4] = (y1 - y2) / D;
+            alpha[5] = (x2 - x1) / D;
+
+            return alpha;
         }
     }
 }

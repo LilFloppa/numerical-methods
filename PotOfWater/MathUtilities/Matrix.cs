@@ -87,7 +87,7 @@ namespace MathUtilities
 			var JA = Portrait.JA;
 			if (i == j)
 			{
-				DI[i] = value;
+				DI[i] += value;
 				return;
 			}
 			else if (j > i)

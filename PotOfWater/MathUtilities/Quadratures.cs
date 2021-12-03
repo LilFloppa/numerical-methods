@@ -16,6 +16,21 @@ namespace MathUtilities
             public double Weight { get; }
         }
 
+        private static IEnumerable<QuadratureNode> TriangleOrder4()
+        {
+            const double a = 0.816847572980459;
+            const double b = 0.108103018168070;
+            const double c = 0.091576213509771;
+            const double d = 0.445948490915965;
+            const double w1 = 0.109951743655322;
+            const double w2 = 0.223381589678011;
+            double[] p1 = { a, c, c, b, d, d };
+            double[] p2 = { c, a, c, d, b, d };
+            double[] w = { w1, w1, w1, w2, w2, w2 };
+            for (int i = 0; i < w.Length; i++)
+                yield return new QuadratureNode(new Point { X = p1[i], Y = p2[i] }, w[i] / 2.0);
+        }
+
         private static IEnumerable<QuadratureNode> TriangleOrder18()
         {
             const int n = 66;
@@ -63,6 +78,21 @@ namespace MathUtilities
                 0.0637273964449};
             for (int i = 0; i < n; i++)
                 yield return new QuadratureNode(new Point { X = p1[i], Y = p2[i] }, 0.25 * w[i]);
+        }
+
+        public static double TriangleGauss4(Func<double, double, double> f)
+        {
+            double result = 0;
+
+            foreach (var node in TriangleOrder4())
+            {
+                double ksi = node.Node.X;
+                double etta = node.Node.Y;
+
+                result += node.Weight * f(ksi, etta);
+            }
+
+            return result;
         }
 
         public static double TriangleGauss18(Func<double, double, double> f)
