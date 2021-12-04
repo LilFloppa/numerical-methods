@@ -31,5 +31,7 @@ namespace MathUtilities
 
 			return new Point(a, b);
 		}
+
+		public override string ToString() => $"{X} {Y}";
 	}
 }

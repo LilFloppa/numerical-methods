@@ -1,5 +1,6 @@
 ﻿using MathUtilities;
 using PotOfWater.Meshes;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -121,6 +122,12 @@ namespace PotOfWater
 
         static void Main(string[] args)
         {
+            System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
+            culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
+            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+
             ProblemInfo info = new ProblemInfo
             {
                 Basis = new TriangleLinearLagrange(),
@@ -157,6 +164,18 @@ namespace PotOfWater
             Solution s = new Solution(q, info.Mesh);
 
             double result = s.GetValue(0.36, 0.4);
+
+            using (StreamWriter w = new StreamWriter(File.OpenWrite("C:/repos/data/q.txt")))
+            {
+                w.WriteLine("Q");
+                foreach (var qi in q)
+                    w.WriteLine(qi);
+
+                w.WriteLine();
+                w.WriteLine("Points");
+                foreach (var point in mesh.Points)
+                    w.WriteLine(point);
+            }
         }
     }
 }
