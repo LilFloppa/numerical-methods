@@ -99,7 +99,7 @@ namespace PotOfWater
 
                     return e.Material.F(x, y) * psi[i](ksi, etta);
                 });
-                localb[i] *= -D;
+                localb[i] *= D;
             }
         }
 

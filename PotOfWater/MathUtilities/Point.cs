@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace MathUtilities
 {
@@ -25,8 +26,8 @@ namespace MathUtilities
 		{
 			string[] tokens = value.Split(' ');
 
-			double.TryParse(tokens[0], out double a);
-			double.TryParse(tokens[1], out double b);
+			double a = double.Parse(tokens[0], NumberStyles.Any, CultureInfo.InvariantCulture);
+			double b = double.Parse(tokens[1], NumberStyles.Any, CultureInfo.InvariantCulture);
 
 			return new Point(a, b);
 		}

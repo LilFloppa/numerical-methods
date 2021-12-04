@@ -39,8 +39,8 @@ namespace PotOfWater
         {
             return new Func<double, double>[2]
             {
-                 (double x) => 1.0 - x,
-                 (double x) => x,
+                (double x) => 1.0 - x,
+                (double x) => x
             };
         }
         public Dictionary<string, Func<double, double>[]> GetDers()
@@ -59,6 +59,41 @@ namespace PotOfWater
         {
             { 1.0 / 3.0,  1.0 / 6.0 },
             { 1.0 / 6.0,  1.0 / 3.0 },
+        };
+    }
+
+    public class LineCubicLagrange : IOneDimBasis
+    {
+        public int Size => 4;
+        public BasisType Type => BasisType.Cubic;
+        public Func<double, double>[] GetFuncs()
+        {
+            return new Func<double, double>[]
+            {
+                (double x) => 0.5 * (1 - x) * (3 * (1 - x) - 1) * (3 * (1 - x) - 2),
+                (double x) => 4.5 * (1 - x) * x* (3 * (1 - x) - 1),
+                (double x) => 4.5 * (1 - x) * x * (3 * x - 1),
+                (double x) => 0.5 * x * (3 * x - 1) * (3 * x - 2)
+            };
+        }
+        public Dictionary<string, Func<double, double>[]> GetDers()
+        {
+            return new Dictionary<string, Func<double, double>[]>
+            {
+                ["x"] = new Func<double, double>[2]
+                {
+                    (double x) => 1.0,
+                    (double x) => -1.0
+                }
+            };
+        }
+
+        public double[,] MassMatrix => new double[4, 4]
+        {
+            {  8.0 / 105, 33.0 / 560, -3.0 / 140, 19.0 / 1680 },
+            { 33.0 / 560, 27.0 / 70, -27.0 / 560, -3.0 / 140 },
+            { -3.0 / 140, -27.0 / 560, 27.0 / 70, 33.0 / 560 },
+            { 19.0 / 1680, -3.0 / 140, 33.0 / 560, 8.0 / 105 }
         };
     }
 
@@ -100,6 +135,8 @@ namespace PotOfWater
     {
         public static double[] ExpandInBasis(Func<double, double> f, IOneDimBasis basis)
         {
+            if (basis.Type == BasisType.Linear)
+                return new double[2] { f(0.0), f(1.0) };
             var psi = basis.GetFuncs();
             double[] b = new double[basis.Size];
             for (int i = 0; i < basis.Size; i++)
