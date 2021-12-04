@@ -48,7 +48,7 @@ namespace PotOfWater
                 Point b = mesh.Points[e[1]];
                 Point c = mesh.Points[e[2]];
 
-                if (Utilities.PointInsideTriangle(a, b, c, p))
+                if (Utilities.PointInTriangle(a, b, c, p))
                 {
                     double[] L = Utilities.GetL(a, b, c, p);
                     double result = 0;

@@ -101,11 +101,29 @@ namespace MathUtilities
 			return x;
 		}
 
-		public static bool PointInsideTriangle(Point a, Point b, Point c, Point p)
+		private static double sign(Point p, Point t1, Point t2)
 		{
-			double crossProduct1 = (a.X - p.X) * (b.Y - a.Y) - (b.X - a.X) * (a.Y - p.Y);
-			double crossProduct2 = (b.X - p.X) * (c.Y - b.Y) - (c.X - b.X) * (b.Y - p.Y);
-			double crossProduct3 = (c.X - p.X) * (a.Y - c.Y) - (a.X - c.X) * (c.Y - p.Y);
+			return (p.X - t2.X) * (t1.Y - t2.Y) - (t1.X - t2.X) * (p.Y - t2.Y);
+		}
+
+		public static bool PointInTriangle(Point t1, Point t2, Point t3, Point p)
+		{
+			double D = Math.Abs(sign(t1, t2, t3));
+			double D1 = Math.Abs(sign(p, t2, t3));
+			double D2 = Math.Abs(sign(t1, p, t3));
+			double D3 = Math.Abs(sign(t1, t2, p));
+
+			if (Math.Abs(D1 + D2 + D3 - D) > 1.0e-5)
+				return false;
+
+			return true;
+		}
+
+		public static bool PointInsideTriangle(Point t1, Point t2, Point t3, Point p)
+		{
+			double crossProduct1 = (t1.X - p.X) * (t2.Y - t1.Y) - (t2.X - t1.X) * (t1.Y - p.Y);
+			double crossProduct2 = (t2.X - p.X) * (t3.Y - t2.Y) - (t3.X - t2.X) * (t2.Y - p.Y);
+			double crossProduct3 = (t3.X - p.X) * (t1.Y - t3.Y) - (t1.X - t3.X) * (t3.Y - p.Y);
 
 			if (crossProduct1 >= 0.0 && crossProduct2 >= 0.0 && crossProduct3 >= 0.0)
 				return true;
