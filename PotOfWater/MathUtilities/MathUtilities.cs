@@ -101,11 +101,11 @@ namespace MathUtilities
 			return x;
 		}
 
-		public static bool PointInsideTriangle(Point t1, Point t2, Point t3, Point p)
+		public static bool PointInsideTriangle(Point a, Point b, Point c, Point p)
 		{
-			double crossProduct1 = (t1.X - p.X) * (t2.Y - t1.Y) - (t2.X - t1.X) * (t1.Y - p.Y);
-			double crossProduct2 = (t2.X - p.X) * (t3.Y - t2.Y) - (t3.X - t2.X) * (t2.Y - p.Y);
-			double crossProduct3 = (t3.X - p.X) * (t1.Y - t3.Y) - (t1.X - t3.X) * (t3.Y - p.Y);
+			double crossProduct1 = (a.X - p.X) * (b.Y - a.Y) - (b.X - a.X) * (a.Y - p.Y);
+			double crossProduct2 = (b.X - p.X) * (c.Y - b.Y) - (c.X - b.X) * (b.Y - p.Y);
+			double crossProduct3 = (c.X - p.X) * (a.Y - c.Y) - (a.X - c.X) * (c.Y - p.Y);
 
 			if (crossProduct1 >= 0.0 && crossProduct2 >= 0.0 && crossProduct3 >= 0.0)
 				return true;
@@ -116,17 +116,17 @@ namespace MathUtilities
 			return false;
 		}
 
-		public static (double, double, double) GetL(Point t1, Point t2, Point t3, Point p)
+		public static double[] GetL(Point a, Point b, Point c, Point p)
 		{
-			double D = Math.Abs(Det(t1, t2, t3));
-			double D1 = Math.Abs(Det(p, t2, t3));
-			double D2 = Math.Abs(Det(t1, p, t3));
-			double D3 = Math.Abs(Det(t1, t2, p));
+			double D = Math.Abs(Det(a, b, c));
+			double D1 = Math.Abs(Det(p, b, c));
+			double D2 = Math.Abs(Det(a, p, c));
+			double D3 = Math.Abs(Det(a, b, p));
 
 			double L1 = D1 / D;
 			double L2 = D2 / D;
 			double L3 = D3 / D;
-			return (L1, L2, L3);
+			return new double[3] { L1, L2, L3 };
 		}
 
 		public static double Error(double[] a, double[] b)

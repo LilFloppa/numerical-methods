@@ -12,7 +12,7 @@ namespace PotOfWater
             {
                 Lambda = 1.0,
                 RoCp = 0.0,
-                F = (double x, double y) => 0.0
+                F = (double x, double y) => -6.0 * x
             },
             [1] = new Material
             {
@@ -24,13 +24,12 @@ namespace PotOfWater
 
         public static Dictionary<int, Func<double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double>>
         {
-            [0] = (double x, double y) => x
+            [0] = (double x, double y) => x * x * x,
         };
 
         public static Dictionary<int, Func<double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double>>
         {
             [0] = (double x, double y) => 20,
-            [1] = (double x, double y) => 0
         };
 
         public static Dictionary<int, (double beta, Func<double, double, double> ubeta)> ThirdBoundary => new Dictionary<int, (double, Func<double, double, double>)>
