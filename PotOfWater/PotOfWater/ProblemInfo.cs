@@ -11,30 +11,24 @@ namespace PotOfWater
             [0] = new Material
             {
                 Lambda = 1.0,
-                RoCp = 0.0,
-                F = (double x, double y) => -6.0 * x
-            },
-            [1] = new Material
-            {
-                Lambda = 1.0,
-                RoCp = 0.0,
-                F = (double x, double y) => 0.0
+                RoCp = 2.0,
+                F = (double x, double y, double t) => 20.0 * x * t + 4
             }
         };
 
-        public static Dictionary<int, Func<double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double>>
+        public static Dictionary<int, Func<double, double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double, double>>
         {
-            [0] = (double x, double y) => x * x * x,
+            [0] = (double x, double y, double t) => 5 * x * t * t + 2 * t
         };
 
-        public static Dictionary<int, Func<double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double>>
+        public static Dictionary<int, Func<double, double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double, double>>
         {
-            [0] = (double x, double y) => 20,
+            [0] = (double x, double y, double t) => 0.0,
         };
 
-        public static Dictionary<int, (double beta, Func<double, double, double> ubeta)> ThirdBoundary => new Dictionary<int, (double, Func<double, double, double>)>
+        public static Dictionary<int, (double beta, Func<double, double, double, double> ubeta)> ThirdBoundary => new Dictionary<int, (double, Func<double, double, double, double>)>
         {
-            [0] = (2.0, (double x, double y) => 20 * y - 27)
+            [0] = (0.0, (double x, double y, double t) => 0.0)
         };
     };
 
@@ -43,9 +37,10 @@ namespace PotOfWater
         public ITwoDimBasis Basis { get; set; }
         public IOneDimBasis BoundaryBasis { get; set; }
         public Mesh Mesh { get; set; }
+        public double[] TimeMesh { get; set; }
         public Dictionary<int, Material> MaterialDictionary { get; set; }
-        public Dictionary<int, Func<double, double, double>> FirstBoundaryDictionary { get; set; }
-        public Dictionary<int, Func<double, double, double>> SecondBoundaryDictionary { get; set; }
-        public Dictionary<int, (double beta, Func<double, double, double> ubeta)> ThirdBoundaryDictionary { get; set; }
+        public Dictionary<int, Func<double, double, double, double>> FirstBoundaryDictionary { get; set; }
+        public Dictionary<int, Func<double, double, double, double>> SecondBoundaryDictionary { get; set; }
+        public Dictionary<int, (double beta, Func<double, double, double, double> ubeta)> ThirdBoundaryDictionary { get; set; }
     }
 }

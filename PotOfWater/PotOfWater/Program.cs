@@ -106,20 +106,69 @@ namespace PotOfWater
             return builder.Build();
         }
 
-        static void GaussMatrixTest()
-        {
-            double[,] A = new double[3, 3]
-            {
-                { 1, 0, 2 },
-                { -2, 5, 8 },
-                { 5, 5, 0 }
-            };
 
-            double[] b = new double[3] { 3, 11, 10 };
-            double[] q = new double[3] { 0, 0, 0 };
-            Gauss.Solve(A, q, b);
+        static void ClearMatrix(IMatrix A, double[] b)
+        {
+            Array.Fill(b, 0.0);
+            Array.Fill(A.AL, 0.0);
+            Array.Fill(A.AU, 0.0);
+            Array.Fill(A.DI, 0.0);
         }
 
+        static void TimeProblem(ProblemInfo info, IMatrix A, double[] b)
+        {
+            ISolver solver = new LOSLU();
+            TimeSlaeBuilder tsb = new TimeSlaeBuilder(info);
+
+            double[] t = info.TimeMesh;
+            double[][] Q = new double[info.TimeMesh.Length][];
+            Q[0] = new double[A.N];
+
+            tsb.Layer = new TwoLayer();
+            tsb.Layer.SetQ(new double[1][] { Q[0] });
+            tsb.Layer.SetT(new double[] { t[0], t[1] });
+            tsb.CurrentT = info.TimeMesh[1];
+            tsb.Build(A, b);
+            Q[1] = solver.Solve(A, b);
+            ClearMatrix(A, b);
+
+            Q[1][A.N - 1] = 0.225;
+
+            tsb.Layer = new ThreeLayer();
+            tsb.Layer.SetQ(new double[2][] { Q[0], Q[1] });
+            tsb.Layer.SetT(new double[3] { t[0], t[1], t[2] });
+            tsb.CurrentT = t[2];
+            tsb.Build(A, b);
+            Q[2] = solver.Solve(A, b);
+            ClearMatrix(A, b);
+
+            tsb.Layer = new FourLayer();
+            tsb.Layer.SetQ(new double[3][] { Q[0], Q[1], Q[2] });
+            tsb.Layer.SetT(new double[4] { t[0], t[1], t[2], t[3] });
+            tsb.CurrentT = t[3];
+            tsb.Build(A, b);
+            Q[3] = solver.Solve(A, b);
+            ClearMatrix(A, b);
+
+            for (int i = 4; i < info.TimeMesh.Length; i++)
+            {
+                tsb.Layer.SetQ(new double[3][] { Q[i - 3], Q[i - 2], Q[i - 1] });
+                tsb.Layer.SetT(new double[4] { t[i - 3], t[i - 2], t[i - 1], t[i] });
+                tsb.CurrentT = t[i];
+                tsb.Build(A, b);
+                Q[i] = solver.Solve(A, b);
+                ClearMatrix(A, b);
+            }    
+        }
+
+        static void Problem(ProblemInfo info, IMatrix A, double[] b)
+        {
+            LSlaeBuilder builder = new LSlaeBuilder(info);
+            builder.Build(A, b);
+
+            ISolver solver = new LOSLU();
+            double[] q = solver.Solve(A, b);
+        }
         static void Main(string[] args)
         {
             System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
@@ -147,6 +196,7 @@ namespace PotOfWater
               info);
 
             info.Mesh = mesh;
+            info.TimeMesh = new double[4] { 0.0, 0.1, 0.3, 0.7 };
 
             PortraitBuilder PB = new PortraitBuilder(info);
             Portrait p = PB.Build();
@@ -155,27 +205,21 @@ namespace PotOfWater
             double[] b = new double[mesh.NodeCount];
             A.SetPortrait(p);
 
-            LSlaeBuilder builder = new LSlaeBuilder(info);
-            builder.Build(A, b);
+            TimeProblem(info, A, b);
 
-            ISolver solver = new LOSLU();
-            double[] q = solver.Solve(A, b);
+           
 
-            Solution s = new Solution(q, info.Mesh);
+            //using (StreamWriter w = new StreamWriter(File.OpenWrite("C:/repos/data/q.txt")))
+            //{
+            //    w.WriteLine("Q");
+            //    foreach (var qi in q)
+            //        w.WriteLine(qi);
 
-            double result = s.GetValue(0.36, 0.4);
-
-            using (StreamWriter w = new StreamWriter(File.OpenWrite("C:/repos/data/q.txt")))
-            {
-                w.WriteLine("Q");
-                foreach (var qi in q)
-                    w.WriteLine(qi);
-
-                w.WriteLine();
-                w.WriteLine("Points");
-                foreach (var point in mesh.Points)
-                    w.WriteLine(point);
-            }
+            //    w.WriteLine();
+            //    w.WriteLine("Points");
+            //    foreach (var point in mesh.Points)
+            //        w.WriteLine(point);
+            //}
         }
     }
 }

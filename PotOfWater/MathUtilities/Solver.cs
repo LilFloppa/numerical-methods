@@ -104,8 +104,6 @@ namespace MathUtilities
 				IterCount++;
 			}
 
-			Console.WriteLine($"Последняя невязка: {Difference}");
-
 			return x;
 		}
 
