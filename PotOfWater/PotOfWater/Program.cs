@@ -213,18 +213,6 @@ namespace PotOfWater
 
             ISolver solver = new LOSLU();
             var q = solver.Solve(A, b);
-
-            //using (StreamWriter w = new StreamWriter(File.OpenWrite("C:/repos/data/q.txt")))
-            //{
-            //    w.WriteLine("Q");
-            //    foreach (var qi in q)
-            //        w.WriteLine(qi);
-
-            //    w.WriteLine();
-            //    w.WriteLine("Points");
-            //    foreach (var point in mesh.Points)
-            //        w.WriteLine(point);
-            //}
         }
     }
 }

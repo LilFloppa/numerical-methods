@@ -11,14 +11,14 @@ namespace PotOfWater
             [0] = new Material
             {
                 Lambda = 1.0,
-                RoCp = 1.0,
-                F = (double r, double z, double t) => 1.0 / r + r
+                RoCp = 0.0,
+                F = (double r, double z, double t) => 4.0
             }
         };
 
         public static Dictionary<int, Func<double, double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double, double>>
         {
-            [0] = (double r, double z, double t) => r
+            [0] = (double r, double z, double t) => r * r
         };
 
         public static Dictionary<int, Func<double, double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double, double>>
