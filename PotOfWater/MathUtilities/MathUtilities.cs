@@ -157,5 +157,23 @@ namespace MathUtilities
 
 			return Math.Sqrt(result);
 		}
+
+		public static Point[] TriangleCubicPoints(Point a, Point b, Point c)
+		{
+			Point[] points = new Point[10];
+
+			points[0] = a;
+			points[1] = b;
+			points[2] = c;
+			points[3] = (((b / 2.0) + a) * 2.0 / 3.0);
+			points[4] = (((b * 2.0) + a) / 3.0);
+			points[5] = (((c / 2.0) + a) * 2.0 / 3.0);
+			points[6] = (((c * 2.0) + a) / 3.0);
+			points[7] = (((c / 2.0) + b) * 2.0 / 3.0);
+			points[8] = (((c * 2.0) + b) / 3.0);
+			points[9] = ((a + b + c) / 3.0);
+
+			return points;
+		}
 	}
 }

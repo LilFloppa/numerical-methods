@@ -179,8 +179,8 @@ namespace PotOfWater
 
             ProblemInfo info = new ProblemInfo
             {
-                Basis = new TriangleLinearLagrange(),
-                BoundaryBasis = new LineLinearLagrange(),
+                Basis = new TriangleCubicLagrange(),
+                BoundaryBasis = new LineCubicLagrange(),
                 MaterialDictionary = AreaInfo.Materials,
                 FirstBoundaryDictionary = AreaInfo.FirstBoundary,
                 SecondBoundaryDictionary = AreaInfo.SecondBoundary,
@@ -193,7 +193,8 @@ namespace PotOfWater
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary1.txt",
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary2.txt",
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary3.txt",
-              info);
+              info,
+              new CubicMeshBuilder());
 
             info.Mesh = mesh;
             info.TimeMesh = new double[4] { 0.0, 0.1, 0.3, 0.7 };
@@ -207,8 +208,11 @@ namespace PotOfWater
 
             // TimeProblem(info, A, b);
 
-            SlaeBuilder sb = new SlaeBuilder(info);
+            CubicSlaeBuilder sb = new CubicSlaeBuilder(info);
             sb.Build(A, b);
+
+            ISolver solver = new LOSLU();
+            var q = solver.Solve(A, b);
 
             //using (StreamWriter w = new StreamWriter(File.OpenWrite("C:/repos/data/q.txt")))
             //{

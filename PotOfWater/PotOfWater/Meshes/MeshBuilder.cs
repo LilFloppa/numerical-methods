@@ -101,10 +101,40 @@ namespace PotOfWater.Meshes
                 ThirdBoundary = thirdBoundary
             };
         }
-
         private void BulidBondary(Dictionary<int, int>[] edgeMatrix)
         {
-            
+            foreach (Edge edge in firstBoundary)
+            {
+                int a = edge[0];
+                int b = edge[3];
+                bool f = a > b;
+                if (f) (a, b) = (b, a);
+
+                edge.Vertices[1] = edgeMatrix[a][b] + (f ? 1 : 0);
+                edge.Vertices[2] = edgeMatrix[a][b] + (f ? 0 : 1);
+            }
+
+            foreach (Edge edge in secondBoundary)
+            {
+                int a = edge[0];
+                int b = edge[3];
+                bool f = a > b;
+                if (f) (a, b) = (b, a);
+
+                edge.Vertices[1] = edgeMatrix[a][b] + (f ? 1 : 0);
+                edge.Vertices[2] = edgeMatrix[a][b] + (f ? 0 : 1);
+            }
+
+            foreach (Edge edge in thirdBoundary)
+            {
+                int a = edge[0];
+                int b = edge[3];
+                bool f = a > b;
+                if (f) (a, b) = (b, a);
+
+                edge.Vertices[1] = edgeMatrix[a][b] + (f ? 1 : 0);
+                edge.Vertices[2] = edgeMatrix[a][b] + (f ? 0 : 1);
+            }
         }
     }
 }
