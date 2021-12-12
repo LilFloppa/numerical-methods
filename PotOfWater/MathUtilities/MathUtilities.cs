@@ -134,7 +134,7 @@ namespace MathUtilities
 			return false;
 		}
 
-		public static double[] GetL(Point a, Point b, Point c, Point p)
+		public static (double, double, double) GetL(Point a, Point b, Point c, Point p)
 		{
 			double D = Math.Abs(Det(a, b, c));
 			double D1 = Math.Abs(Det(p, b, c));
@@ -144,7 +144,7 @@ namespace MathUtilities
 			double L1 = D1 / D;
 			double L2 = D2 / D;
 			double L3 = D3 / D;
-			return new double[3] { L1, L2, L3 };
+			return (L1, L2, L3);
 		}
 
 		public static double Error(double[] a, double[] b)

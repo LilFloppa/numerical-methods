@@ -213,6 +213,9 @@ namespace PotOfWater
 
             ISolver solver = new LOSLU();
             var q = solver.Solve(A, b);
+
+            Solution solution = new Solution(q, mesh);
+            double res = solution.GetValue(0.5, 0.5);
         }
     }
 }

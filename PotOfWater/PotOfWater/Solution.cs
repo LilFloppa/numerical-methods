@@ -29,10 +29,10 @@ namespace PotOfWater
 
                 if (Utilities.PointInsideTriangle(a, b, c, p))
                 {
-                    double[] L = Utilities.GetL(a, b, c, p);
+                    (double L1, double L2, double L3) = Utilities.GetL(a, b, c, p);
                     double result = 0;
-                    for (int i = 0; i < 3; i++)
-                        result *= L[i] * q[e[i]];
+                    for (int i = 0; i < LInfo.LBasis.Length; i++)
+                        result += q[e[i]] * LInfo.LBasis[i](L1, L2, L3);
                 }
             }
             
@@ -48,12 +48,12 @@ namespace PotOfWater
                 Point b = mesh.Points[e[1]];
                 Point c = mesh.Points[e[2]];
 
-                if (Utilities.PointInTriangle(a, b, c, p))
+                if (Utilities.PointInsideTriangle(a, b, c, p))
                 {
-                    double[] L = Utilities.GetL(a, b, c, p);
+                    (double L1, double L2, double L3) = Utilities.GetL(a, b, c, p);
                     double result = 0;
-                    for (int i = 0; i < 3; i++)
-                        result += L[i] * q[e[i]];
+                    for (int i = 0; i < LInfo.LBasis.Length; i++)
+                        result += q[e[i]] * LInfo.LBasis[i](L1, L2, L3);
 
                     return result;
                 }

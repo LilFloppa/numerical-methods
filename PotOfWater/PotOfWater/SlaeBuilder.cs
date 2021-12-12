@@ -553,14 +553,14 @@ namespace PotOfWater
             double[,] M = info.BoundaryBasis.MassMatrix;
 
             Func<double, double, double, double> ugtime = edge.F;
-            Func<double, double, double> ug = (double x, double y) => ugtime(x, y, 0);
+            Func<double, double, double> ug = (double r, double z) => ugtime(r, z, 0);
 
-            double x0 = info.Mesh.Points[edge[0]].X;
-            double y0 = info.Mesh.Points[edge[0]].Y;
-            double x1 = info.Mesh.Points[edge[edge.NodeCount - 1]].X;
-            double y1 = info.Mesh.Points[edge[edge.NodeCount - 1]].Y;
+            double r0 = info.Mesh.Points[edge[0]].R;
+            double z0 = info.Mesh.Points[edge[0]].Z;
+            double r1 = info.Mesh.Points[edge[edge.NodeCount - 1]].R;
+            double z1 = info.Mesh.Points[edge[edge.NodeCount - 1]].Z;
 
-            double[] q = BasisHelpers.ExpandInBasis((double ksi) => ug(x0 + ksi * (x1 - x0), y0 + ksi * (y1 - y0)), info.BoundaryBasis);
+            double[] q = BasisHelpers.ExpandInBasis((double ksi) => ug(r0 + ksi * (r1 - r0), z0 + ksi * (z1 - z0)), info.BoundaryBasis);
 
             for (int i = 0; i < edge.NodeCount; i++)
             {
