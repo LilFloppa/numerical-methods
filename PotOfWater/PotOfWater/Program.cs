@@ -14,7 +14,8 @@ namespace PotOfWater
             string firstBoundaryFile,
             string secondBoundaryFile,
             string thirdBoundaryFile,
-            ProblemInfo info)
+            ProblemInfo info,
+            IMeshBuilder builder)
         {
             // Points Parsing --------------------------------------------------------
             string[] lines = File.ReadAllLines(pointsFile);
@@ -97,7 +98,6 @@ namespace PotOfWater
             }
             // -----------------------------------------------------------------------
 
-            IMeshBuilder builder = new LinearMeshBuilder();
             builder.AddPoints(points);
             builder.AddElements(elements);
             builder.AddFirstBoundary(firstBondary);
@@ -205,9 +205,10 @@ namespace PotOfWater
             double[] b = new double[mesh.NodeCount];
             A.SetPortrait(p);
 
-            TimeProblem(info, A, b);
+            // TimeProblem(info, A, b);
 
-           
+            SlaeBuilder sb = new SlaeBuilder(info);
+            sb.Build(A, b);
 
             //using (StreamWriter w = new StreamWriter(File.OpenWrite("C:/repos/data/q.txt")))
             //{

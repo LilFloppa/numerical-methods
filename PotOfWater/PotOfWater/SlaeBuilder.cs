@@ -1,7 +1,6 @@
 ﻿using MathUtilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace PotOfWater
 {
@@ -65,7 +64,6 @@ namespace PotOfWater
 
         protected virtual void BuildLocalMatrix(FiniteElement e)
         {
-            // TODO: implement this method
             Point a = points[e[0]];
             Point b = points[e[1]];
             Point c = points[e[2]];
@@ -183,8 +181,8 @@ namespace PotOfWater
         private Func<double, double, double> GetGrad(int i, int j, Point a, Point b, Point c)
         {
             var J = new Matrix2x2(
-                b.Y - c.Y, b.X - c.X,
-                a.Y - c.Y, a.X - c.X);
+                a.X - c.X, a.Y - c.Y,
+                b.X - c.X, b.Y - c.Y);
 
             var JT = J.Transpose();
 

@@ -62,39 +62,20 @@ namespace PotOfWater
         };
     }
 
-    public class LineCubicLagrange : IOneDimBasis
+    public class TriangleCubicLagrange : ITwoDimBasis
     {
-        public int Size => 4;
+        public int Size => 10;
         public BasisType Type => BasisType.Cubic;
-        public Func<double, double>[] GetFuncs()
+
+        Func<double, double, double>[] ITwoDimBasis.GetFuncs()
         {
-            return new Func<double, double>[]
-            {
-                (double x) => 0.5 * (1 - x) * (3 * (1 - x) - 1) * (3 * (1 - x) - 2),
-                (double x) => 4.5 * (1 - x) * x* (3 * (1 - x) - 1),
-                (double x) => 4.5 * (1 - x) * x * (3 * x - 1),
-                (double x) => 0.5 * x * (3 * x - 1) * (3 * x - 2)
-            };
-        }
-        public Dictionary<string, Func<double, double>[]> GetDers()
-        {
-            return new Dictionary<string, Func<double, double>[]>
-            {
-                ["x"] = new Func<double, double>[2]
-                {
-                    (double x) => 1.0,
-                    (double x) => -1.0
-                }
-            };
+            throw new NotImplementedException();
         }
 
-        public double[,] MassMatrix => new double[4, 4]
+        Dictionary<string, Func<double, double, double>[]> ITwoDimBasis.GetDers()
         {
-            {  8.0 / 105, 33.0 / 560, -3.0 / 140, 19.0 / 1680 },
-            { 33.0 / 560, 27.0 / 70, -27.0 / 560, -3.0 / 140 },
-            { -3.0 / 140, -27.0 / 560, 27.0 / 70, 33.0 / 560 },
-            { 19.0 / 1680, -3.0 / 140, 33.0 / 560, 8.0 / 105 }
-        };
+            throw new NotImplementedException();
+        }
     }
 
     public class TriangleLinearLagrange : ITwoDimBasis
@@ -105,9 +86,9 @@ namespace PotOfWater
         {
             return new Func<double, double, double>[3]
             {
+                 (double ksi, double etta) => ksi,
                  (double ksi, double etta) => etta,
                  (double ksi, double etta) => 1.0 - ksi - etta,
-                 (double ksi, double etta) => ksi,
             };
         }
         public Dictionary<string, Func<double, double, double>[]> GetDers()
@@ -148,6 +129,4 @@ namespace PotOfWater
             return q;
         }
     }
-
-    // TODO: Implement quadratic and cubic lagrange basis
 }
