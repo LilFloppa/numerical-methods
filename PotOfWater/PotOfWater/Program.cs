@@ -194,7 +194,7 @@ namespace PotOfWater
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary2.txt",
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary3.txt",
               info,
-              new CubicMeshBuilder());
+              new  CubicMeshBuilder());
 
             info.Mesh = mesh;
             info.TimeMesh = new double[4] { 0.0, 0.1, 0.3, 0.7 };
@@ -215,7 +215,7 @@ namespace PotOfWater
             var q = solver.Solve(A, b);
 
             Solution solution = new Solution(q, mesh);
-            double res = solution.GetValue(0.5, 0.5);
+            double res = solution.GetValue(1.5, 1.5);
         }
     }
 }

@@ -210,11 +210,12 @@ namespace PotOfWater
 
     public class LSlaeBuilder : SlaeBuilder
     {
+        public double CurrentT { get; set; } = 0.0;
+        private double[,] M = new double[3, 3];
         public LSlaeBuilder(ProblemInfo info) : base(info) { }
 
         protected override void BuildLocalMatrix(FiniteElement e)
         {
-            // TODO: implement this method
             Point a = points[e[0]];
             Point b = points[e[1]];
             Point c = points[e[2]];
@@ -230,17 +231,138 @@ namespace PotOfWater
                 (alpha[4], alpha[5])
             };
 
+
+            ClearM();
+
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    double M = Quadratures.TriangleGauss18((double ksi, double etta) => psi[i](ksi, etta) * psi[j](ksi, etta));
+                    for (int k = 0; k < 3; k++)
+                    {
+                        int[] v = new int[3];
+                        v[i]++;
+                        v[j]++;
+                        v[k]++;
+                        double r = points[e[k]].R;
+
+                        M[i, j] += Integral(v[0], v[1], v[2]) * r;
+                    }
+
                     double G = (grads[i].a1 * grads[j].a1 + grads[i].a2 * grads[j].a2) / 2;
-                    local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * M) * D;  
+                    G *= (a.R + b.R + c.R) / 6;
+
+                    local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * M[i, j]) * D;  
                 }
             }
         }
+        protected override void BuildLocalB(FiniteElement e)
+        {
+            Point a = points[e[0]];
+            Point b = points[e[1]];
+            Point c = points[e[2]];
 
+            double D = Math.Abs(Utilities.Det(a, b, c));
+
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    localb[i] = Quadratures.TriangleGauss18((double ksi, double etta) =>
+            //    {
+            //        double r = a.R * ksi + b.R * etta + c.R * (1 - ksi - etta);
+            //        double z = a.Z * ksi + b.Z * etta + c.Z * (1 - ksi - etta);
+
+            //        return e.Material.F(r, z, 0) * psi[i](ksi, etta) * r;
+            //    });
+            //    localb[i] *= D;
+            //}
+
+            double[] f = new double[3];
+            for (int i = 0; i < 3; i++)
+            {
+                var p = points[e[i]];
+                f[i] = e.Material.F(p.R, p.Z, CurrentT);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                localb[i] = f[0] * M[i, 0];
+
+                for (int j = 1; j < 3; j++)
+                    localb[i] += f[j] * M[i, j];
+
+                localb[i] *= D;
+            }
+        }
+        protected override void AddFirstBoundary(IMatrix A, double[] b, FirstBoundaryEdge edge)
+        {
+            double[,] M = info.BoundaryBasis.MassMatrix;
+
+            Func<double, double, double, double> ugtime = edge.F;
+            Func<double, double, double> ug = (double r, double z) => ugtime(r, z, 0);
+
+            double r0 = info.Mesh.Points[edge[0]].R;
+            double z0 = info.Mesh.Points[edge[0]].Z;
+            double r1 = info.Mesh.Points[edge[edge.NodeCount - 1]].R;
+            double z1 = info.Mesh.Points[edge[edge.NodeCount - 1]].Z;
+
+            double[] q = BasisHelpers.ExpandInBasis((double ksi) => ug(r0 + ksi * (r1 - r0), z0 + ksi * (z1 - z0)), info.BoundaryBasis);
+
+            for (int i = 0; i < edge.NodeCount; i++)
+            {
+                A.DI[edge[i]] = 1.0e+50;
+                b[edge[i]] = 1.0e+50 * q[i];
+            }
+        }
+        protected override void AddSecondBoundary(IMatrix A, double[] b, SecondBoundaryEdge edge)
+        {
+            Func<double, double, double, double> thetatime = edge.Theta;
+            Func<double, double, double> theta = (double r, double z) => thetatime(r, z, 0);
+
+            Point p1 = info.Mesh.Points[edge[0]];
+            Point p2 = info.Mesh.Points[edge[edge.NodeCount - 1]];
+
+            double r0 = p1.R;
+            double z0 = p1.Z;
+            double r1 = p2.R;
+            double z1 = p2.Z;
+
+            double h = Point.Distance(p1, p2);
+
+            for (int i = 0; i < info.BoundaryBasis.Size; i++)
+                b[edge[i]] += h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => theta(r0 + ksi * (r1 - r0), z0 + ksi * (z1 - z0)) * boundaryPsi[i](ksi) * (r0 + ksi * (r1 - r0)));
+        }
+        protected override void AddThirdBoundary(IMatrix A, double[] b, ThirdBoundaryEdge edge)
+        {
+            Func<double, double, double, double> ubetatime = edge.UBeta;
+            Func<double, double, double> ubeta = (double r, double z) => ubetatime(r, z, 0);
+            double beta = edge.Beta;
+
+            Point p1 = info.Mesh.Points[edge[0]];
+            Point p2 = info.Mesh.Points[edge[edge.NodeCount - 1]];
+
+            double z0 = p1.R;
+            double r0 = p1.Z;
+            double z1 = p2.R;
+            double r1 = p2.Z;
+
+            double h = Point.Distance(p1, p2);
+
+            for (int i = 0; i < info.BoundaryBasis.Size; i++)
+                b[edge[i]] += beta * h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => ubeta(r0 + ksi * (r1 - r0), z0 + ksi * (z1 - z0)) * boundaryPsi[i](ksi) * (r0 + ksi * (r1 - r0)));
+
+            for (int i = 0; i < info.BoundaryBasis.Size; i++)
+                for (int j = 0; j < info.BoundaryBasis.Size; j++)
+                {
+                    double M = beta * h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => boundaryPsi[i](ksi) * boundaryPsi[j](ksi) * (r0 + ksi * (r1 - r0)));
+                    A.Add(edge[i], edge[j], M);
+                }
+        }
+        private void ClearM()
+        {
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++)
+                    M[i, j] = 0.0;
+        }
         private double[] Alpha(Point a, Point b, Point c)
         {
             double[] alpha = new double[6];
@@ -261,6 +383,10 @@ namespace PotOfWater
             alpha[5] = (x2 - x1) / D;
 
             return alpha;
+        }
+        private double Integral(int v1, int v2, int v3)
+        {
+            return Utilities.Factorial(v1) * Utilities.Factorial(v2) * Utilities.Factorial(v3) / (double)Utilities.Factorial(v1 + v2 + v3 + 2);
         }
     }
 
@@ -611,7 +737,7 @@ namespace PotOfWater
                 for (int j = 0; j < info.BoundaryBasis.Size; j++)
                 {
                     double M = beta * h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => boundaryPsi[i](ksi) * boundaryPsi[j](ksi) * (r0 + ksi * (r1 - r0))); 
-                    A.Add(edge[i], edge[j], beta * h * M);
+                    A.Add(edge[i], edge[j], M);
                 }
         }
 

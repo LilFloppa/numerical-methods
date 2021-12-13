@@ -6,13 +6,39 @@ namespace PotOfWater
 {
     public static class AreaInfo
     {
+        //public static Dictionary<int, Material> Materials => new Dictionary<int, Material>
+        //{
+        //    [0] = new Material
+        //    {
+        //        Lambda = 1.0,
+        //        RoCp = 1.0,
+        //        F = (double r, double z, double t) => -(2.0 + 2.0) + r * r + z
+        //    }
+        //};
+
+        //public static Dictionary<int, Func<double, double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double, double>>
+        //{
+        //    [0] = (double r, double z, double t) => r * r + z
+        //};
+
+        //public static Dictionary<int, Func<double, double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double, double>>
+        //{
+        //    [0] = (double r, double z, double t) => -1.0
+        //};
+
+        //public static Dictionary<int, (double beta, Func<double, double, double, double> ubeta)> ThirdBoundary => new Dictionary<int, (double, Func<double, double, double, double>)>
+        //{
+        //    [0] = (2.0, (double r, double z, double t) => 6 + z),
+        //    [1] = (1.0, (double r, double z, double t) => r * r + 3)
+        //};
+
         public static Dictionary<int, Material> Materials => new Dictionary<int, Material>
         {
             [0] = new Material
             {
                 Lambda = 1.0,
                 RoCp = 1.0,
-                F = (double r, double z, double t) => -(4.0) + r * r
+                F = (double r, double z, double t) => -4.0 + r * r
             }
         };
 
@@ -23,12 +49,13 @@ namespace PotOfWater
 
         public static Dictionary<int, Func<double, double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double, double>>
         {
-            [0] = (double x, double y, double t) => 0.0,
+            [0] = (double r, double z, double t) => -2.0,
+            [1] = (double r, double z, double t) => 4.0,
         };
 
         public static Dictionary<int, (double beta, Func<double, double, double, double> ubeta)> ThirdBoundary => new Dictionary<int, (double, Func<double, double, double, double>)>
         {
-            [0] = (0.0, (double x, double y, double t) => 0.0)
+            [0] = (2.0, (double r, double z, double t) => r * r)
         };
     };
 
