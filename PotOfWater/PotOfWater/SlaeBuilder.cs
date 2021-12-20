@@ -249,10 +249,10 @@ namespace PotOfWater
                         M[i, j] += Integral(v[0], v[1], v[2]) * r;
                     }
 
-                    double G = (grads[i].a1 * grads[j].a1 + grads[i].a2 * grads[j].a2) / 2;
+                    double G = grads[i].a1 * grads[j].a1 + grads[i].a2 * grads[j].a2;
                     G *= (a.R + b.R + c.R) / 6;
 
-                    local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * M[i, j]) * D;  
+                    local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * M[i, j]) * D;
                 }
             }
         }
@@ -264,6 +264,7 @@ namespace PotOfWater
 
             double D = Math.Abs(Utilities.Det(a, b, c));
 
+
             //for (int i = 0; i < 3; i++)
             //{
             //    localb[i] = Quadratures.TriangleGauss18((double ksi, double etta) =>
@@ -271,7 +272,7 @@ namespace PotOfWater
             //        double r = a.R * ksi + b.R * etta + c.R * (1 - ksi - etta);
             //        double z = a.Z * ksi + b.Z * etta + c.Z * (1 - ksi - etta);
 
-            //        return e.Material.F(r, z, 0) * psi[i](ksi, etta) * r;
+            //        return e.Material.F(r, z, CurrentT) * psi[i](ksi, etta) * r;
             //    });
             //    localb[i] *= D;
             //}
@@ -316,7 +317,7 @@ namespace PotOfWater
         protected override void AddSecondBoundary(IMatrix A, double[] b, SecondBoundaryEdge edge)
         {
             Func<double, double, double, double> thetatime = edge.Theta;
-            Func<double, double, double> theta = (double r, double z) => thetatime(r, z, 0);
+            Func<double, double, double> theta = (double r, double z) => thetatime(r, z, CurrentT);
 
             Point p1 = info.Mesh.Points[edge[0]];
             Point p2 = info.Mesh.Points[edge[edge.NodeCount - 1]];

@@ -106,7 +106,6 @@ namespace PotOfWater
             return builder.Build();
         }
 
-
         static void ClearMatrix(IMatrix A, double[] b)
         {
             Array.Fill(b, 0.0);
@@ -114,7 +113,6 @@ namespace PotOfWater
             Array.Fill(A.AU, 0.0);
             Array.Fill(A.DI, 0.0);
         }
-
         static void TimeProblem(ProblemInfo info, IMatrix A, double[] b)
         {
             ISolver solver = new LOSLU();
@@ -160,7 +158,6 @@ namespace PotOfWater
                 ClearMatrix(A, b);
             }    
         }
-
         static void Problem(ProblemInfo info, IMatrix A, double[] b)
         {
             LSlaeBuilder builder = new LSlaeBuilder(info);
@@ -179,8 +176,8 @@ namespace PotOfWater
 
             ProblemInfo info = new ProblemInfo
             {
-                Basis = new TriangleCubicLagrange(),
-                BoundaryBasis = new LineCubicLagrange(),
+                Basis = new TriangleLinearLagrange(),
+                BoundaryBasis = new LineLinearLagrange(),
                 MaterialDictionary = AreaInfo.Materials,
                 FirstBoundaryDictionary = AreaInfo.FirstBoundary,
                 SecondBoundaryDictionary = AreaInfo.SecondBoundary,
@@ -194,7 +191,7 @@ namespace PotOfWater
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary2.txt",
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary3.txt",
               info,
-              new  CubicMeshBuilder());
+              new  LinearMeshBuilder());
 
             info.Mesh = mesh;
             info.TimeMesh = new double[4] { 0.0, 0.1, 0.3, 0.7 };
@@ -208,11 +205,15 @@ namespace PotOfWater
 
             // TimeProblem(info, A, b);
 
-            CubicSlaeBuilder sb = new CubicSlaeBuilder(info);
+            LSlaeBuilder sb = new LSlaeBuilder(info);
             sb.Build(A, b);
 
             ISolver solver = new LOSLU();
             var q = solver.Solve(A, b);
+
+            double[] realQ = new double[9] { 1, 1, 1, 1.5, 1.5, 1.5, 2, 2, 2};
+            double[] realB = new double[9];
+            A.Multiply(realQ, realB);
 
             Solution solution = new Solution(q, mesh);
             double res = solution.GetValue(1.5, 1.5);
