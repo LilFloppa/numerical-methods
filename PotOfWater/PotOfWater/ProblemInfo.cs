@@ -12,7 +12,8 @@ namespace PotOfWater
             {
                 Lambda = 1.0,
                 RoCp = 1.0,
-                F = (double r, double z, double t) => 0.0 + z
+                V = (1.0, 1.0),
+                F = (double r, double z, double t) => 0.0 + (z + 1)
             }
         };
 

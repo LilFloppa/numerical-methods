@@ -252,7 +252,19 @@ namespace PotOfWater
                     double G = grads[i].a1 * grads[j].a1 + grads[i].a2 * grads[j].a2;
                     G *= (a.R + b.R + c.R) / 6;
 
-                    local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * M[i, j]) * D;
+                    double V = 0.0;
+                    for (int k = 0; k < 3; k++)
+                    {
+                        int[] v = new int[3];
+                        v[i]++;
+                        v[k]++;
+                        double r = points[e[k]].R;
+                        V += Integral(v[0], v[1], v[2]) * r;
+                    }
+
+                    V *= grads[j].a1 * e.Material.V.Item1 + grads[j].a2 * e.Material.V.Item2;
+
+                    local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * (M[i, j] + V)) * D;
                 }
             }
         }
