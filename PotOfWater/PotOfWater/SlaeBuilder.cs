@@ -91,7 +91,7 @@ namespace PotOfWater
 
             for (int i = 0; i < info.Basis.Size; i++)
             {
-                localb[i] = Quadratures.TriangleGauss18((double ksi, double etta) => 
+                localb[i] = Quadratures.TriangleGauss18((double ksi, double etta) =>
                 {
                     double x = a.X * ksi + b.X * etta + c.X * (1 - ksi - etta);
                     double y = a.Y * ksi + b.Y * etta + c.Y * (1 - ksi - etta);
@@ -116,7 +116,7 @@ namespace PotOfWater
         {
             double[,] M = info.BoundaryBasis.MassMatrix;
 
-            Func<double, double,  double, double> ugtime = edge.F;
+            Func<double, double, double, double> ugtime = edge.F;
             Func<double, double, double> ug = (double x, double y) => ugtime(x, y, 0);
 
             double x0 = info.Mesh.Points[edge[0]].X;
@@ -749,7 +749,7 @@ namespace PotOfWater
             for (int i = 0; i < info.BoundaryBasis.Size; i++)
                 for (int j = 0; j < info.BoundaryBasis.Size; j++)
                 {
-                    double M = beta * h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => boundaryPsi[i](ksi) * boundaryPsi[j](ksi) * (r0 + ksi * (r1 - r0))); 
+                    double M = beta * h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => boundaryPsi[i](ksi) * boundaryPsi[j](ksi) * (r0 + ksi * (r1 - r0)));
                     A.Add(edge[i], edge[j], M);
                 }
         }
