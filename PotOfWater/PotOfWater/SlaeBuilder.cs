@@ -210,6 +210,7 @@ namespace PotOfWater
 
     public class LSlaeBuilder : SlaeBuilder
     {
+        public ILayer Layer { get; set; } = null;
         public double CurrentT { get; set; } = 0.0;
         private double[,] M = new double[3, 3];
         public LSlaeBuilder(ProblemInfo info) : base(info) { }
@@ -264,7 +265,10 @@ namespace PotOfWater
 
                     V *= grads[j].a1 * e.Material.V.Item1 + grads[j].a2 * e.Material.V.Item2;
 
-                    local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * (M[i, j] + V)) * D;
+                    if (Layer != null)
+                        local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * (Layer.Coeff0 * M[i, j] + V)) * D;
+                    else
+                        local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * (M[i, j] + V)) * D;
                 }
             }
         }
@@ -275,19 +279,6 @@ namespace PotOfWater
             Point c = points[e[2]];
 
             double D = Math.Abs(Utilities.Det(a, b, c));
-
-
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    localb[i] = Quadratures.TriangleGauss18((double ksi, double etta) =>
-            //    {
-            //        double r = a.R * ksi + b.R * etta + c.R * (1 - ksi - etta);
-            //        double z = a.Z * ksi + b.Z * etta + c.Z * (1 - ksi - etta);
-
-            //        return e.Material.F(r, z, CurrentT) * psi[i](ksi, etta) * r;
-            //    });
-            //    localb[i] *= D;
-            //}
 
             double[] f = new double[3];
             for (int i = 0; i < 3; i++)
@@ -303,6 +294,13 @@ namespace PotOfWater
                 for (int j = 1; j < 3; j++)
                     localb[i] += f[j] * M[i, j];
 
+                if (Layer != null)
+                {
+                    for (int k = 0; k < Layer.Size; k++)
+                        for (int j = 0; j < info.Basis.Size; j++)
+                            localb[i] += Layer.Coeffs[k] * M[i, j] * Layer.Q[k][e[j]] * e.Material.RoCp;
+                }
+
                 localb[i] *= D;
             }
         }
@@ -311,7 +309,7 @@ namespace PotOfWater
             double[,] M = info.BoundaryBasis.MassMatrix;
 
             Func<double, double, double, double> ugtime = edge.F;
-            Func<double, double, double> ug = (double r, double z) => ugtime(r, z, 0);
+            Func<double, double, double> ug = (double r, double z) => ugtime(r, z, CurrentT);
 
             double r0 = info.Mesh.Points[edge[0]].R;
             double z0 = info.Mesh.Points[edge[0]].Z;
@@ -347,7 +345,7 @@ namespace PotOfWater
         protected override void AddThirdBoundary(IMatrix A, double[] b, ThirdBoundaryEdge edge)
         {
             Func<double, double, double, double> ubetatime = edge.UBeta;
-            Func<double, double, double> ubeta = (double r, double z) => ubetatime(r, z, 0);
+            Func<double, double, double> ubeta = (double r, double z) => ubetatime(r, z, CurrentT);
             double beta = edge.Beta;
 
             Point p1 = info.Mesh.Points[edge[0]];
