@@ -266,22 +266,11 @@ namespace PotOfWater
             new List<PsiComp>() { new PsiComp(27.0, 1, 1, 1) }
         };
 
-        static public Func<double, double, double, double>[] LBasis = new Func<double, double, double, double>[BasisSize]
+        static public Func<double, double, double, double>[] LBasis = new Func<double, double, double, double>[3]
         {
-            (double L1, double L2, double L3) => 0.5 * L1 * (3 * L1 - 1) * (3 * L1 - 2),
-            (double L1, double L2, double L3) => 0.5 * L2 * (3 * L2 - 1) * (3 * L2 - 2),
-            (double L1, double L2, double L3) => 0.5 * L3 * (3 * L3 - 1) * (3 * L3 - 2),
-
-            (double L1, double L2, double L3) => 9.0 * L1 * L2 * (3 * L1 - 1) / 2.0,
-            (double L1, double L2, double L3) => 9.0 * L1 * L2 * (3 * L2 - 1) / 2.0,
-
-            (double L1, double L2, double L3) => 9.0 * L3 * L1 * (3 * L1 - 1) / 2.0,
-            (double L1, double L2, double L3) => 9.0 * L3 * L1 * (3 * L3 - 1) / 2.0,
-
-            (double L1, double L2, double L3) => 9.0 * L2 * L3 * (3 * L2 - 1) / 2.0,
-            (double L1, double L2, double L3) => 9.0 * L2 * L3 * (3 * L3 - 1) / 2.0,
-
-            (double L1, double L2, double L3) => 27.0 * L1 * L2 * L3
+            (double L1, double L2, double L3) => L1,
+            (double L1, double L2, double L3) => L2,
+            (double L1, double L2, double L3) => L3,
         };
     }
 }

@@ -113,28 +113,13 @@ namespace MathUtilities
 			double D2 = Math.Abs(sign(t1, p, t3));
 			double D3 = Math.Abs(sign(t1, t2, p));
 
-			if (Math.Abs(D1 + D2 + D3 - D) > 1.0e-5)
+			if (Math.Abs(D1 + D2 + D3 - D) > 1.0e-9)
 				return false;
 
 			return true;
 		}
 
-		public static bool PointInsideTriangle(Point t1, Point t2, Point t3, Point p)
-		{
-			double crossProduct1 = (t1.X - p.X) * (t2.Y - t1.Y) - (t2.X - t1.X) * (t1.Y - p.Y);
-			double crossProduct2 = (t2.X - p.X) * (t3.Y - t2.Y) - (t3.X - t2.X) * (t2.Y - p.Y);
-			double crossProduct3 = (t3.X - p.X) * (t1.Y - t3.Y) - (t1.X - t3.X) * (t3.Y - p.Y);
-
-			if (crossProduct1 >= 0.0 && crossProduct2 >= 0.0 && crossProduct3 >= 0.0)
-				return true;
-
-			if (crossProduct1 <= 0.0 && crossProduct1 <= 0.0 && crossProduct3 <= 0.0)
-				return true;
-
-			return false;
-		}
-
-		public static (double, double, double) GetL(Point a, Point b, Point c, Point p)
+		public static double[] GetL(Point a, Point b, Point c, Point p)
 		{
 			double D = Math.Abs(Det(a, b, c));
 			double D1 = Math.Abs(Det(p, b, c));
@@ -144,7 +129,7 @@ namespace MathUtilities
 			double L1 = D1 / D;
 			double L2 = D2 / D;
 			double L3 = D3 / D;
-			return (L1, L2, L3);
+			return new double[3] { L1, L2, L3 };
 		}
 
 		public static double Error(double[] a, double[] b)

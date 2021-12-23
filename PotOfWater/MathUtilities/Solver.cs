@@ -49,6 +49,7 @@ namespace MathUtilities
 
 		public double[] Solve(IMatrix matrix, double[] B)
 		{
+			IterCount = 0;
 			N = matrix.N;
 			InitAuxVectors(N);
 			LUFactorization(matrix);

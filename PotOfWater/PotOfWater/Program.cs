@@ -3,6 +3,7 @@ using PotOfWater.Meshes;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace PotOfWater
 {
@@ -113,7 +114,7 @@ namespace PotOfWater
             Array.Fill(A.AU, 0.0);
             Array.Fill(A.DI, 0.0);
         }
-        static void TimeProblem(ProblemInfo info, IMatrix A, double[] b)
+        static double[][] TimeProblem(ProblemInfo info, IMatrix A, double[] b)
         {
             ISolver solver = new LOSLU();
             LSlaeBuilder tsb = new LSlaeBuilder(info);
@@ -121,6 +122,8 @@ namespace PotOfWater
             double[] t = info.TimeMesh;
             double[][] Q = new double[info.TimeMesh.Length][];
             Q[0] = new double[A.N];
+            for (int i = 0; i < A.N; i++)
+                Q[0][i] = 25.0;
 
             tsb.Layer = new TwoLayer();
             tsb.Layer.SetQ(new double[1][] { Q[0] });
@@ -129,12 +132,6 @@ namespace PotOfWater
             tsb.Build(A, b);
             Q[1] = solver.Solve(A, b);
             ClearMatrix(A, b);
-
-            for (int i = 0; i < info.Mesh.Points.Length; i++)
-            {
-                var p = info.Mesh.Points[i];
-                Q[1][i] = (p.R * p.R + p.Z * p.Z) * 0.01 * 0.01;
-            }
 
             tsb.Layer = new ThreeLayer();
             tsb.Layer.SetQ(new double[2][] { Q[0], Q[1] });
@@ -160,7 +157,9 @@ namespace PotOfWater
                 tsb.Build(A, b);
                 Q[i] = solver.Solve(A, b);
                 ClearMatrix(A, b);
-            }    
+            }
+
+            return Q;
         }
         static void Problem(ProblemInfo info, IMatrix A, double[] b)
         {
@@ -195,10 +194,15 @@ namespace PotOfWater
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary2.txt",
               @"C:\repos\numerical-methods\PotOfWater\PotOfWater\Input\boundary3.txt",
               info,
-              new  LinearMeshBuilder());
+              new LinearMeshBuilder());
 
             info.Mesh = mesh;
-            info.TimeMesh = new double[7] { 0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06 };
+
+            int n = 600 * 10;
+            double[] t = new double[n];
+            for (int i = 0; i < n; i++)
+                t[i] = i * 0.1;
+            info.TimeMesh = t;
 
             PortraitBuilder PB = new PortraitBuilder(info);
             Portrait p = PB.Build();
@@ -207,7 +211,7 @@ namespace PotOfWater
             double[] b = new double[mesh.NodeCount];
             A.SetPortrait(p);
 
-            TimeProblem(info, A, b);
+            var Q = TimeProblem(info, A, b);
 
             //LSlaeBuilder sb = new LSlaeBuilder(info);
             //sb.Build(A, b);
@@ -219,8 +223,11 @@ namespace PotOfWater
             //double[] realB = new double[9];
             //A.Multiply(realQ, realB);
 
-            //Solution solution = new Solution(q, mesh);
-            //double res = solution.GetValue(1.5, 1.5);
+            for (int i = 0; i < 600; i++)
+            {
+                Solution solution = new Solution(Q[i * 10], mesh);
+                Console.WriteLine($"sec = { i }, t = { solution.GetValue(0.0424995, 0.032)}");
+            }
         }
     }
 }

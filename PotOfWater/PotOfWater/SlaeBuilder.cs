@@ -220,6 +220,7 @@ namespace PotOfWater
             Point a = points[e[0]];
             Point b = points[e[1]];
             Point c = points[e[2]];
+            Point center = (a + b + c) / 3;
 
             double D = Math.Abs(Utilities.Det(a, b, c));
 
@@ -263,7 +264,8 @@ namespace PotOfWater
                         V += Integral(v[0], v[1], v[2]) * r;
                     }
 
-                    V *= grads[j].a1 * e.Material.V.Item1 + grads[j].a2 * e.Material.V.Item2;
+                    var vel = AreaInfo.V(center.R, center.Z);
+                    V *= grads[j].a1 * vel.Item1 + grads[j].a2 * vel.Item2;
 
                     if (Layer != null)
                         local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * (Layer.Coeff0 * M[i, j] + V)) * D;
