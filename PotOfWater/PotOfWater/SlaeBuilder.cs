@@ -264,8 +264,15 @@ namespace PotOfWater
                         V += Integral(v[0], v[1], v[2]) * r;
                     }
 
-                    var vel = AreaInfo.V(center.R, center.Z);
-                    V *= grads[j].a1 * vel.Item1 + grads[j].a2 * vel.Item2;
+                    if (e.Material.Name == "Water")
+                    {
+                        var vel = AreaInfo.V(center.R, center.Z);
+                        V *= grads[j].a1 * vel.Item1 + grads[j].a2 * vel.Item2;
+                    }
+                    else
+                    {
+                        V = 0.0;
+                    }
 
                     if (Layer != null)
                         local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * (Layer.Coeff0 * M[i, j] + V)) * D;

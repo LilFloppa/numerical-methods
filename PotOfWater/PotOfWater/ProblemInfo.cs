@@ -10,12 +10,14 @@ namespace PotOfWater
         {
             [2] = new Material
             {
+                Name = "Steel",
                 Lambda = 25.0,
                 RoCp = 7800 * 462,
                 F = (double r, double z, double t) => 0.0
             },
             [3] = new Material
             {
+                Name = "Water",
                 Lambda = 0.648,
                 RoCp = 1000.0 * 4200.0,
                 F = (double r, double z, double t) => 0.0
