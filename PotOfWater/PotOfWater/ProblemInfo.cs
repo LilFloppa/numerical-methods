@@ -24,7 +24,7 @@ namespace PotOfWater
 
         public static Dictionary<int, Func<double, double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double, double>>
         {
-            [0] = (double r, double z, double t) => (r * r + z * z) * t * t
+            [0] = (double r, double z, double t) => 0.0
         };
 
         public static Dictionary<int, Func<double, double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double, double>>
@@ -41,7 +41,7 @@ namespace PotOfWater
         public static (double, double) V(double r, double z)
         {
             double hor = 0.01;
-            double ver = hor * r;
+            double ver = hor * 0.0212;
             Func<double, double> increase = (double r) => 0.06 / (0.085 - 1.0e-6) * r + 0.002;
             Func<double, double> decrease = (double r) => -0.06 / (0.085 - 1.0e-6) * r + 0.062;
 

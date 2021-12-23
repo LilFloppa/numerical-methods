@@ -226,7 +226,7 @@ namespace PotOfWater
             for (int i = 0; i < 600; i++)
             {
                 Solution solution = new Solution(Q[i * 10], mesh);
-                Console.WriteLine($"sec = { i }, t = { solution.GetValue(0.0424995, 0.032)}");
+                Console.WriteLine($"{ i } { solution.GetValue(0.0424995, 0.032)}");
             }
         }
     }
