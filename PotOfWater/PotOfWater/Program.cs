@@ -156,6 +156,7 @@ namespace PotOfWater
                 tsb.CurrentT = t[i];
                 tsb.Build(A, b);
                 Q[i] = solver.Solve(A, b);
+                Console.WriteLine($"Невязка = {solver.Difference:E4}");
                 ClearMatrix(A, b);
             }
 

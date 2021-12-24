@@ -31,7 +31,7 @@ namespace PotOfWater
 
         public static Dictionary<int, Func<double, double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double, double>>
         {
-            [2] = (double r, double z, double t) => 1100,
+            [2] = (double r, double z, double t) => 1100000,
             [3] = (double r, double z, double t) => 0.0,
         };
 
@@ -42,8 +42,14 @@ namespace PotOfWater
 
         public static (double, double) V(double r, double z)
         {
-            double hor = 0.01;
-            double ver = hor * 0.0212;
+            double left_triangle_vel = 0.005;
+            double r0 = 0.02124975;
+            double r1 = 0.06374975;
+
+            double hor_vel_begin = left_triangle_vel * r0;
+            double hor_vel_end = left_triangle_vel * r0 / r1;
+            double right_triangle_vel = hor_vel_end;
+
             Func<double, double> increase = (double r) => 0.06 / (0.085 - 1.0e-6) * r + 0.002;
             Func<double, double> decrease = (double r) => -0.06 / (0.085 - 1.0e-6) * r + 0.062;
 
@@ -51,7 +57,13 @@ namespace PotOfWater
             {
                 // top triangle
                 (double r, double z) v = (0.0, 0.0);
-                v.r = -ver / r;
+
+                if (r < r0)
+                    v.r = hor_vel_begin;
+                else if (r > r1)
+                    v.r = hor_vel_end;
+                else
+                    v.r = hor_vel_begin / r;
 
                 double zbeg = 0.032;
                 double zmid = 0.047;
@@ -74,7 +86,7 @@ namespace PotOfWater
             {
                 // right triangle
                 (double r, double z) v = (0.0, 0.0);
-                v.z = hor;
+                v.z = right_triangle_vel;
 
                 double rbeg = 0.0424995;
                 double rmid = 0.06374975;
@@ -97,7 +109,7 @@ namespace PotOfWater
             {
                 // left triangle
                 (double r, double z) v = (0.0, 0.0);
-                v.z = -hor;
+                v.z = -left_triangle_vel;
 
                 double rbeg = 1.0e-6;
                 double rmid = 0.02124975;
@@ -120,7 +132,13 @@ namespace PotOfWater
             {
                 // bottom triangle
                 (double r, double z) v = (0.0, 0.0);
-                v.r = ver / r;
+
+                if (r < r0)
+                    v.r = hor_vel_begin;
+                else if (r > r1)
+                    v.r = hor_vel_end;
+                else
+                    v.r = hor_vel_begin / r;
 
                 double zbeg = 0.002;
                 double zmid = 0.017;
