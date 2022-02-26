@@ -20,7 +20,7 @@ namespace GravityGradiometry
 
             double[] x = new double[xCount] { 2000.0, 2500.0, 3000.0 };
             double[] z = new double[zCount] { -1000.0, -750.0, -500.0 };
-            double[] p = new double[k] { 10.0, 10.0, 10.0, 10.0 };
+            double[] p = new double[k] { 1.0, 1.0, 1.0, 1.0 };
 
             Point[] receivers = new Point[n];
 

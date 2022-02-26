@@ -10,7 +10,7 @@ namespace GravityGradiometry
         public double[] Z { get; set; }
         public double[] P { get; set; }
 
-        private IEnumerable<QuadratureNode> quadrature = Quadratures.RectangleOrder3();
+        private IEnumerable<QuadratureNode> quadrature = Quadratures.RectangleOrder7();
 
         public GravityCalculator(double[] x, double[] z, double[] p)
         {
@@ -44,7 +44,8 @@ namespace GravityGradiometry
                         gk += node.Weight * z / (r * r * r);
                     }
 
-                    result += gk * mes * pk / (4 * Math.PI);
+                    gk *= mes / (4 * Math.PI);
+                    result += pk * gk;
                 }
             }
 
@@ -73,7 +74,7 @@ namespace GravityGradiometry
                 gk += node.Weight * z / (r * r * r);
             }
 
-            return gk * mes * pk / (4 * Math.PI);
+            return gk * mes / (4 * Math.PI);
         }
     }
 }
