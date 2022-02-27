@@ -21,6 +21,8 @@ namespace GravityGradiometry
             double[] x = new double[xCount] { 2000.0, 2500.0, 3000.0 };
             double[] z = new double[zCount] { -1000.0, -750.0, -500.0 };
             double[] p = new double[k] { 1.0, 1.0, 1.0, 1.0 };
+            double[] gamma = new double[k] { 1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10 };
+            double alpha = 0.0;
 
             Point[] receivers = new Point[n];
 
@@ -47,8 +49,9 @@ namespace GravityGradiometry
             info.X = x;
             info.Z = z;
             info.Receivers = receivers;
-            info.Alpha = 0.0;
             info.realG = realG;
+            info.Alpha = alpha;
+            info.Gamma = gamma;
 
             Functional F = new Functional(info);
 
