@@ -13,15 +13,15 @@ namespace GravityGradiometry
             System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
             System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
 
-            const int xCount = 3;
-            const int zCount = 3;
+            const int xCount = 4;
+            const int zCount = 4;
             const int k = (xCount - 1) * (zCount - 1);
             const int n = 800;
 
-            double[] x = new double[xCount] { 2000.0, 2500.0, 3000.0 };
-            double[] z = new double[zCount] { -1000.0, -750.0, -500.0 };
-            double[] p = new double[k] { 1.0, 1.0, 1.0, 1.0 };
-            double[] gamma = new double[k] { 1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10 };
+            double[] x = new double[xCount] { 2000.0, 2300.0, 2700.0, 3000.0 };
+            double[] z = new double[zCount] { -1000.0, -800, -600.0, -500.0 };
+            double[] p = new double[k] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+            double[] gamma = new double[k] { 1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10 };
             double alpha = 0.0;
 
             Point[] receivers = new Point[n];
@@ -41,8 +41,8 @@ namespace GravityGradiometry
             for (int i = 0; i < k; i++)
                 p[i] = 0.1;
 
-            for (int i = 0; i < n; i++)
-                Console.WriteLine($"{receivers[i].X}; {realG[i]}");
+            // for (int i = 0; i < n; i++)
+            //     Console.WriteLine($"{receivers[i].X}; {realG[i]}");
 
             ProblemInfo info = new ProblemInfo();
             info.P = p;

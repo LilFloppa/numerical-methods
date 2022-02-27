@@ -5,7 +5,6 @@ namespace GravityGradiometry
 {
     class GravityCalculator
     {
-
         public double[] X { get; set; }
         public double[] Z { get; set; }
         public double[] P { get; set; }

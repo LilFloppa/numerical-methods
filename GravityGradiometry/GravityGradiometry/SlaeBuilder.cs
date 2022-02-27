@@ -1,4 +1,6 @@
-﻿namespace GravityGradiometry
+﻿using GravityGradiometry;
+
+namespace GravityGradiometry
 {
     struct ProblemInfo
     {
@@ -22,17 +24,6 @@
         private int zCellCount;
         private double alpha;
         private double[] gamma;
-
-        private (int s, int q)[] adjacentCells = {
-                    (-1, -1),
-                    (-1, 0),
-                    (-1, 1),
-                    (0, -1),
-                    (0, 1),
-                    (1, -1),
-                    (1, 0),
-                    (1, 1)
-                };
 
         public SlaeBuilder(ProblemInfo info)
         {
@@ -73,20 +64,10 @@
 
             for (int i = 0; i < k; i++)
             {
-                int celli = i / xCellCount;
-                int cellj = i % xCellCount;
-
-                foreach (var adjCell in adjacentCells)
+                foreach (var adjCell in Mesh.GetAdjacentCells(i, xCellCount, zCellCount))
                 {
-                    int s = celli + adjCell.s;
-                    int q = cellj + adjCell.q;
-
-                    if (s >= 0 && s < xCellCount && q >= 0 && q < zCellCount)
-                    {
-                        int cell = s * xCellCount + q;
-                        A.Add(i, cell, -(gamma[i] + gamma[cell]));
-                        A.Add(i, i, gamma[i] + gamma[cell]);
-                    }
+                    A.Add(i, adjCell, -(gamma[i] + gamma[adjCell]));
+                    A.Add(i, i, gamma[i] + gamma[adjCell]);
                 }
             }
         }
