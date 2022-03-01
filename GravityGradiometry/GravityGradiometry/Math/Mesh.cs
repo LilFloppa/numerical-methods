@@ -30,9 +30,8 @@ namespace GravityGradiometry
                 int s = celli + adjCell.s;
                 int q = cellj + adjCell.q;
 
-                if (s >= 0 && s < xCellCount && q >= 0 && q < zCellCount)
+                if (s >= 0 && s < zCellCount && q >= 0 && q < xCellCount)
                 {
-                    Console.WriteLine($"yield { s * xCellCount + q}");
                     yield return s * xCellCount + q;
                 }
             }
