@@ -1,0 +1,22 @@
+﻿@page "/"
+
+Количество клеток по X: <input @bind=xAxis.CellCount />
+Начало по X: <input @bind=xAxis.Begin />
+Конец по X: <input @bind=xAxis.End />
+
+<br />
+
+Количество клеток по Z: <input @bind=zAxis.CellCount />
+<br />
+<button @onclick=OnBuildGridClick>Построить сетку</button>
+<br />
+
+@if (properties != null)
+{
+    @foreach (var p in properties)
+    {
+        <input type="number" >
+    }
+}
+<button @onclick=OnCalculateClick>Calculate</button>
+<button @onclick=OnUndoClick>Undo</button>

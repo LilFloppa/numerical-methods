@@ -1,9 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31911.196
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GravityGradiometry", "GravityGradiometry\GravityGradiometry.csproj", "{53DD49A7-1B24-4B7E-91A1-0D6D03AED210}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GravityGradiometry", "GravityGradiometry\GravityGradiometry.csproj", "{53DD49A7-1B24-4B7E-91A1-0D6D03AED210}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UI", "UI\UI.csproj", "{ED95E4A4-A302-47F5-8F72-6CD6B44F29A3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EA2952F4-F3C6-48C3-BF0D-D9C29B6F2C74}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +22,10 @@ Global
 		{53DD49A7-1B24-4B7E-91A1-0D6D03AED210}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53DD49A7-1B24-4B7E-91A1-0D6D03AED210}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53DD49A7-1B24-4B7E-91A1-0D6D03AED210}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED95E4A4-A302-47F5-8F72-6CD6B44F29A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED95E4A4-A302-47F5-8F72-6CD6B44F29A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED95E4A4-A302-47F5-8F72-6CD6B44F29A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED95E4A4-A302-47F5-8F72-6CD6B44F29A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

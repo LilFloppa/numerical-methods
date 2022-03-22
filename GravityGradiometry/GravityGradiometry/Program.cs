@@ -54,7 +54,7 @@ namespace GravityGradiometry
                 realG[i] = calc.CalculateFromAll(receivers[i]);
 
             for (int i = 0; i < k; i++)
-                p[i] = 0.1;
+                p[i] = 1.0;
 
             // for (int i = 0; i < n; i++)
             //     Console.WriteLine($"{receivers[i].X}; {realG[i]}");

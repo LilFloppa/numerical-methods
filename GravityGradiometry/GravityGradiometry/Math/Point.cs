@@ -2,7 +2,7 @@
 
 namespace GravityGradiometry
 {
-    class Point
+    public class Point
     {
         public double X { get; set; }
         public double Z { get; set; }
