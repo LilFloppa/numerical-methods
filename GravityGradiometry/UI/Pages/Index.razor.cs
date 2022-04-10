@@ -11,6 +11,7 @@ namespace UI.Pages
 
         public Problem problem = null;
         public Grid grid = null;
+        public Grid initialGrid = null;
 
         public void OnBuildGrid()
         {
@@ -43,11 +44,23 @@ namespace UI.Pages
 
             double[] properties = new double[k];
             grid = new(x, z, properties, receiversInfo.BuildReceivers());
+            initialGrid = grid;
+
+            Logger.LogInformation("Сетка построена");
         }
 
-        public void OnCalculate()
+        public async Task OnCalculate()
         {
+            if (grid == null)
+            {
+                Logger.LogError("Невозможно посчитать задачу, сетка не построена");
+                return;
+            }
 
+            double[] gamma = new double[grid.Properties.Length];
+            problem = new Problem(grid, new Regularization { Alpha = 0.0, Gamma = new double[grid.Properties.Length] });
+            double[] soultion = await Task.Run(() => problem.Solve());
+            grid.Properties = soultion;
         }
 
         public void OnResetGrid()

@@ -26,7 +26,7 @@ namespace UI.Models
 
             double[] initialProperties = new double[k];
             for (int i = 0; i < k; i++)
-                initialProperties[i] = 1.0;
+                initialProperties[i] = 0.1;
 
             double alpha = Regularization.Alpha;
             double[] gamma = Regularization.Gamma;

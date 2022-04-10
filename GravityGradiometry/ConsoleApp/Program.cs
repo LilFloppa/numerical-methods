@@ -1,7 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using GravityGradiometry;
 
-namespace GravityGradiometry
+namespace Console
 {
 
     class Program
@@ -274,13 +273,13 @@ namespace GravityGradiometry
 
         static void Main(string[] args)
         {
-            Test18x12();
+            Test4x4();
         }
 
         static void PrintToCSV(string filename, double[] p, int width, int height)
         {
             double[,] result = new double[width, height];
-  
+
             for (int z = 0; z < height; z++)
                 for (int x = 0; x < width; x++)
                 {
