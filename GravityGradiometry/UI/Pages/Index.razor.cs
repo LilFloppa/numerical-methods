@@ -1,5 +1,6 @@
 ﻿using GravityGradiometry;
 using Microsoft.AspNetCore.Components;
+using System.Globalization;
 using UI.Models;
 
 namespace UI.Pages
@@ -12,6 +13,8 @@ namespace UI.Pages
         public Problem problem = null;
         public Grid grid = null;
         public Grid initialGrid = null;
+
+        public ColorScale colorScale = new ColorScale();
 
         public void OnBuildGrid()
         {
@@ -46,6 +49,8 @@ namespace UI.Pages
             grid = new(x, z, properties, receiversInfo.BuildReceivers());
             initialGrid = grid;
 
+            UpdateColorScale();
+
             Logger.LogInformation("Сетка построена");
         }
 
@@ -61,11 +66,49 @@ namespace UI.Pages
             problem = new Problem(grid, new Regularization { Alpha = 0.0, Gamma = new double[grid.Properties.Length] });
             double[] soultion = await Task.Run(() => problem.Solve());
             grid.Properties = soultion;
+
+            UpdateColorScale();
         }
 
         public void OnResetGrid()
         {
             grid = null;
+            initialGrid = null;
+        }
+
+        public void OnGridCellChange(ChangeEventArgs args, int index)
+        {
+            if (grid == null)
+            {
+                Logger.LogError("Невозможно изменить значение ячейки, так как сетка не построена");
+                return;
+            }
+
+            string? stringValue = args?.Value?.ToString();
+
+            if (stringValue == null)
+            {
+                // TODO: Add logging
+                return;
+            }
+
+            stringValue = stringValue.Replace(",", ".");
+            if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
+            {
+                grid.Properties[index] = result;
+                UpdateColorScale();;
+            }
+            else
+            {
+                // TODO: Add logging
+                StateHasChanged();
+            }
+        }
+
+        private void UpdateColorScale()
+        {
+            if (grid != null)
+                colorScale.SetValues(grid.Properties);
         }
     }
 }

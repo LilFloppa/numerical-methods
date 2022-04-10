@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using System.Drawing
 
 @inject ILogger<Index> Logger
 
@@ -29,7 +30,7 @@
     <div class="buttons-line">
         <button class="button" @onclick=OnBuildGrid>Построить сетку</button>
         <button class="button" @onclick=OnResetGrid>Сбросить сетку</button>
-        <button class="button" @onclick=OnCalculate>Посчитать задачу</button>
+        <button class="button" @onclick=@(async () => await OnCalculate())>Посчитать задачу</button>
     </div>
 
     @if (grid != null)
@@ -45,28 +46,9 @@
             @for (int i = 0; i < grid.Properties.Length; i++)
             {
                 var index = i;
-                <input class="input input--table" type="number" @bind=grid.Properties[index] style=@($"background: rgba({0}, {0}, {150}, 0.5);")>
+                Color color = colorScale.GetColor(grid.Properties[index]);
+                <input class="input input--table" value=@($"{grid.Properties[index]:G4}") @onchange=@((ChangeEventArgs args) => OnGridCellChange(args, index)) style=@($"background: rgba({color.R}, {color.G}, {color.B}, 0.5);")>
             }
         </div>
     }
 </div>
-
-@*
-
-<br />
-
-Количество клеток по Z: <input @bind=zAx4is.CellCount />
-<br />
-<button @onclick=OnBuildGridClick>Построить сетку</button>
-<br />
-
-@if (properties != null)
-{
-    @foreach (var p in properties)
-    {
-        <input type="number" >
-    }
-}
-
-<button @onclick=OnCalculateClick>Calculate</button>
-<button @onclick=OnUndoClick>Undo</button>*@
