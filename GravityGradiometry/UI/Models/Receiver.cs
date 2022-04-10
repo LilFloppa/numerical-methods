@@ -17,14 +17,10 @@ namespace UI.Models
             return clone;
         }
 
-        public Point[]? BuildReceivers()
+        public bool Validate() => Count > 0 && BeginX < EndX;
+
+        public Point[] BuildReceivers()
         {
-            if (Count <= 0)
-                return null;
-
-            if (BeginX >= EndX)
-                return null;
-
             Point[] receivers = new Point[Count];
 
             double stepX = (EndX - BeginX) / (Count - 1);

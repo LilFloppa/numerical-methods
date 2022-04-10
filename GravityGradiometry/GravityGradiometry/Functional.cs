@@ -1,11 +1,11 @@
 ﻿namespace GravityGradiometry
 {
-    interface IFunctional
+    public interface IFunctional
     {
         public double Calculate(double[] p);
     }
 
-    class Functional : IFunctional
+    public class Functional : IFunctional
     {
         private Point[] receivers;
         private int n;

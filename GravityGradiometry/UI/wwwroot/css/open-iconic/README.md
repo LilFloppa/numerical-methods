@@ -74,7 +74,7 @@ You can find our Bootstrap stylesheets in `font/css/open-iconic-bootstrap.{css, 
 
 
 ```
-<span class="oi oi-icon-name" title="icon name" aria-hidden="true"></span>
+<p class="oi oi-icon-name" title="icon name" aria-hidden="true"></p>
 ```
 
 ##### …with Foundation
@@ -87,7 +87,7 @@ You can find our Foundation stylesheets in `font/css/open-iconic-foundation.{css
 
 
 ```
-<span class="fi-icon-name" title="icon name" aria-hidden="true"></span>
+<p class="fi-icon-name" title="icon name" aria-hidden="true"></p>
 ```
 
 ##### …on its own
@@ -99,7 +99,7 @@ You can find our default stylesheets in `font/css/open-iconic.{css, less, scss, 
 ```
 
 ```
-<span class="oi" data-glyph="icon-name" title="icon name" aria-hidden="true"></span>
+<p class="oi" data-glyph="icon-name" title="icon name" aria-hidden="true"></p>
 ```
 
 

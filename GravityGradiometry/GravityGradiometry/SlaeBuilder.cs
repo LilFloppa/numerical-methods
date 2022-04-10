@@ -2,7 +2,7 @@
 
 namespace GravityGradiometry
 {
-    struct ProblemInfo
+    public struct ProblemInfo
     {
         public Point[] Receivers;
         public double[] realG;
@@ -13,7 +13,7 @@ namespace GravityGradiometry
         public double[] Gamma;
     }
 
-    class SlaeBuilder
+    public class SlaeBuilder
     {
         private Point[] receivers;
         private GravityCalculator calc;

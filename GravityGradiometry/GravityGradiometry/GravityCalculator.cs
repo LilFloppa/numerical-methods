@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace GravityGradiometry
 {
-    class GravityCalculator
+    public class GravityCalculator
     {
         public double[] X { get; set; }
         public double[] Z { get; set; }

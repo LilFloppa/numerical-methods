@@ -1,12 +1,61 @@
 ﻿@page "/"
 
-Количество клеток по X: <input @bind=xAxis.CellCount />
-Начало по X: <input @bind=xAxis.Begin />
-Конец по X: <input @bind=xAxis.End />
+@inject ILogger<Index> Logger
+
+<div class="container">
+    <div class="container__inner">
+        <div class="form">
+            <p class="form-title">X:</p><p></p>
+            <p class="input-title">Количество клеток по X:</p> <input type="number" class="input" @bind=xAxis.CellCount />
+            <p class="input-title">Начало по X: </p><input type="number" class="input" @bind=xAxis.Begin />
+            <p class="input-title">Конец по X: </p><input type="number" class="input" @bind=xAxis.End />
+        </div>
+
+        <div class="form">
+            <p class="form-title">Z:</p><p></p>
+            <p class="input-title">Количество клеток по Z:</p> <input type="number" class="input" @bind=zAxis.CellCount />
+            <p class="input-title">Начало по Z: </p><input type="number" class="input" @bind=zAxis.Begin />
+            <p class="input-title">Конец по Z: </p><input type="number" class="input" @bind=zAxis.End />
+        </div>
+    </div>
+
+   @* <div class="table-row">
+        @for (int i = 1; i < xAxis.CellCount + 2; i++)
+        {
+            <div class="table-row__number">@i</div>
+        }
+    </div>*@
+
+    <div class="buttons-line">
+        <button class="button" @onclick=OnBuildGrid>Построить сетку</button>
+        <button class="button" @onclick=OnResetGrid>Сбросить сетку</button>
+        <button class="button" @onclick=OnCalculate>Посчитать задачу</button>
+    </div>
+
+    @if (grid != null)
+    {
+        <div class="buttons-line buttons-line--icons">
+            <button class="button">@('<')</button>
+            <button class="button">@('>')</button>
+        </div>
+
+
+        <div class="table" style=@($"grid-template-columns: repeat({xAxis.CellCount}, 1fr);")>
+
+            @for (int i = 0; i < grid.Properties.Length; i++)
+            {
+                var index = i;
+                <input class="input input--table" type="number" @bind=grid.Properties[index] style=@($"background: rgba({0}, {0}, {150}, 0.5);")>
+            }
+        </div>
+    }
+</div>
+
+@*
 
 <br />
 
-Количество клеток по Z: <input @bind=zAxis.CellCount />
+Количество клеток по Z: <input @bind=zAx4is.CellCount />
 <br />
 <button @onclick=OnBuildGridClick>Построить сетку</button>
 <br />
@@ -18,5 +67,6 @@
         <input type="number" >
     }
 }
+
 <button @onclick=OnCalculateClick>Calculate</button>
-<button @onclick=OnUndoClick>Undo</button>
+<button @onclick=OnUndoClick>Undo</button>*@

@@ -6,14 +6,10 @@
         public double End;
         public int CellCount;
 
-        public double[]? Build()
+        public bool Validate() => Begin < End && CellCount > 0;
+
+        public double[] Build()
         {
-            if (Begin >= End)
-                return null;
-
-            if (CellCount <= 0)
-                return null;
-
             double[] result = new double[CellCount + 1];
             double step = (End - Begin) / CellCount;
 

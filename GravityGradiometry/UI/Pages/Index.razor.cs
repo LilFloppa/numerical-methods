@@ -19,96 +19,97 @@ namespace UI.Pages
         Index originator;
         public History(Index originator) => this.originator = originator;
 
-        public void Backup()
-        {
-            states.Push(originator.Save());
-        }
+        //public void Backup()
+        //{
+        //    states.Push(originator.Save());
+        //}
 
-        public void Undo()
-        {
-            if (states.Count == 0)
-                return;
+        //public void Undo()
+        //{
+        //    if (states.Count == 0)
+        //        return;
 
-            State state = states.Pop();
-            originator.Restore(state);
-        }
+        //    State state = states.Pop();
+        //    originator.Restore(state);
+        //}
     }
 
     public partial class Index: ComponentBase
     {
-        public History history;
-
-        public Problem problem = new();
         public Axis xAxis = new();
         public Axis zAxis = new();
-        public ReceiversInfo receiversInfo = new();
 
-        public int k = 0;
-        public double[] properties;
+        public Problem problem = null;
+        public Grid grid = null;
 
-        protected override void OnInitialized()
+        public void OnBuildGrid()
         {
-            base.OnInitialized();
+            if (grid != null)
+            {
+                Logger.LogWarning("Сетка уже построена. Если вы хотите построить новую, то нажмите сначала на кнопку [Сбросить сетку]");
+                return;
+            }
 
-            history = new History(this);
-        }
-
-        public void OnBuildGridClick()
-        {
-            history.Backup();
-
-            k = (xAxis.CellCount + 1) * (zAxis.CellCount + 1);
-            properties = new double[k];
+            if (!xAxis.Validate())
+            {
+                Logger.LogError("Данные для оси X не валидны");
+                return;
+            }
+            
+            if (!zAxis.Validate())
+            {
+                Logger.LogError("Данные для оси Z не валидны");
+                return;
+            }
+            
+            ReceiversInfo receiversInfo = new();             
+            receiversInfo.BeginX = -2000;
+            receiversInfo.EndX = 6000;
+            receiversInfo.Count = 800;
 
             double[] x = xAxis.Build();
             double[] z = zAxis.Build();
+            int k = xAxis.CellCount * zAxis.CellCount;
 
-            Point[] receivers = receiversInfo.BuildReceivers();
-
-            //TODO: check if x or z is not null
-            //TODO: check if receivers is not null
-
-            problem.X = x;
-            problem.Z = z;
-            problem.Receivers = receivers;
+            double[] properties = new double[k];
+            grid = new(x, z, properties, receiversInfo.BuildReceivers());
         }
 
-        public void OnSetProperties()
+        public void OnCalculate()
         {
 
         }
 
-        public void OnCalculateClick()
+        public void OnResetGrid()
         {
-
+            grid = null;
         }
 
-        public void OnUndoClick()
+        public void OnUndo()
         {
-            history.Undo();
         }
 
-        public State Save()
-        {
-            State state = new State();
-            if (properties != null)
-            {
-                state.properties = new double[properties.Length];
-                Array.Copy(properties, state.properties, properties.Length);
-            }
-            state.xAxis = (Axis)xAxis.Clone();
-            state.zAxis = (Axis)zAxis.Clone();
-            state.receiversInfo = (ReceiversInfo)receiversInfo.Clone();
+        //public State Save()
+        //{
+        //    State state = new State();
+        //    if (properties != null)
+        //    {
+        //        state.properties = new double[properties.Length];
+        //        Array.Copy(properties, state.properties, properties.Length);
+        //    }
+        //    state.xAxis = (Axis)xAxis.Clone();
+        //    state.zAxis = (Axis)zAxis.Clone();
+        //    state.receiversInfo = (ReceiversInfo)receiversInfo.Clone();
 
-            return state;
-        }
+        //    return state;
+        //}
 
-        public void Restore(State state)
-        {
-            xAxis = state.xAxis;
-            zAxis = state.zAxis;
-            receiversInfo = state.receiversInfo;
-            properties = state.properties;
-        }
+        //public void Restore(State state)
+        //{
+        //    xAxis = state.xAxis;
+        //    zAxis = state.zAxis;
+        //    receiversInfo = state.receiversInfo;
+        //    properties = state.properties;
+        //}
     }
 }
