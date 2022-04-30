@@ -28,8 +28,10 @@ namespace UI.Models
             for (int i = 0; i < k; i++)
                 initialProperties[i] = 0.1;
 
+            double[] gamma = new double[Grid.Properties.Length];
+            Array.Fill(gamma, Regularization.Gamma);
+
             double alpha = Regularization.Alpha;
-            double[] gamma = Regularization.Gamma;
 
             ProblemInfo info = new ProblemInfo();
             info.P = initialProperties;

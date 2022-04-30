@@ -33,21 +33,21 @@
         <button class="button" @onclick=@(async () => await OnCalculate())>Посчитать задачу</button>
     </div>
 
-    @if (grid != null)
+    @if (currentGrid != null)
     {
         <div class="buttons-line buttons-line--icons">
-            <button class="button">@('<')</button>
-            <button class="button">@('>')</button>
+            <button class="button" @onclick=OnBack>@('<')</button>
+            <button class="button" @onclick=OnForward>@('>')</button>
         </div>
 
 
         <div class="table" style=@($"grid-template-columns: repeat({xAxis.CellCount}, 1fr);")>
 
-            @for (int i = 0; i < grid.Properties.Length; i++)
+            @for (int i = 0; i < currentGrid.Properties.Length; i++)
             {
                 var index = i;
-                Color color = colorScale.GetColor(grid.Properties[index]);
-                <input class="input input--table" value=@($"{grid.Properties[index]:G4}") @onchange=@((ChangeEventArgs args) => OnGridCellChange(args, index)) style=@($"background: rgba({color.R}, {color.G}, {color.B}, 0.5);")>
+                Color color = colorScale.GetColor(currentGrid.Properties[index]);
+                <input class="input input--table" value=@($"{currentGrid.Properties[index]:G4}") @onchange=@((ChangeEventArgs args) => OnGridCellChange(args, index)) style=@($"background: rgba({color.R}, {color.G}, {color.B}, 0.5);")>
             }
         </div>
     }

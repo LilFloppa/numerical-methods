@@ -11,14 +11,16 @@ namespace UI.Pages
         public Axis zAxis = new();
 
         public Problem problem = null;
-        public Grid grid = null;
+        public Regularization regularization = new();
+        public Grid currentGrid = null;
+        public Grid solutionGrid = null;
         public Grid initialGrid = null;
 
         public ColorScale colorScale = new ColorScale();
 
         public void OnBuildGrid()
         {
-            if (grid != null)
+            if (initialGrid != null)
             {
                 Logger.LogWarning("Сетка уже построена. Если вы хотите построить новую, то нажмите сначала на кнопку [Сбросить сетку]");
                 return;
@@ -46,8 +48,8 @@ namespace UI.Pages
             int k = xAxis.CellCount * zAxis.CellCount;
 
             double[] properties = new double[k];
-            grid = new(x, z, properties, receiversInfo.BuildReceivers());
-            initialGrid = grid;
+            initialGrid = new(x, z, properties, receiversInfo.BuildReceivers());
+            currentGrid = initialGrid;
 
             UpdateColorScale();
 
@@ -56,29 +58,36 @@ namespace UI.Pages
 
         public async Task OnCalculate()
         {
-            if (grid == null)
+            if (initialGrid == null)
             {
                 Logger.LogError("Невозможно посчитать задачу, сетка не построена");
                 return;
             }
 
-            double[] gamma = new double[grid.Properties.Length];
-            problem = new Problem(grid, new Regularization { Alpha = 0.0, Gamma = new double[grid.Properties.Length] });
-            double[] soultion = await Task.Run(() => problem.Solve());
-            grid.Properties = soultion;
+            if (!regularization.Validate())
+            {
+                Logger.LogError("Неверные параметры регуляризации");
+                return;
+            }    
+
+            problem = new Problem(initialGrid, regularization);
+            double[] solution = await Task.Run(() => problem.Solve());
+            solutionGrid = new(initialGrid.X, initialGrid.Z, solution, initialGrid.Receivers);
+            currentGrid = solutionGrid;
 
             UpdateColorScale();
         }
 
         public void OnResetGrid()
         {
-            grid = null;
+            currentGrid = null;
             initialGrid = null;
+            solutionGrid = null;
         }
 
         public void OnGridCellChange(ChangeEventArgs args, int index)
         {
-            if (grid == null)
+            if (currentGrid == null)
             {
                 Logger.LogError("Невозможно изменить значение ячейки, так как сетка не построена");
                 return;
@@ -95,8 +104,8 @@ namespace UI.Pages
             stringValue = stringValue.Replace(",", ".");
             if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
             {
-                grid.Properties[index] = result;
-                UpdateColorScale();;
+                currentGrid.Properties[index] = result;
+                UpdateColorScale();
             }
             else
             {
@@ -107,8 +116,30 @@ namespace UI.Pages
 
         private void UpdateColorScale()
         {
-            if (grid != null)
-                colorScale.SetValues(grid.Properties);
+            if (currentGrid != null)
+                colorScale.SetValues(currentGrid.Properties);
+        }
+
+        private void OnBack()
+        {
+            if (initialGrid != null)
+            {
+                currentGrid = initialGrid;
+                UpdateColorScale();
+            }
+            else
+                Logger.LogError("Невозможно переключиться на исходную сетку, так как она null");
+        }
+
+        private void OnForward()
+        {
+            if (solutionGrid != null)
+            {
+                currentGrid = solutionGrid;
+                UpdateColorScale();
+            }
+            else
+                Logger.LogError("Невозможно переключиться на сетку решения, так как она null");
         }
     }
 }
