@@ -21,6 +21,5 @@ int main()
 
 	BCG(A, s, b);
 
-	std::cout << "Hello, World!" << std::endl;
 	return 0;
 }
