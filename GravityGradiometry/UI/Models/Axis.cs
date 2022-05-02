@@ -27,5 +27,7 @@
             clone.CellCount = CellCount;
             return clone;
         }
+
+        public int GetLabel(int i) => (int)(Begin + i * (End - Begin) / CellCount);
     }
 }

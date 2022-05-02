@@ -7,7 +7,7 @@
     <div class="container__inner">
         <div class="form">
             <p class="form-title">X:</p><p></p>
-            <p class="input-title">Количество клеток по X:</p> <input type="number" class="input" @bind=xAxis.CellCount />
+            <p class="input-title">Количество клеток по X:</p> <input type="number" class="input" @bind=xAxis.CellCount/>
             <p class="input-title">Начало по X: </p><input type="number" class="input" @bind=xAxis.Begin />
             <p class="input-title">Конец по X: </p><input type="number" class="input" @bind=xAxis.End />
         </div>
@@ -18,14 +18,19 @@
             <p class="input-title">Начало по Z: </p><input type="number" class="input" @bind=zAxis.Begin />
             <p class="input-title">Конец по Z: </p><input type="number" class="input" @bind=zAxis.End />
         </div>
+        <div class="form">
+            <p class="form-title">Регуляризация</p><p></p>
+            <p class="input-title">Альфа: </p> <input class="input" value=@(regularization.Alpha) @onchange=@((ChangeEventArgs args) => OnInputChange(args, "alpha"))/>
+            <p class="input-title">Гамма: </p><input class="input" value=@(regularization.Gamma) @onchange=@((ChangeEventArgs args) => OnInputChange(args, "gamma")) />
+        </div>
     </div>
 
-   @* <div class="table-row">
+    @* <div class="table-row">
         @for (int i = 1; i < xAxis.CellCount + 2; i++)
         {
-            <div class="table-row__number">@i</div>
+        <div class="table-row__number">@i</div>
         }
-    </div>*@
+        </div>*@
 
     <div class="buttons-line">
         <button class="button" @onclick=OnBuildGrid>Построить сетку</button>
@@ -40,15 +45,38 @@
             <button class="button" @onclick=OnForward>@('>')</button>
         </div>
 
-
-        <div class="table" style=@($"grid-template-columns: repeat({xAxis.CellCount}, 1fr);")>
-
-            @for (int i = 0; i < currentGrid.Properties.Length; i++)
+        <div class="numbers numbers-row">
+            @for (int i = 0; i < xAxis.CellCount + 1; i++)
             {
-                var index = i;
-                Color color = colorScale.GetColor(currentGrid.Properties[index]);
-                <input class="input input--table" value=@($"{currentGrid.Properties[index]:G4}") @onchange=@((ChangeEventArgs args) => OnGridCellChange(args, index)) style=@($"background: rgba({color.R}, {color.G}, {color.B}, 0.5);")>
+                int label = xAxis.GetLabel(i);
+                <div class="number">@(String.Format("{0,4:D}", label))</div>
             }
         </div>
+
+        <div class="table-line">
+            <div class="numbers numbers-column">
+                @for (int i = zAxis.CellCount - 1; i >= 0; i--)
+                {
+                    int label = zAxis.GetLabel(i);
+                    <div class="number">@(String.Format("{0,4:D}", label))</div>
+                }
+            </div>
+            <div class="table" style=@($"grid-template-columns: repeat({xAxis.CellCount}, 1fr);")>
+
+                @for (int i = 0; i < currentGrid.Properties.Length; i++)
+                {
+                    var index = i;
+                    Color color = colorScale.GetColor(currentGrid.Properties[index]);
+                    <input class="input input--table" value=@($"{currentGrid.Properties[index]:G4}") @onchange=@((ChangeEventArgs args) => OnGridCellChange(args, index)) style=@($"background: rgba({color.R}, {color.G}, {color.B}, 0.5);")>
+                }
+            </div>
+        </div>
     }
+
+    <div class="container__inner">
+        <div class="form">
+            <p class="form-title">Функционал</p><p></p>
+            <p class="input-title">F: </p> <input type="number" class="input" readonly @bind=F />
+        </div>
+    </div>
 </div>

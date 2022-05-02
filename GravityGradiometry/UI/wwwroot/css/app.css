@@ -6,7 +6,7 @@
 }
 
 .container {
-    padding: 20px;
+    padding: 35px;
 }
 
 .container__inner {
@@ -96,7 +96,7 @@ input::-webkit-inner-spin-button {
 
 .buttons-line--icons {
     gap: 5px;
-    margin-bottom: 15px;
+    margin-bottom: 35px;
 }
 
 .button {
@@ -122,4 +122,34 @@ input::-webkit-inner-spin-button {
 .button:active {
     box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.8);
     transform: translate(3px, 3px);
+}
+
+.numbers {
+    display: flex;
+}
+
+.numbers-row {
+    margin-left: 34px;
+    margin-bottom: 6px;
+}
+
+.numbers-column {
+    flex-direction: column;
+}
+
+.number {
+    width: 120px;
+    transform: translateX(-16px);
+}
+
+.numbers-column .number {
+    width: auto;
+    height: 35px;
+    transform: translate(-16px, 28px);
+    text-align: right
+}
+
+.table-line {
+    display: flex;
+    margin-bottom: 40px
 }

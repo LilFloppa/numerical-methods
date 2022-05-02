@@ -82,7 +82,13 @@ namespace Console
 
             f = F.Calculate(newP);
 
+            GravityCalculator newCalc = new GravityCalculator(x, z, newP);
+            double[] newG = new double[n];
+            for (int i = 0; i < n; i++)
+                newG[i] = newCalc.CalculateFromAll(receivers[i]);
+
             PrintToCSV("Test2x2.csv", newP, xCellCount, zCellCount);
+            PrintG("Test2x2", receivers, realG, newG);
         }
 
         static void Test4x4()
@@ -144,10 +150,16 @@ namespace Console
 
             f = F.Calculate(newP);
 
+            GravityCalculator newCalc = new GravityCalculator(x, z, newP);
+            double[] newG = new double[n];
+            for (int i = 0; i < n; i++)
+                newG[i] = newCalc.CalculateFromAll(receivers[i]);
+
             PrintToCSV("Test4x4.csv", newP, xCellCount, zCellCount);
+            PrintG("Test4x4", receivers, realG, newG);
         }
 
-        static void Test9x6()
+        static void Test9x6(double alpha)
         {
             const int xCellCount = 9;
             const int zCellCount = 6;
@@ -163,7 +175,6 @@ namespace Console
 
             double[] p = new double[k];
             double[] gamma = new double[k];
-            double alpha = 1.0e-5;
 
             double beginX = -2000;
             double endX = 6000;
@@ -206,7 +217,13 @@ namespace Console
 
             f = F.Calculate(newP);
 
+            GravityCalculator newCalc = new GravityCalculator(x, z, newP);
+            double[] newG = new double[n];
+            for (int i = 0; i < n; i++)
+                newG[i] = newCalc.CalculateFromAll(receivers[i]);
+
             PrintToCSV("Test9x6.csv", newP, xCellCount, zCellCount);
+            PrintG("Test9x6", receivers, realG, newG);
         }
 
         static void Test18x12()
@@ -268,12 +285,25 @@ namespace Console
 
             f = F.Calculate(newP);
 
+            GravityCalculator newCalc = new GravityCalculator(x, z, newP);
+            double[] newG = new double[n];
+            for (int i = 0; i < n; i++)
+                newG[i] = newCalc.CalculateFromAll(receivers[i]);
+
             PrintToCSV("Test18x12.csv", newP, xCellCount, zCellCount);
+            PrintG("Test18x12", receivers, realG, newG);
         }
 
         static void Main(string[] args)
         {
-            Test4x4();
+            System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
+            culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
+            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+            // Test4x4();
+            Test9x6(0.0);
         }
 
         static void PrintToCSV(string filename, double[] p, int width, int height)
@@ -298,6 +328,31 @@ namespace Console
 
                     w.WriteLine();
                 }
+            }
+        }
+
+        static void PrintG(string filename, Point[] receivers, double[] realG, double[] newG)
+        {
+            double[] diff = new double[realG.Length];
+            for (int i = 0; i < realG.Length; i++)
+                diff[i] = Math.Abs(realG[i] - newG[i]);
+
+            using (var w = new StreamWriter(File.Open("C:/repos/" + filename + "-realG.txt", FileMode.Create)))
+            {
+                for (int i = 0; i < realG.Length; i++)
+                    w.WriteLine($"{receivers[i].X}; {realG[i]}");
+            }
+
+            using (var w = new StreamWriter(File.Open("C:/repos/" + filename + "-newG.txt", FileMode.Create)))
+            {
+                for (int i = 0; i < newG.Length; i++)
+                    w.WriteLine($"{receivers[i].X}; {newG[i]}");
+            }
+
+            using (var w = new StreamWriter(File.Open("C:/repos/" + filename + "-diffG.txt", FileMode.Create)))
+            {
+                for (int i = 0; i < diff.Length; i++)
+                    w.WriteLine($"{receivers[i].X}; {diff[i]}");
             }
         }
     }

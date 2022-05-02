@@ -14,7 +14,7 @@ namespace UI.Models
             Regularization = regularization;
         }
 
-        public double[] Solve()
+        public (double[], double) Solve()
         {
             int n = Grid.Receivers.Length;
             int k = Grid.Properties.Length;
@@ -57,7 +57,7 @@ namespace UI.Models
 
             f = F.Calculate(solution);
 
-            return solution;
+            return (solution, f);
         }
     }
 }

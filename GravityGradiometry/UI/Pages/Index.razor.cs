@@ -18,6 +18,8 @@ namespace UI.Pages
 
         public ColorScale colorScale = new ColorScale();
 
+        public double F = 0.0;
+
         public void OnBuildGrid()
         {
             if (initialGrid != null)
@@ -71,9 +73,10 @@ namespace UI.Pages
             }    
 
             problem = new Problem(initialGrid, regularization);
-            double[] solution = await Task.Run(() => problem.Solve());
+            (double[] solution, double f) = await Task.Run(() => problem.Solve());
             solutionGrid = new(initialGrid.X, initialGrid.Z, solution, initialGrid.Receivers);
             currentGrid = solutionGrid;
+            F = f;
 
             UpdateColorScale();
         }
@@ -111,6 +114,27 @@ namespace UI.Pages
             {
                 // TODO: Add logging
                 StateHasChanged();
+            }
+        }
+
+        public void OnInputChange(ChangeEventArgs args, string name)
+        {
+            string? stringValue = args?.Value?.ToString();
+            if (stringValue == null)
+            {
+                // TODO: Add logging
+                return;
+            }
+
+            stringValue = stringValue.Replace(",", ".");
+            if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
+            {
+                if (name == "alpha")
+                    regularization.Alpha = result;
+
+                if (name == "gamma")
+                    regularization.Gamma = result;
+                StateHasChanged();          
             }
         }
 
