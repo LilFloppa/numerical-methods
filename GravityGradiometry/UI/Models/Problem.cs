@@ -2,6 +2,14 @@
 
 namespace UI.Models
 {
+    public class Solution
+    {
+        public double F { get; set; }
+        public double[] P { get; set; }
+        public double[] RealG { get; set; }
+        public double[] SolutionG { get; set; }
+    }
+
     public class Problem
     {
         public Grid Grid { get; set; }
@@ -14,7 +22,7 @@ namespace UI.Models
             Regularization = regularization;
         }
 
-        public (double[], double) Solve()
+        public Solution Solve()
         {
             int n = Grid.Receivers.Length;
             int k = Grid.Properties.Length;
@@ -57,7 +65,18 @@ namespace UI.Models
 
             f = F.Calculate(solution);
 
-            return (solution, f);
+            GravityCalculator newCalc = new GravityCalculator(Grid.X, Grid.Z, solution);
+            double[] solutionG = new double[n];
+            for (int i = 0; i < n; i++)
+                solutionG[i] = newCalc.CalculateFromAll(Grid.Receivers[i]);
+
+            return new Solution
+            {
+                F = f,
+                P = solution,
+                RealG = realG,
+                SolutionG = solutionG
+            };
         }
     }
 }

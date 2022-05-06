@@ -5,6 +5,12 @@ using UI.Models;
 
 namespace UI.Pages
 {
+    public class ChartData
+    {
+        public double X { get; set; }
+        public double G { get; set; }
+    }
+
     public partial class Index: ComponentBase
     {
         public Axis xAxis = new();
@@ -19,6 +25,10 @@ namespace UI.Pages
         public ColorScale colorScale = new ColorScale();
 
         public double F = 0.0;
+
+        public ChartData[] realG;
+        public ChartData[] solutionG;
+        public ChartData[] diffG;
 
         public void OnBuildGrid()
         {
@@ -73,10 +83,21 @@ namespace UI.Pages
             }    
 
             problem = new Problem(initialGrid, regularization);
-            (double[] solution, double f) = await Task.Run(() => problem.Solve());
-            solutionGrid = new(initialGrid.X, initialGrid.Z, solution, initialGrid.Receivers);
+            Solution solution = await Task.Run(() => problem.Solve());
+            solutionGrid = new(initialGrid.X, initialGrid.Z, solution.P, initialGrid.Receivers);
             currentGrid = solutionGrid;
-            F = f;
+            F = solution.F;
+
+            realG = new ChartData[solutionGrid.Receivers.Length];
+            solutionG = new ChartData[solutionGrid.Receivers.Length];
+            diffG = new ChartData[solutionGrid.Receivers.Length];
+
+            for (int i = 0; i < solutionGrid.Receivers.Length; i++)
+            {
+                realG[i] = new ChartData{ X = solutionGrid.Receivers[i].X, G = solution.RealG[i] };
+                solutionG[i] = new ChartData { X = solutionGrid.Receivers[i].X, G = solution.SolutionG[i] };
+                diffG[i] = new ChartData { X = solutionGrid.Receivers[i].X, G = Math.Abs(realG[i].G - solutionG[i].G) };
+            }
 
             UpdateColorScale();
         }

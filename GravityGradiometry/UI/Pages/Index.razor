@@ -7,7 +7,7 @@
     <div class="container__inner">
         <div class="form">
             <p class="form-title">X:</p><p></p>
-            <p class="input-title">Количество клеток по X:</p> <input type="number" class="input" @bind=xAxis.CellCount/>
+            <p class="input-title">Количество клеток по X:</p> <input type="number" class="input" @bind=xAxis.CellCount />
             <p class="input-title">Начало по X: </p><input type="number" class="input" @bind=xAxis.Begin />
             <p class="input-title">Конец по X: </p><input type="number" class="input" @bind=xAxis.End />
         </div>
@@ -20,7 +20,7 @@
         </div>
         <div class="form">
             <p class="form-title">Регуляризация</p><p></p>
-            <p class="input-title">Альфа: </p> <input class="input" value=@(regularization.Alpha) @onchange=@((ChangeEventArgs args) => OnInputChange(args, "alpha"))/>
+            <p class="input-title">Альфа: </p> <input class="input" value=@(regularization.Alpha) @onchange=@((ChangeEventArgs args) => OnInputChange(args, "alpha")) />
             <p class="input-title">Гамма: </p><input class="input" value=@(regularization.Gamma) @onchange=@((ChangeEventArgs args) => OnInputChange(args, "gamma")) />
         </div>
     </div>
@@ -72,6 +72,43 @@
             </div>
         </div>
     }
+
+
+    <RadzenTabs TabPosition="Radzen.TabPosition.Top">
+        <Tabs>
+            <RadzenTabsItem Text="Настоящая G">
+                <RadzenChart>
+                    <RadzenLineSeries Smooth="false" Data="@realG" CategoryProperty="X" Title="Настоящая G" LineType="LineType.Solid" ValueProperty="G">
+                        <RadzenMarkers MarkerType="MarkerType.None" />
+                        <RadzenLegend Visible="false" />
+                        <RadzenValueAxis FormatString="{0:G4}" />
+                    </RadzenLineSeries>
+                </RadzenChart>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Посчитанная G">
+
+                <RadzenChart>
+                    <RadzenLineSeries Smooth="true" Data="@solutionG" CategoryProperty="X" Title="Посчитанная G" LineType="LineType.Solid" ValueProperty="G">
+                        <RadzenMarkers MarkerType="MarkerType.None" />
+                        <RadzenLegend Visible="false" />
+                        <RadzenValueAxis FormatString="{0:G4}" />
+                    </RadzenLineSeries>
+                </RadzenChart>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="Разница">
+
+                <RadzenChart>
+                    <RadzenLineSeries Smooth="true" Data="@diffG" CategoryProperty="X" Title="Разница" LineType="LineType.Solid" ValueProperty="G">
+                        <RadzenMarkers MarkerType="MarkerType.None" />
+                        <RadzenLegend Visible="false" />
+                        <RadzenValueAxis FormatString="{0:G4}" />
+                    </RadzenLineSeries>
+                </RadzenChart>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
 
     <div class="container__inner">
         <div class="form">
