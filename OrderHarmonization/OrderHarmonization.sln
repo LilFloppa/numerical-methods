@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderHarmonization", "OrderHarmonization\OrderHarmonization.csproj", "{07BFB0AD-29E1-47C1-85E3-E64AF263B503}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathUtilities", "MathUtilities\MathUtilities.csproj", "{1FD5F5AD-763F-4D12-B017-7C9CCC1D7490}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{07BFB0AD-29E1-47C1-85E3-E64AF263B503}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07BFB0AD-29E1-47C1-85E3-E64AF263B503}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07BFB0AD-29E1-47C1-85E3-E64AF263B503}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07BFB0AD-29E1-47C1-85E3-E64AF263B503}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FD5F5AD-763F-4D12-B017-7C9CCC1D7490}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FD5F5AD-763F-4D12-B017-7C9CCC1D7490}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FD5F5AD-763F-4D12-B017-7C9CCC1D7490}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FD5F5AD-763F-4D12-B017-7C9CCC1D7490}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8D3BAD1-5350-4F68-A7AD-124A7316D3FA}
+	EndGlobalSection
+EndGlobal
