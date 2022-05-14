@@ -116,13 +116,15 @@ namespace OrderHarmonization
 
             ProblemInfo info = new ProblemInfo
             {
-                Basis = new TriangleLinearHierarchical(),
-                BoundaryBasis = new LineLinearHierarchical(),
+                Basis = new TriangleCubicHierarchical(),
+                BoundaryBasis = new LineCubicHierarchical(),
                 MaterialDictionary = AreaInfo.Materials,
                 FirstBoundaryDictionary = AreaInfo.FirstBoundary,
                 SecondBoundaryDictionary = AreaInfo.SecondBoundary,
                 ThirdBoundaryDictionary = AreaInfo.ThirdBoundary
             };
+
+            var meshBuilder = new CubicMeshBuilder();
 
             Mesh mesh = LoadMesh(
               @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\points.txt",
@@ -131,10 +133,9 @@ namespace OrderHarmonization
               @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\boundary2.txt",
               @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\boundary3.txt",
               info,
-              new LinearMeshBuilder());
+              meshBuilder);
 
             info.Mesh = mesh;
-
 
             PortraitBuilder PB = new PortraitBuilder(info);
             Portrait p = PB.Build();
@@ -148,6 +149,14 @@ namespace OrderHarmonization
 
             ISolver solver = new LOSLU();
             double[] q = solver.Solve(A, b);
+
+            double[] v1 = new double[A.N];
+            A.Multiply(q, v1);
+
+            Solution s = new Solution(q, mesh);
+
+            double value = s.GetValue(new Point(0.7, 0.4));
+            Console.WriteLine(value);
         }
     }
 }

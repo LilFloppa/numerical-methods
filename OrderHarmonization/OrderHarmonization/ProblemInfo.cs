@@ -12,20 +12,23 @@ namespace OrderHarmonization
             {
                 Name = "Steel",
                 Lambda = 1,
-                RoCp = 0,
-                F = (double x, double y) => 0.0
+                RoCp = 1,
+                F = (double x, double y) => x
             },
         };
 
         public static Dictionary<int, Func<double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double>>
         {
-            [0] = (double x, double y) => 0.0,
-            [1] = (double x, double y) => 1.0,
+            [0] = (x, y) => 0,
+            [1] = (x, y) => 2,
+           // [0] = (double x, double y) => x * x + 0 * 0,
+           // [1] = (double x, double y) => x * x + 1 * 1,
         };
 
         public static Dictionary<int, Func<double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double>>
         {
-            [0] = (double x, double y) => 0.0,
+            [0] = (double x, double y) => 0,
+            [1] = (double x, double y) => 0,
         };
 
         public static Dictionary<int, (double beta, Func<double,  double, double> ubeta)> ThirdBoundary => new Dictionary<int, (double, Func<double, double, double>)>
