@@ -13,16 +13,16 @@ namespace OrderHarmonization
                 Name = "Steel",
                 Lambda = 1,
                 RoCp = 1,
-                F = (double x, double y) => x
+                F = (double x, double y) => 1 * x * x - 2,
             },
         };
 
         public static Dictionary<int, Func<double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double>>
         {
             [0] = (x, y) => 0,
-            [1] = (x, y) => 2,
-           // [0] = (double x, double y) => x * x + 0 * 0,
-           // [1] = (double x, double y) => x * x + 1 * 1,
+            [1] = (x, y) => 4,
+            // [0] = (double x, double y) => x * x + 0 * 0,
+            // [1] = (double x, double y) => x * x + 1 * 1,
         };
 
         public static Dictionary<int, Func<double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double>>
@@ -40,6 +40,8 @@ namespace OrderHarmonization
     {
         public ITwoDimBasis Basis { get; set; }
         public IOneDimBasis BoundaryBasis { get; set; }
+        public IOneDimBasis BoundaryBasisFirstOrder { get; set; }
+        public IOneDimBasis BoundaryBasisThirdOrder { get; set; }
         public Mesh Mesh { get; set; }
         public Dictionary<int, Material> MaterialDictionary { get; set; }
         public Dictionary<int, Func<double, double, double>> FirstBoundaryDictionary { get; set; }

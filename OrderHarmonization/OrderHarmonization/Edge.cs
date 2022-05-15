@@ -6,12 +6,14 @@ namespace OrderHarmonization
     {
         public int NodeCount { get; set; }
         public int[] Vertices { get; set; }
+        public int Order { get; set; } = 1;
         public int this[int i] => Vertices[i];
 
         public Edge(int nodeCount)
         {
             NodeCount = nodeCount;
             Vertices = new int[nodeCount];
+            Array.Fill(Vertices, -1);
         }
     }
 

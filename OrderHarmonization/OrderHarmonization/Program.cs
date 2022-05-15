@@ -39,6 +39,7 @@ namespace OrderHarmonization
                 e.Vertices[1] = int.Parse(tokens[1]);
                 e.Vertices[2] = int.Parse(tokens[2]);
                 e.Material = info.MaterialDictionary[int.Parse(tokens[3])];
+                e.Order = int.Parse(tokens[4]);
 
                 elements.Add(e);
             }
@@ -118,13 +119,27 @@ namespace OrderHarmonization
             {
                 Basis = new TriangleCubicHierarchical(),
                 BoundaryBasis = new LineCubicHierarchical(),
+                BoundaryBasisFirstOrder = new LineLinearHierarchical(),
+                BoundaryBasisThirdOrder = new LineCubicHierarchical(),
                 MaterialDictionary = AreaInfo.Materials,
                 FirstBoundaryDictionary = AreaInfo.FirstBoundary,
                 SecondBoundaryDictionary = AreaInfo.SecondBoundary,
                 ThirdBoundaryDictionary = AreaInfo.ThirdBoundary
             };
 
-            var meshBuilder = new CubicMeshBuilder();
+            //ProblemInfo info = new ProblemInfo
+            //{
+            //    Basis = new TriangleLinearHierarchical(),
+            //    BoundaryBasis = new LineLinearHierarchical(),
+            //    BoundaryBasisFirstOrder = new LineLinearHierarchical(),
+            //    BoundaryBasisThirdOrder = new LineCubicHierarchical(),
+            //    MaterialDictionary = AreaInfo.Materials,
+            //    FirstBoundaryDictionary = AreaInfo.FirstBoundary,
+            //    SecondBoundaryDictionary = AreaInfo.SecondBoundary,
+            //    ThirdBoundaryDictionary = AreaInfo.ThirdBoundary
+            //};
+
+            var meshBuilder = new HarmonicMeshBuilder();
 
             Mesh mesh = LoadMesh(
               @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\points.txt",
@@ -144,19 +159,18 @@ namespace OrderHarmonization
             double[] b = new double[mesh.NodeCount];
             A.SetPortrait(p);
 
-            SlaeBuilder builder = new SlaeBuilder(info);
+            HarmonicSlaeBuilder builder = new HarmonicSlaeBuilder(info);
             builder.Build(A, b);
 
             ISolver solver = new LOSLU();
             double[] q = solver.Solve(A, b);
 
-            double[] v1 = new double[A.N];
-            A.Multiply(q, v1);
-
             Solution s = new Solution(q, mesh);
 
-            double value = s.GetValue(new Point(0.7, 0.4));
+            double value = s.GetValue(new Point(1.5, 0.3));
+            double value1 = s.GetValue(new Point(0.5, 1.2));
             Console.WriteLine(value);
+            Console.WriteLine(value1);
         }
     }
 }

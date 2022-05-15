@@ -48,6 +48,7 @@ namespace OrderHarmonization
 		private void BuildConnections(Mesh mesh)
 		{
 			foreach (FiniteElement e in mesh.Elements)
+			{
 				for (int i = 1; i < info.Basis.Size; i++)
 					for (int j = 0; j < i; j++)
 					{
@@ -55,8 +56,10 @@ namespace OrderHarmonization
 						int b = e.Vertices[j];
 						if (a < b) (a, b) = (b, a);
 
-						connections[a].Add(b);
+						if (a != -1 && b != -1)
+							connections[a].Add(b);
 					}
+			}
 		}
 	};
 }
