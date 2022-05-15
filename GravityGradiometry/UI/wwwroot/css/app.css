@@ -153,3 +153,11 @@ input::-webkit-inner-spin-button {
     display: flex;
     margin-bottom: 40px
 }
+
+.rz-axis {
+    stroke: black !important;
+}
+
+.rz-tick-text {
+    fill: black !important;
+}
