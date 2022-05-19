@@ -269,8 +269,6 @@ namespace OrderHarmonization
                     double G = Quadratures.TriangleGauss18(GetGrad(i, j, a, b, c));
                     double M = Quadratures.TriangleGauss18((double ksi, double etta) => psi[i](ksi, etta) * psi[j](ksi, etta));
                     local[i, j] = (e.Material.Lambda * G + e.Material.RoCp * M) * D;
-
-                    Console.WriteLine($"G: {G:F7}\t\tM: {M:F7}");
                 }
             }
         }

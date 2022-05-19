@@ -13,7 +13,7 @@ namespace OrderHarmonization
                 Name = "Steel",
                 Lambda = 1,
                 RoCp = 1,
-                F = (double x, double y) => 1 * x * x - 2,
+                F = (double x, double y) => x * x - 2,
             },
         };
 

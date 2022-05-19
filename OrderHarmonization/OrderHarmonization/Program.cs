@@ -107,14 +107,80 @@ namespace OrderHarmonization
             return builder.Build();
         }
 
-        static void Main(string[] args)
-        {
-            System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
-            culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
-            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
-            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
-            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
 
+        static Mesh Build(GridBuilder gridBuilder, ProblemInfo info, IMeshBuilder builder)
+        {
+            // Elements Parsing ------------------------------------------------------
+            List<FiniteElement> elements = new List<FiniteElement>();
+
+            foreach (var gridElem in gridBuilder.Elements)
+            {
+                FiniteElement e = new FiniteElement(info.Basis.Size);
+                e.Vertices[0] = gridElem.V1;
+                e.Vertices[1] = gridElem.V2;
+                e.Vertices[2] = gridElem.V3;
+                e.Material = info.MaterialDictionary[gridElem.MaterialNo];
+                e.Order = gridElem.Order;
+
+                elements.Add(e);
+            }
+            // -----------------------------------------------------------------------
+
+            // First Boundary Parsing ------------------------------------------------
+            List<FirstBoundaryEdge> firstBondary = new List<FirstBoundaryEdge>();
+
+            foreach (var gridEdge in gridBuilder.FirstBoundary)
+            {
+                FirstBoundaryEdge e = new FirstBoundaryEdge(info.BoundaryBasis.Size);
+                e.Vertices[0] = gridEdge.V1;
+                e.Vertices[info.BoundaryBasis.Size - 1] = gridEdge.V2;
+                e.F = info.FirstBoundaryDictionary[gridEdge.No];
+
+                firstBondary.Add(e);
+            }
+            // -----------------------------------------------------------------------
+
+            // Second Boundary Parsing -----------------------------------------------
+            List<SecondBoundaryEdge> secondBondary = new List<SecondBoundaryEdge>();
+
+            foreach (var gridEdge in gridBuilder.SecondBoundary)
+            {
+                SecondBoundaryEdge e = new SecondBoundaryEdge(info.BoundaryBasis.Size);
+                e.Vertices[0] = gridEdge.V1;
+                e.Vertices[info.BoundaryBasis.Size - 1] = gridEdge.V2;
+                e.Theta = info.SecondBoundaryDictionary[gridEdge.No];
+
+                secondBondary.Add(e);
+            }
+            // -----------------------------------------------------------------------
+
+            // Third Boundary Parsing ------------------------------------------------
+            List<ThirdBoundaryEdge> thirdBondary = new List<ThirdBoundaryEdge>();
+
+            foreach (var gridEdge in gridBuilder.ThirdBoundary)
+            {
+                ThirdBoundaryEdge e = new ThirdBoundaryEdge(info.BoundaryBasis.Size);
+                e.Vertices[0] = gridEdge.V1;
+                e.Vertices[info.BoundaryBasis.Size - 1] = gridEdge.V2;
+
+                int boundaryNo = gridEdge.No;
+                e.UBeta = info.ThirdBoundaryDictionary[boundaryNo].ubeta;
+                e.Beta = info.ThirdBoundaryDictionary[boundaryNo].beta;
+
+                thirdBondary.Add(e);
+            }
+            // -----------------------------------------------------------------------
+
+            builder.AddPoints(gridBuilder.Points);
+            builder.AddElements(elements);
+            builder.AddFirstBoundary(firstBondary);
+            builder.AddSecondBoundary(secondBondary);
+            builder.AddThirdBoundary(thirdBondary);
+            return builder.Build();
+        }
+
+        static void Problem1()
+        {
             ProblemInfo info = new ProblemInfo
             {
                 Basis = new TriangleCubicHierarchical(),
@@ -150,6 +216,74 @@ namespace OrderHarmonization
               info,
               meshBuilder);
 
+            info.Mesh = mesh;
+
+            PortraitBuilder PB = new PortraitBuilder(info);
+            Portrait p = PB.Build();
+
+            IMatrix A = new SparseMatrix(mesh.NodeCount);
+            double[] b = new double[mesh.NodeCount];
+            A.SetPortrait(p);
+
+            HarmonicSlaeBuilder builder = new HarmonicSlaeBuilder(info);
+            builder.Build(A, b);
+
+            ISolver solver = new LOSLU();
+            double[] q = solver.Solve(A, b);
+
+            Solution s = new Solution(q, mesh);
+
+            double value = s.GetValue(new Point(1.5, 0.3));
+            double value1 = s.GetValue(new Point(0.5, 1.2));
+            Console.WriteLine(value);
+            Console.WriteLine(value1);
+        }
+
+        static void Main(string[] args)
+        {
+            System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
+            culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
+            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+            GridInfo gridInfo = new GridInfo
+            {
+                XBegin = 0.0,
+                XEnd = 2.0,
+                YBegin = 0.0,
+                YEnd = 2.0,
+                XNodeCount = 3,
+                YNodeCount = 3,
+                TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
+                BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
+                LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
+                RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.First },
+                ThirdOrderSubDomains = new()
+                {
+                    new(0.0, 2.0, 0.0, 2.0)
+                }
+            };
+            
+            GridBuilder gridBuilder = new GridBuilder(gridInfo);
+            gridBuilder.Build();
+
+            ProblemInfo info = new ProblemInfo
+            {
+                Basis = new TriangleCubicHierarchical(),
+                BoundaryBasis = new LineCubicHierarchical(),
+                BoundaryBasisFirstOrder = new LineLinearHierarchical(),
+                BoundaryBasisThirdOrder = new LineCubicHierarchical(),
+                MaterialDictionary = AreaInfo.Materials,
+                FirstBoundaryDictionary = AreaInfo.FirstBoundary,
+                SecondBoundaryDictionary = AreaInfo.SecondBoundary,
+                ThirdBoundaryDictionary = AreaInfo.ThirdBoundary
+            };
+
+
+            var meshBuilder = new HarmonicMeshBuilder();
+
+            Mesh mesh = Build(gridBuilder, info, meshBuilder);
             info.Mesh = mesh;
 
             PortraitBuilder PB = new PortraitBuilder(info);
