@@ -50,15 +50,20 @@ namespace OrderHarmonization
 			foreach (FiniteElement e in mesh.Elements)
 			{
 				for (int i = 1; i < info.Basis.Size; i++)
-					for (int j = 0; j < i; j++)
+				{
+					int a = e.Vertices[i];
+					if (a != -1)
 					{
-						int a = e.Vertices[i];
-						int b = e.Vertices[j];
-						if (a < b) (a, b) = (b, a);
+						for (int j = 0; j < i; j++)
+						{
+							int b = e.Vertices[j];
+							if (a < b) (a, b) = (b, a);
 
-						if (a != -1 && b != -1)
-							connections[a].Add(b);
+							if (b != -1)
+								connections[a].Add(b);
+						}
 					}
+				}
 			}
 		}
 	};

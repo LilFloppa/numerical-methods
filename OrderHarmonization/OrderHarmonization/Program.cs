@@ -239,6 +239,27 @@ namespace OrderHarmonization
             Console.WriteLine(value1);
         }
 
+        static double Diff(GridInfo info, Solution s, Func<double, double, double> u, int xCount, int yCount)
+        {
+            double xStep = (info.XEnd - info.XBegin) / (xCount - 1);
+            double yStep = (info.YEnd - info.YBegin) / (yCount - 1);
+
+            double diff = 0.0;
+            for (int i = 0; i < yCount; i++)
+                for (int j = 0; j < xCount; j++)
+                {
+                    double x = info.XBegin + xStep * j;
+                    double y = info.YBegin + yStep * i;
+
+                    double ureal = u(x, y);
+                    double ucalc = s.GetValue(x, y);
+
+                    diff += (ureal - ucalc) * (ureal - ucalc);
+                }
+
+            return diff;
+        }
+
         static void Main(string[] args)
         {
             System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
@@ -249,19 +270,19 @@ namespace OrderHarmonization
 
             GridInfo gridInfo = new GridInfo
             {
-                XBegin = 0.0,
-                XEnd = 2.0,
+                XBegin = -8.0,
+                XEnd = 1.0,
                 YBegin = 0.0,
                 YEnd = 2.0,
-                XNodeCount = 3,
+                XNodeCount = 5,
                 YNodeCount = 3,
                 TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
                 RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.First },
-                ThirdOrderSubDomains = new()
+                OrderSubDomains = new()
                 {
-                    new(0.0, 2.0, 0.0, 2.0)
+                    new(-3.0, 1.0, 0.0, 2.0, 3)
                 }
             };
             
@@ -300,11 +321,9 @@ namespace OrderHarmonization
             double[] q = solver.Solve(A, b);
 
             Solution s = new Solution(q, mesh);
+            Func<double, double, double> u = (x, y) => Math.Exp(x);
 
-            double value = s.GetValue(new Point(1.5, 0.3));
-            double value1 = s.GetValue(new Point(0.5, 1.2));
-            Console.WriteLine(value);
-            Console.WriteLine(value1);
+            Console.WriteLine(Diff(gridInfo, s, u, 5, 5));
         }
     }
 }

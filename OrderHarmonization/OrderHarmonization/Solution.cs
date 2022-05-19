@@ -56,7 +56,8 @@ namespace OrderHarmonization
                     double[] L = Utilities.GetL(a, b, c, p);
                     double result = 0;
                     for (int i = 0; i < LInfo.LBasis.Length; i++)
-                        result += q[e[i]] * LInfo.LBasis[i](L[0], L[1], L[2]);
+                        if (e[i] != -1)
+                            result += q[e[i]] * LInfo.LBasis[i](L[0], L[1], L[2]);
 
                     return result;
                 }

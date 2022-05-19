@@ -30,14 +30,16 @@ namespace OrderHarmonization.Meshes
         public int FuncNo;
     }
 
-    public struct SubDomain
+    public struct OrderSubDomain
     {
         public double X1, X2, Y1, Y2;
+        public int Order;
 
-        public SubDomain(double x1, double x2, double y1, double y2)
+        public OrderSubDomain(double x1, double x2, double y1, double y2, int order)
         {
             X1 = x1; Y1 = y1;
             X2 = x2; Y2 = y2;
+            Order = order;
         }
         public bool Contains(double x1, double x2, double y1, double y2) => x1 >= X1 && x2 <= X2 && y1 >= Y1 && y2 <= Y2;
     }
@@ -57,7 +59,7 @@ namespace OrderHarmonization.Meshes
         public GridBoundary RightBoundary { get; set; }
         public GridBoundary BottomBoundary { get; set; }
 
-        public List<SubDomain> ThirdOrderSubDomains { get; set; }
+        public List<OrderSubDomain> OrderSubDomains { get; set; }
     }
 
     public class GridBuilder
@@ -191,10 +193,11 @@ namespace OrderHarmonization.Meshes
 
         int GetOrder(double x1, double x2, double y1, double y2)
         {
-            foreach (var sub in Info.ThirdOrderSubDomains)
+            if (Info.OrderSubDomains != null)
             {
-                if (sub.Contains(x1, x2, y1, y2))
-                    return 3;
+                foreach (var sub in Info.OrderSubDomains)
+                    if (sub.Contains(x1, x2, y1, y2))
+                        return sub.Order;
             }
 
             return 1;

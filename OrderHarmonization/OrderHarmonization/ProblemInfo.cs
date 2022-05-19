@@ -13,16 +13,14 @@ namespace OrderHarmonization
                 Name = "Steel",
                 Lambda = 1,
                 RoCp = 1,
-                F = (double x, double y) => x * x - 2,
+                F = (double x, double y) => 0,
             },
         };
 
         public static Dictionary<int, Func<double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double>>
         {
-            [0] = (x, y) => 0,
-            [1] = (x, y) => 4,
-            // [0] = (double x, double y) => x * x + 0 * 0,
-            // [1] = (double x, double y) => x * x + 1 * 1,
+            [0] = (x, y) => Math.Exp(-8.0),
+            [1] = (x, y) => Math.Exp(1.0),
         };
 
         public static Dictionary<int, Func<double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double>>
