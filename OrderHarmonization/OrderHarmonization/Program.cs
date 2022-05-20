@@ -276,10 +276,10 @@ namespace OrderHarmonization
 
             ProblemInfo info = new ProblemInfo
             {
-                Basis = new TriangleCubicHierarchical(),
-                BoundaryBasis = new LineCubicHierarchical(),
+                Basis = new TriangleQuadHierarchical(),
+                BoundaryBasis = new LineQuadHierarchical(),
                 BoundaryBasisFirstOrder = new LineLinearHierarchical(),
-                BoundaryBasisThirdOrder = new LineCubicHierarchical(),
+                BoundaryBasisThirdOrder = new LineQuadHierarchical(),
                 MaterialDictionary = AreaInfo.Materials,
                 FirstBoundaryDictionary = AreaInfo.FirstBoundary,
                 SecondBoundaryDictionary = AreaInfo.SecondBoundary,
@@ -340,10 +340,10 @@ namespace OrderHarmonization
 
             ProblemInfo info = new ProblemInfo
             {
-                Basis = new TriangleCubicHierarchical(),
-                BoundaryBasis = new LineCubicHierarchical(),
+                Basis = new TriangleQuadHierarchical(),
+                BoundaryBasis = new LineQuadHierarchical(),
                 BoundaryBasisFirstOrder = new LineLinearHierarchical(),
-                BoundaryBasisThirdOrder = new LineCubicHierarchical(),
+                BoundaryBasisThirdOrder = new LineQuadHierarchical(),
                 MaterialDictionary = AreaInfo.Materials,
                 FirstBoundaryDictionary = AreaInfo.FirstBoundary,
                 SecondBoundaryDictionary = AreaInfo.SecondBoundary,

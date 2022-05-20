@@ -62,17 +62,16 @@ namespace OrderHarmonization
         };
     }
 
-    public class LineCubicHierarchical : IOneDimBasis
+    public class LineQuadHierarchical : IOneDimBasis
     {
-        public int Size => 4;
+        public int Size => 3;
         public BasisType Type => BasisType.Cubic;
         public Func<double, double>[] GetFuncs()
         {
-            return new Func<double, double>[4]
+            return new Func<double, double>[3]
             {
                 (double x) => 1.0 - x,
                 (double x) => x * (1.0 - x),
-                (double x) => x * (1.0 - x) * (2.0 * x - 1.0),
                 (double x) => x
             };
         }
@@ -81,12 +80,11 @@ namespace OrderHarmonization
             throw new NotImplementedException();
         }
 
-        public double[,] MassMatrix => new double[4, 4]
+        public double[,] MassMatrix => new double[3, 3]
         {
-            { 1.0 / 3, 1.0 / 12, -1.0 / 60, 1.0 / 6 },
-            { 1.0 / 12, 1.0 / 30, 0, 1.0 / 12 },
-            { -1.0 / 60, 0, 1.0 / 210, 1.0 / 60 },
-            { 1.0 / 6, 1.0 / 12, 1.0 / 60, 1.0 / 3 },
+            { 1.0 / 3,      1.0 / 12,   1.0 / 6 },
+            { 1.0 / 12,     1.0 / 30,   1.0 / 12 },
+            { 1.0 / 6,     1.0 / 12,   1.0 / 3 },
         };
     }
 
@@ -124,9 +122,9 @@ namespace OrderHarmonization
         }
     }
 
-    public class TriangleCubicHierarchical : ITwoDimBasis
+    public class TriangleQuadHierarchical : ITwoDimBasis
     {
-        public int Size => 10;
+        public int Size => 6;
         public BasisType Type => BasisType.Cubic;
 
         public Func<double, double, double>[] GetFuncs()
@@ -135,18 +133,14 @@ namespace OrderHarmonization
             Func<double, double, double> L2 = (k, e) => e;
             Func<double, double, double> L3 = (k, e) => 1 - k - e;
 
-            return new Func<double, double, double>[10]
+            return new Func<double, double, double>[6]
             {
                  (k,e) => L1(k, e),
                  (k,e) => L2(k, e),
                  (k,e) => L3(k, e),
                  (k,e) => L1(k, e) * L2(k, e),
-                 (k,e) => L1(k, e) * L2(k, e) * (L1(k, e) - L2(k, e)),
                  (k,e) => L1(k, e) * L3(k, e),
-                 (k,e) => L1(k, e) * L3(k, e) * (L1(k, e) - L3(k, e)),
                  (k,e) => L2(k, e) * L3(k, e),
-                 (k,e) => L2(k, e) * L3(k, e) * (L2(k, e) - L3(k, e)),
-                 (k,e) => L1(k, e) * L2(k, e) * L3(k, e),
             };
         }
         public Dictionary<string, Func<double, double, double>[]> GetDers()
@@ -165,58 +159,26 @@ namespace OrderHarmonization
 
             return new Dictionary<string, Func<double, double, double>[]>
             {
-                ["ksi"] = new Func<double, double, double>[10]
+                ["ksi"] = new Func<double, double, double>[6]
                 {
                     (k, e) => dL1dk,
                     (k, e) => dL2dk,
                     (k, e) => dL3dk,
 
                     (k,e) => dL1dk * L2(k, e) + L1(k, e) * dL2dk,
-                    (k,e) =>
-                        dL1dk * L2(k, e) * (L1(k, e) - L2(k, e)) +
-                        L1(k, e) * dL2dk * (L1(k, e) - L2(k, e)) +
-                        L1(k, e) * L2(k, e) * (dL1dk - dL2dk),
-
                     (k,e) => dL1dk * L3(k, e) + L1(k, e) * dL3dk,
-                    (k,e) =>
-                        dL1dk * L3(k, e) * (L1(k, e) - L3(k, e)) +
-                        L1(k, e) * dL3dk * (L1(k, e) - L3(k, e)) +
-                        L1(k, e) * L3(k, e) * (dL1dk - dL3dk),
-
                     (k,e) => dL2dk * L3(k, e) + L2(k, e) * dL3dk,
-                    (k,e) =>
-                        dL2dk * L3(k, e) * (L2(k, e) - L3(k, e)) +
-                        L2(k, e) * dL3dk * (L2(k, e) - L3(k, e)) +
-                        L2(k, e) * L3(k, e) * (dL2dk - dL3dk),
-
-                    (k,e) => dL1dk * L2(k, e) * L3(k, e) + L1(k, e) * dL2dk * L3(k, e) + L1(k, e) * L2(k, e) * dL3dk,
                 },
 
-                ["etta"] = new Func<double, double, double>[10]
+                ["etta"] = new Func<double, double, double>[6]
                 {
                     (k, e) => dL1de,
                     (k, e) => dL2de,
                     (k, e) => dL3de,
 
                     (k,e) => dL1de * L2(k, e) + L1(k, e) * dL2de,
-                    (k,e) =>
-                        dL1de * L2(k, e) * (L1(k, e) - L2(k, e)) +
-                        L1(k, e) * dL2de * (L1(k, e) - L2(k, e)) +
-                        L1(k, e) * L2(k, e) * (dL1de - dL2de),
-
                     (k,e) => dL1de * L3(k, e) + L1(k, e) * dL3de,
-                    (k,e) =>
-                        dL1de * L3(k, e) * (L1(k, e) - L3(k, e)) +
-                        L1(k, e) * dL3de * (L1(k, e) - L3(k, e)) +
-                        L1(k, e) * L3(k, e) * (dL1de - dL3de),
-
                     (k,e) => dL2de * L3(k, e) + L2(k, e) * dL3de,
-                    (k,e) =>
-                        dL2de * L3(k, e) * (L2(k, e) - L3(k, e)) +
-                        L2(k, e) * dL3de * (L2(k, e) - L3(k, e)) +
-                        L2(k, e) * L3(k, e) * (dL2de - dL3de),
-
-                    (k,e) => dL1de * L2(k, e) * L3(k, e) + L1(k, e) * dL2de * L3(k, e) + L1(k, e) * L2(k, e) * dL3de,
                 }
             };
         }
@@ -243,7 +205,7 @@ namespace OrderHarmonization
 
      public class LInfo
     {
-        public const int BasisSize = 10;
+        public const int BasisSize = 6;
 
         public struct DerComp
         {
@@ -340,18 +302,14 @@ namespace OrderHarmonization
             new List<PsiComp>() { new PsiComp(27.0, 1, 1, 1) }
         };
 
-        static public Func<double, double, double, double>[] LBasis = new Func<double, double, double, double>[10]
+        static public Func<double, double, double, double>[] LBasis = new Func<double, double, double, double>[6]
         {
             (double L1, double L2, double L3) => L1,
             (double L1, double L2, double L3) => L2,
             (double L1, double L2, double L3) => L3,
             (double L1, double L2, double L3) => L1 * L2,
-            (double L1, double L2, double L3) => L1 * L2 * (L1 - L2),
             (double L1, double L2, double L3) => L1 * L3,
-            (double L1, double L2, double L3) => L1 * L3 * (L1 - L3),
             (double L1, double L2, double L3) => L2 * L3,
-            (double L1, double L2, double L3) => L2 * L3 * (L2 - L3),
-            (double L1, double L2, double L3) => L1 * L2 * L3,
         };
     }
 }

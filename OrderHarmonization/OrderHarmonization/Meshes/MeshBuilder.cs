@@ -179,11 +179,11 @@ namespace OrderHarmonization.Meshes
 
             foreach (FiniteElement e in elements)
             {
-                if (e.Order == 3)
+                if (e.Order == 2)
                 {
                     int index = 3;
                     for (int i = 0; i < 3; i++)
-                        for (int j = i + 1; j < 3; j++, index += 2)
+                        for (int j = i + 1; j < 3; j++, index++)
                         {
                             int a = e.Vertices[i];
                             int b = e.Vertices[j];
@@ -197,20 +197,16 @@ namespace OrderHarmonization.Meshes
 
                             if (edgeMatrix[a, b].Index == 0)
                             {
-                                e.Vertices[index] = nodeCount + (f ? 1 : 0);
-                                e.Vertices[index + 1] = nodeCount + (f ? 0 : 1);
+                                e.Vertices[index] = nodeCount;
                                 edgeMatrix[a, b].Index = nodeCount;
-                                nodeCount += 2;
+                                nodeCount++;
                             }
                             else
                             {
                                 int a1 = edgeMatrix[a, b].Index;
-                                e.Vertices[index] = a1 + (f ? 1 : 0);
-                                e.Vertices[index + 1] = a1 + (f ? 0 : 1);
+                                e.Vertices[index] = a1;
                             }
                         }
-                    e.Vertices[index] = nodeCount;
-                    nodeCount++;
                 }
             }
 
@@ -231,46 +227,43 @@ namespace OrderHarmonization.Meshes
             foreach (Edge edge in firstBoundary)
             {
                 int a = edge[0];
-                int b = edge[3];
+                int b = edge[2];
                 bool f = a > b;
                 if (f) (a, b) = (b, a);
 
                 if (edgeMatrix[a, b].BelongsToFirstOrderTriangle)
                     continue;
 
-                edge.Vertices[1] = edgeMatrix[a, b].Index + (f ? 1 : 0);
-                edge.Vertices[2] = edgeMatrix[a, b].Index + (f ? 0 : 1);
-                edge.Order = 3;
+                edge.Vertices[1] = edgeMatrix[a, b].Index;
+                edge.Order = 2;
             }
 
             foreach (Edge edge in secondBoundary)
             {
                 int a = edge[0];
-                int b = edge[3];
+                int b = edge[2];
                 bool f = a > b;
                 if (f) (a, b) = (b, a);
 
                 if (edgeMatrix[a, b].BelongsToFirstOrderTriangle)
                     continue;
 
-                edge.Vertices[1] = edgeMatrix[a, b].Index + (f ? 1 : 0);
-                edge.Vertices[2] = edgeMatrix[a, b].Index + (f ? 0 : 1);
-                edge.Order = 3;
+                edge.Vertices[1] = edgeMatrix[a, b].Index;
+                edge.Order = 2;
             }
 
             foreach (Edge edge in thirdBoundary)
             {
                 int a = edge[0];
-                int b = edge[3];
+                int b = edge[2];
                 bool f = a > b;
                 if (f) (a, b) = (b, a);
 
                 if (edgeMatrix[a, b].BelongsToFirstOrderTriangle)
                     continue;
 
-                edge.Vertices[1] = edgeMatrix[a, b].Index + (f ? 1 : 0);
-                edge.Vertices[2] = edgeMatrix[a, b].Index + (f ? 0 : 1);
-                edge.Order = 3;
+                edge.Vertices[1] = edgeMatrix[a, b].Index;
+                edge.Order = 2;
             }
         }
     }
