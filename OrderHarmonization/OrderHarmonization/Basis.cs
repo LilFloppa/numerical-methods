@@ -245,6 +245,17 @@ namespace OrderHarmonization
     {
         public const int BasisSize = 10;
 
+        public struct Grad
+        {
+            public double R { get; set; }
+            public double Z { get; set; }
+
+            public Grad(double r, double z)
+            {
+                R = r;
+                Z = z;
+            }
+        }
         public struct DerComp
         {
             public DerComp(int gradNo, double coefficient, int v1, int v2, int v3)
@@ -308,36 +319,30 @@ namespace OrderHarmonization
 
         static public List<List<DerComp>> Ders = new List<List<DerComp>>()
         {
-            new List<DerComp>() { new DerComp(0, 13.5, 2, 0, 0),  new DerComp(0, -9.0, 1, 0, 0),   new DerComp(0, 1.0, 0, 0, 0) },
-            new List<DerComp>() { new DerComp(1, 13.5, 0, 2, 0),  new DerComp(1, -9.0, 0, 1, 0),   new DerComp(1, 1.0, 0, 0, 0) },
-            new List<DerComp>() { new DerComp(2, 13.5, 0, 0, 2),  new DerComp(2, -9.0, 0, 0, 1),   new DerComp(2, 1.0, 0, 0, 0) },
-
-            new List<DerComp>() { new DerComp(0, 27.0, 1, 1, 0),  new DerComp(0, -4.5, 0, 1, 0),   new DerComp(1, 13.5, 2, 0, 0),   new DerComp(1, -4.5, 1, 0, 0) }, // 4
-			new List<DerComp>() { new DerComp(0, 13.5, 0, 2, 0),  new DerComp(0, -4.5, 0, 1, 0),   new DerComp(1, 27.0, 1, 1, 0),   new DerComp(1, -4.5, 1, 0, 0) }, // 5
-
-			new List<DerComp>() { new DerComp(0, 27.0, 1, 0, 1),  new DerComp(0, -4.5, 0, 0, 1),   new DerComp(2, 13.5, 2, 0, 0),   new DerComp(2, -4.5, 1, 0, 0) }, // 9
-			new List<DerComp>() { new DerComp(0, 13.5, 0, 0, 2),  new DerComp(0, -4.5, 0, 0, 1),   new DerComp(2, 27.0, 1, 0, 1),   new DerComp(2, -4.5, 1, 0, 0) }, // 8
-
-			new List<DerComp>() { new DerComp(1, 27.0, 0, 1, 1),  new DerComp(1, -4.5, 0, 0, 1),   new DerComp(2, 13.5, 0, 2, 0),   new DerComp(2, -4.5, 0, 1, 0) }, // 6
-			new List<DerComp>() { new DerComp(1, 13.5, 0, 0, 2),  new DerComp(1, -4.5, 0, 0, 1),   new DerComp(2, 27.0, 0, 1, 1),   new DerComp(2, -4.5, 0, 1, 0) }, // 7
-			new List<DerComp>() { new DerComp(0, 27.0, 0, 1, 1),  new DerComp(1, 27.0, 1, 0, 1),   new DerComp(2, 27.0, 1, 1, 0) }
+            new List<DerComp>(){ new DerComp(0, 1, 0, 0, 0) },
+            new List<DerComp>(){ new DerComp(1, 1, 0, 0, 0) },
+            new List<DerComp>(){ new DerComp(2, 1, 0, 0, 0) },
+	        new List<DerComp>(){ new DerComp(0, 1, 0, 1, 0),    new DerComp(1, 1, 1, 0, 0) },
+	        new List<DerComp>(){ new DerComp(0, 2, 1, 1, 0),    new DerComp(1, 1, 2, 0, 0),     new DerComp(0, -1, 0, 2, 0),		new DerComp(1, -2, 1, 1, 0) },
+	        new List<DerComp>(){ new DerComp(0, 1, 0, 0, 1),    new DerComp(2, 1, 1, 0, 0) },
+	        new List<DerComp>(){ new DerComp(0, 2, 1, 0, 1),    new DerComp(2, 1, 2, 0, 0),     new DerComp(0, -1, 0, 0, 2),		new DerComp(2, -2, 1, 0, 1) },
+	        new List<DerComp>(){ new DerComp(1, 1, 0, 0, 1),    new DerComp(2, 1, 0, 1, 0) },
+	        new List<DerComp>(){ new DerComp(1, 2, 0, 1, 1),    new DerComp(2, 1, 0, 2, 0),     new DerComp(1, -1, 0, 0, 2),		new DerComp(2, -2, 0, 1, 1) },
+	        new List<DerComp>(){ new DerComp(0, 1, 0, 1, 1),    new DerComp(1, 1, 1, 0, 1),		new DerComp(2, 1, 1, 1, 0) },
         };
 
         static public List<List<PsiComp>> Basis = new List<List<PsiComp>>()
         {
-            new List<PsiComp>() { new PsiComp(4.5, 3, 0, 0),      new PsiComp(-4.5, 2, 0, 0),   new PsiComp(1.0, 1, 0, 0) },
-            new List<PsiComp>() { new PsiComp(4.5, 0, 3, 0),      new PsiComp(-4.5, 0, 2, 0),   new PsiComp(1.0, 0, 1, 0) },
-            new List<PsiComp>() { new PsiComp(4.5, 0, 0, 3),      new PsiComp(-4.5, 0, 0, 2),   new PsiComp(1.0, 0, 0, 1) },
-
-            new List<PsiComp>() { new PsiComp(13.5, 2, 1, 0),     new PsiComp(-4.5, 1, 1, 0) },
-            new List<PsiComp>() { new PsiComp(13.5, 1, 2, 0),     new PsiComp(-4.5, 1, 1, 0) },
-
-            new List<PsiComp>() { new PsiComp(13.5, 2, 0, 1),     new PsiComp(-4.5, 1, 0, 1) },
-            new List<PsiComp>() { new PsiComp(13.5, 1, 0, 2),     new PsiComp(-4.5, 1, 0, 1) },
-
-            new List<PsiComp>() { new PsiComp(13.5, 0, 2, 1),     new PsiComp(-4.5, 0, 1, 1) },
-            new List<PsiComp>() { new PsiComp(13.5, 0, 1, 2),     new PsiComp(-4.5, 0, 1, 1) },
-            new List<PsiComp>() { new PsiComp(27.0, 1, 1, 1) }
+            new List<PsiComp>(){ new PsiComp(1, 1, 0, 0) },
+            new List<PsiComp>(){ new PsiComp(1, 0, 1, 0) },
+            new List<PsiComp>(){ new PsiComp(1, 0, 0, 1) },
+            new List<PsiComp>(){ new PsiComp(1, 1, 1, 0) },
+            new List<PsiComp>(){ new PsiComp(1, 2, 1, 0),   new PsiComp(-1, 1, 2, 0) },
+            new List<PsiComp>(){ new PsiComp(1, 1, 0, 1) },
+            new List<PsiComp>(){ new PsiComp(1, 2, 0, 1),   new PsiComp( -1, 1, 0, 2) },
+            new List<PsiComp>(){ new PsiComp(1, 0, 1, 1) },
+            new List<PsiComp>(){ new PsiComp(1, 0, 2, 1),   new PsiComp(-1, 0, 1, 2) },
+	        new List<PsiComp>(){ new PsiComp(1, 1, 1, 1) }
         };
 
         static public Func<double, double, double, double>[] LBasis = new Func<double, double, double, double>[10]
