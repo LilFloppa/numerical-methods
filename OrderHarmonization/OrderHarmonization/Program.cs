@@ -282,7 +282,7 @@ namespace OrderHarmonization
                 RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.First },
                 OrderSubDomains = new()
                 {
-                    new(-3.0, 1.0, 0.0, 2.0, 3)
+                    new(-3.0, 1.0, 0.0, 2.0, 1)
                 }
             };
             

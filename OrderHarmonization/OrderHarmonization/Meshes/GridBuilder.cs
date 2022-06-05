@@ -102,7 +102,7 @@ namespace OrderHarmonization.Meshes
 
             for (int i = 0; i < Info.YNodeCount; i++)
                 for (int j = 0; j < Info.XNodeCount; j++)
-                    Points[i * Info.XNodeCount + j] = new Point(Info.XBegin + j * xStep, (Info.YBegin + i * yStep));
+                    Points[i * Info.XNodeCount + j] = new Point(Info.XBegin + j * xStep, Info.YBegin + i * yStep);
         }
 
         void BuildTriangles()
@@ -119,10 +119,10 @@ namespace OrderHarmonization.Meshes
                     int p3 = (i + 1) * Info.XNodeCount + j;
                     int p4 = (i + 1) * Info.XNodeCount + j + 1;
 
-                    var x1 = Points[j].X;
-                    var x2 = Points[j + 1].X;
-                    var y1 = Points[i].Y;
-                    var y2 = Points[i + 1].Y;
+                    var x1 = Points[p1].X;
+                    var x2 = Points[p2].X;
+                    var y1 = Points[p1].Y;
+                    var y2 = Points[p3].Y;
 
                     int matNo = GetMaterial(x1, x2, y1, y2);
                     int order = GetOrder(x1, x2, y1, y2);
