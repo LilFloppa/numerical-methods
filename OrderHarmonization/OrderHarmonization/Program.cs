@@ -322,6 +322,7 @@ namespace OrderHarmonization
                 YEnd = 1.0,
                 XIntervals = new()
                 {
+<<<<<<< HEAD
                     new(){ Begin = -8.0, End = -3.0, Mat = 0, NodeCount = 5, Order = 1 },
                     new(){ Begin = -3.0, End = +2.0, Mat = 0, NodeCount = 10, Order = 3 },
                 },
@@ -333,6 +334,14 @@ namespace OrderHarmonization
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
                 RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.First },
+=======
+                    new(0.1, 1.0, -3.0, 1.0, 3)
+                },
+                MaterialSubDomains = new()
+                {
+                    new(0.5, 0.6, -4.0, -3.0, 1)
+                }
+>>>>>>> 6ce4487 (add Materual sub domains)
             };
 
             GridBuilder gridBuilder = new GridBuilder(gridInfo);
@@ -370,6 +379,7 @@ namespace OrderHarmonization
             double[] q = solver.Solve(A, b);
 
             Solution s = new Solution(q, mesh);
+<<<<<<< HEAD
             Console.WriteLine(Diff(gridInfo, s, (x, y) => Math.Exp(x), 10, 10));
         }
 
@@ -380,6 +390,10 @@ namespace OrderHarmonization
             System.Threading.Thread.CurrentThread.CurrentCulture = culture;
             System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
             System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+=======
+            Func<double, double, double> u = (r, z) => z;
+            Console.WriteLine(Diff(gridInfo, s, u, 5, 5));
+>>>>>>> 6ce4487 (add Materual sub domains)
 
             ExponentProblem();
         }
