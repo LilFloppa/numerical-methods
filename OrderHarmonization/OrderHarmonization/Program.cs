@@ -3,6 +3,7 @@ using OrderHarmonization.Meshes;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 
 namespace OrderHarmonization
 {
@@ -260,6 +261,50 @@ namespace OrderHarmonization
             return diff;
         }
 
+        static double Diff(GridInfo info, Solution s, List<double> u, int xCount, int yCount)
+        {
+            var it = u.GetEnumerator();
+            it.MoveNext();
+            double xStep = (info.XEnd - info.XBegin) / (xCount - 1);
+            double yStep = (info.YEnd - info.YBegin) / (yCount - 1);
+
+            double diff = 0.0;
+            for (int i = 0; i < yCount; i++)
+                for (int j = 0; j < xCount; j++)
+                {
+                    double x = info.XBegin + xStep * j;
+                    double y = info.YBegin + yStep * i;
+
+                    double ureal = it.Current;
+                    it.MoveNext();
+                    double ucalc = s.GetValue(x, y);
+
+                    diff += (ureal - ucalc) * (ureal - ucalc);
+                }
+
+            return diff;
+        }
+
+        static List<double> GetValues(GridInfo info, Solution s, int xCount, int yCount)
+        {
+            double xStep = (info.XEnd - info.XBegin) / (xCount - 1);
+            double yStep = (info.YEnd - info.YBegin) / (yCount - 1);
+
+            List<double> values = new List<double>();
+
+            for (int i = 0; i < yCount; i++)
+                for (int j = 0; j < xCount; j++)
+                {
+                    double x = info.XBegin + xStep * j;
+                    double y = info.YBegin + yStep * i;
+
+                    double value = s.GetValue(x, y);
+                    values.Add(value);
+                }
+
+            return values;
+        }
+
         static void Main(string[] args)
         {
             System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
@@ -274,15 +319,15 @@ namespace OrderHarmonization
                 XEnd = 1.0,
                 YBegin = 0.0,
                 YEnd = 1.0,
-                XNodeCount = 50,
-                YNodeCount = 50,
+                XNodeCount = 30,
+                YNodeCount = 30,
                 TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 LeftBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.Second },
                 RightBoundary = new GridBoundary { FuncNo = 2, Type = BoundaryType.Second },
                 OrderSubDomains = new()
                 {
-                    new(0.0, 1.0, 0.0, 1.0, 1)
+                    new(0.2, 0.8, 0.2, 0.8, 3)
                 },
                 MaterialSubDomains = new()
                 {
@@ -325,9 +370,8 @@ namespace OrderHarmonization
             double[] q = solver.Solve(A, b);
 
             Solution s = new Solution(q, mesh);
-            Console.WriteLine(s.GetValue(new Point(0.1, 0.5)));
-            Console.WriteLine(s.GetValue(new Point(0.5, 0.5)));
-            Console.WriteLine(s.GetValue(new Point(0.9, 0.5)));
+            List<double> u = JsonSerializer.Deserialize<List<double>>(File.ReadAllText("C:/repos/values.txt"));
+            Console.WriteLine(Diff(gridInfo, s, u, 10, 10));
         }
     }
 }
