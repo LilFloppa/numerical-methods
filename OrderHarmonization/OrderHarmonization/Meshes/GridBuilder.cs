@@ -60,6 +60,7 @@ namespace OrderHarmonization.Meshes
         public GridBoundary BottomBoundary { get; set; }
 
         public List<OrderSubDomain> OrderSubDomains { get; set; }
+        public List<OrderSubDomain> MaterialSubDomains { get; set; }
     }
 
     public class GridBuilder
@@ -187,7 +188,12 @@ namespace OrderHarmonization.Meshes
 
         int GetMaterial(double x1, double x2, double y1, double y2)
         {
-            // TODO: Implement
+            if (Info.MaterialSubDomains != null)
+            {
+                foreach (var sub in Info.MaterialSubDomains)
+                    if (sub.Contains(x1, x2, y1, y2))
+                        return sub.Order;
+            }
             return 0;
         }
 

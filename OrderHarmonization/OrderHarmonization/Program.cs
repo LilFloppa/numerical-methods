@@ -270,19 +270,23 @@ namespace OrderHarmonization
 
             GridInfo gridInfo = new GridInfo
             {
-                XBegin = -8.0,
+                XBegin = 0.0,
                 XEnd = 1.0,
                 YBegin = 0.0,
-                YEnd = 2.0,
-                XNodeCount = 5,
-                YNodeCount = 3,
+                YEnd = 1.0,
+                XNodeCount = 50,
+                YNodeCount = 50,
                 TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
-                LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
-                RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.First },
+                LeftBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.Second },
+                RightBoundary = new GridBoundary { FuncNo = 2, Type = BoundaryType.Second },
                 OrderSubDomains = new()
                 {
-                    new(-3.0, 1.0, 0.0, 2.0, 3)
+                    new(0.0, 1.0, 0.0, 1.0, 1)
+                },
+                MaterialSubDomains = new()
+                {
+                    new(0.29, 0.71, 0.29, 0.71, 1)
                 }
             };
             
@@ -321,9 +325,9 @@ namespace OrderHarmonization
             double[] q = solver.Solve(A, b);
 
             Solution s = new Solution(q, mesh);
-            Func<double, double, double> u = (x, y) => Math.Exp(x);
-
-            Console.WriteLine(Diff(gridInfo, s, u, 5, 5));
+            Console.WriteLine(s.GetValue(new Point(0.1, 0.5)));
+            Console.WriteLine(s.GetValue(new Point(0.5, 0.5)));
+            Console.WriteLine(s.GetValue(new Point(0.9, 0.5)));
         }
     }
 }
