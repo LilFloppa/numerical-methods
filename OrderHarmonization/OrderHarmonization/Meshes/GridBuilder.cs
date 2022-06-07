@@ -30,37 +30,26 @@ namespace OrderHarmonization.Meshes
         public int FuncNo;
     }
 
-    public struct OrderSubDomain
+
+    public struct Interval
     {
-        public double X1, X2, Y1, Y2;
+        public double Begin;
+        public double End;
+        public int NodeCount;
         public int Order;
-
-        public OrderSubDomain(double x1, double x2, double y1, double y2, int order)
-        {
-            X1 = x1; Y1 = y1;
-            X2 = x2; Y2 = y2;
-            Order = order;
-        }
-        public bool Contains(double x1, double x2, double y1, double y2) => x1 >= X1 && x2 <= X2 && y1 >= Y1 && y2 <= Y2;
+        public int Mat;
     }
-
 
     public struct GridInfo
     {
-        public int XNodeCount { get; set; }
-        public int YNodeCount { get; set; }
-        public double XBegin { get; set; }
-        public double YBegin { get; set; }
-        public double XEnd { get; set; }
-        public double YEnd { get; set; }
-
+        public double XBegin, XEnd;
+        public double YBegin, YEnd;
+        public List<Interval> XIntervals;
+        public List<Interval> YIntervals;
         public GridBoundary LeftBoundary { get; set; }
         public GridBoundary TopBoundary { get; set; }
         public GridBoundary RightBoundary { get; set; }
         public GridBoundary BottomBoundary { get; set; }
-
-        public List<OrderSubDomain> OrderSubDomains { get; set; }
-        public List<OrderSubDomain> MaterialSubDomains { get; set; }
     }
 
     public class GridBuilder
@@ -73,12 +62,16 @@ namespace OrderHarmonization.Meshes
         public List<GridEdge> ThirdBoundary { get; set; } = new();
 
         private Dictionary<BoundaryType, Action<GridEdge>> BoundaryTypeMap = new();
+        private int xNodeCount = 0;
+        private int yNodeCount = 0;
 
         public GridBuilder(GridInfo info)
         {
             Info = info;
 
-            int pointCount = Info.XNodeCount * Info.YNodeCount;
+            xNodeCount = NodeCount(info.XIntervals);
+            yNodeCount = NodeCount(info.YIntervals);
+            int pointCount = xNodeCount * yNodeCount;
             Points = new Point[pointCount];
             Elements = new();
 
@@ -87,6 +80,14 @@ namespace OrderHarmonization.Meshes
             BoundaryTypeMap.Add(BoundaryType.Third, (e) => ThirdBoundary.Add(e));
         }
 
+        int NodeCount(List<Interval> intervals)
+        {
+            int nodeCount = 0;
+            foreach (var i in intervals)
+                nodeCount += i.NodeCount;
+
+            return nodeCount - intervals.Count + 1;
+        }
         public void Build()
         {
             BuildPoints();
@@ -96,52 +97,87 @@ namespace OrderHarmonization.Meshes
 
         void BuildPoints()
         {
-            double width = Info.XEnd - Info.XBegin;
-            double height = Info.YEnd - Info.YBegin;
-            double xStep = width / (Info.XNodeCount - 1);
-            double yStep = height / (Info.YNodeCount - 1);
+            int index = 0;
+            foreach (var yint in Info.YIntervals)
+            {
+                double height = yint.End - yint.Begin;
+                double yStep = height / (yint.NodeCount - 1);
 
-            for (int i = 0; i < Info.YNodeCount; i++)
-                for (int j = 0; j < Info.XNodeCount; j++)
-                    Points[i * Info.XNodeCount + j] = new Point(Info.XBegin + j * xStep, Info.YBegin + i * yStep);
+                for (int i = 0; i < yint.NodeCount - 1; i++)
+                {
+                    foreach (var xint in Info.XIntervals)
+                    {
+                        double width = xint.End - xint.Begin;
+                        double xStep = width / (xint.NodeCount - 1);
+
+                        for (int j = 0; j < xint.NodeCount - 1; j++)
+                            Points[index++] = new Point(xint.Begin + j * xStep, yint.Begin + i * yStep);
+
+                    }
+
+                    Points[index++] = new Point(Info.XEnd, yint.Begin + i * yStep);
+                }
+            }
+
+            foreach (var xint in Info.XIntervals)
+            {
+                double width = xint.End - xint.Begin;
+                double xStep = width / (xint.NodeCount - 1);
+
+                for (int j = 0; j < xint.NodeCount - 1; j++)
+                    Points[index++] = new Point(xint.Begin + j * xStep, Info.YEnd);
+
+            }
+
+            Points[index++] = new Point(Info.XEnd, Info.YEnd);
         }
 
         void BuildTriangles()
         {
-            for (int i = 0; i < Info.YNodeCount - 1; i++)
+            int xIndex = 0;
+            int yIndex = 0;
+            foreach (var yint in Info.YIntervals)
             {
-                for (int j = 0; j < Info.XNodeCount - 1; j++)
+                for (int i = 0; i < yint.NodeCount - 1; i++, yIndex++)
                 {
-                    var e1 = new Triangle();
-                    var e2 = new Triangle();
+                    foreach (var xint in Info.XIntervals)
+                    {
+                        for (int j = 0; j < xint.NodeCount - 1; j++, xIndex++)
+                        {
+                            var e1 = new Triangle();
+                            var e2 = new Triangle();
 
-                    int p1 = i * Info.XNodeCount + j;
-                    int p2 = i * Info.XNodeCount + j + 1;
-                    int p3 = (i + 1) * Info.XNodeCount + j;
-                    int p4 = (i + 1) * Info.XNodeCount + j + 1;
+                            int p1 = yIndex * xNodeCount + xIndex;
+                            int p2 = yIndex * xNodeCount + xIndex + 1;
+                            int p3 = (yIndex + 1) * xNodeCount + xIndex;
+                            int p4 = (yIndex + 1) * xNodeCount + xIndex + 1;
 
-                    var x1 = Points[p1].X;
-                    var x2 = Points[p2].X;
-                    var y1 = Points[p1].Y;
-                    var y2 = Points[p3].Y;
+                            var x1 = Points[p1].X;
+                            var x2 = Points[p2].X;
+                            var y1 = Points[p1].Y;
+                            var y2 = Points[p3].Y;
 
-                    int matNo = GetMaterial(x1, x2, y1, y2);
-                    int order = GetOrder(x1, x2, y1, y2);
+                            int matNo = Math.Min(xint.Mat, yint.Mat);
+                            int order = Math.Min(xint.Order, yint.Order);
 
-                    e1.V1 = p1;
-                    e1.V2 = p2;
-                    e1.V3 = p4;
-                    e1.MaterialNo = matNo;
-                    e1.Order = order;
+                            e1.V1 = p1;
+                            e1.V2 = p2;
+                            e1.V3 = p4;
+                            e1.MaterialNo = matNo;
+                            e1.Order = order;
 
-                    e2.V1 = p1;
-                    e2.V2 = p3;
-                    e2.V3 = p4;
-                    e2.MaterialNo = matNo;
-                    e2.Order = order;
+                            e2.V1 = p1;
+                            e2.V2 = p3;
+                            e2.V3 = p4;
+                            e2.MaterialNo = matNo;
+                            e2.Order = order;
 
-                    Elements.Add(e1);
-                    Elements.Add(e2);
+                            Elements.Add(e1);
+                            Elements.Add(e2);
+                        }
+                    }
+
+                    xIndex = 0;
                 }
             }
         }
@@ -149,34 +185,34 @@ namespace OrderHarmonization.Meshes
         void BuildBoundary()
         {
             // Left
-            for (int i = 0; i < Info.YNodeCount - 1; i++)
+            for (int i = 0; i < yNodeCount - 1; i++)
             {
                 var edge = new GridEdge();
-                edge.V1 = i * Info.XNodeCount;
-                edge.V2 = (i + 1) * Info.XNodeCount;
+                edge.V1 = i * xNodeCount;
+                edge.V2 = (i + 1) * xNodeCount;
                 edge.No = Info.LeftBoundary.FuncNo;
                 BoundaryTypeMap[Info.LeftBoundary.Type](edge);
             }
             // Top
-            for (int i = 0; i < Info.XNodeCount - 1; i++)
+            for (int i = 0; i < xNodeCount - 1; i++)
             {
                 var edge = new GridEdge();
-                edge.V1 = Info.XNodeCount * (Info.YNodeCount - 1) + i;
-                edge.V2 = Info.XNodeCount * (Info.YNodeCount - 1) + i + 1;
+                edge.V1 = xNodeCount * (yNodeCount - 1) + i;
+                edge.V2 = xNodeCount * (yNodeCount - 1) + i + 1;
                 edge.No = Info.TopBoundary.FuncNo;
                 BoundaryTypeMap[Info.TopBoundary.Type](edge);
             }
             // Right
-            for (int i = 0; i < Info.YNodeCount - 1; i++)
+            for (int i = 0; i < yNodeCount - 1; i++)
             {
                 var edge = new GridEdge();
-                edge.V1 = (i + 1) * Info.XNodeCount - 1;
-                edge.V2 = (i + 2) * Info.XNodeCount - 1;
+                edge.V1 = (i + 1) * xNodeCount - 1;
+                edge.V2 = (i + 2) * xNodeCount - 1;
                 edge.No = Info.RightBoundary.FuncNo;
                 BoundaryTypeMap[Info.RightBoundary.Type](edge);
             }
             // Bottom
-            for (int i = 0; i < Info.XNodeCount - 1; i++)
+            for (int i = 0; i < xNodeCount - 1; i++)
             {
                 var edge = new GridEdge();
                 edge.V1 = i;
@@ -184,29 +220,6 @@ namespace OrderHarmonization.Meshes
                 edge.No = Info.BottomBoundary.FuncNo;
                 BoundaryTypeMap[Info.BottomBoundary.Type](edge);
             }
-        }
-
-        int GetMaterial(double x1, double x2, double y1, double y2)
-        {
-            if (Info.MaterialSubDomains != null)
-            {
-                foreach (var sub in Info.MaterialSubDomains)
-                    if (sub.Contains(x1, x2, y1, y2))
-                        return sub.Order;
-            }
-            return 0;
-        }
-
-        int GetOrder(double x1, double x2, double y1, double y2)
-        {
-            if (Info.OrderSubDomains != null)
-            {
-                foreach (var sub in Info.OrderSubDomains)
-                    if (sub.Contains(x1, x2, y1, y2))
-                        return sub.Order;
-            }
-
-            return 1;
         }
     }
 
