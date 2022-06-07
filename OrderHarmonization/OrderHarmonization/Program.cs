@@ -245,14 +245,8 @@ namespace OrderHarmonization
             return values;
         }
 
-        static void Main(string[] args)
+        static void LambdaProblem()
         {
-            System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
-            culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
-            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
-            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
-            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
-
             GridInfo gridInfo = new GridInfo
             {
                 XBegin = 0.0,
@@ -276,7 +270,7 @@ namespace OrderHarmonization
                 LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
                 RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.Second },
             };
-            
+
             GridBuilder gridBuilder = new GridBuilder(gridInfo);
             gridBuilder.Build();
 
@@ -313,24 +307,81 @@ namespace OrderHarmonization
 
             Solution s = new Solution(q, mesh);
 
-            File.WriteAllText("C:/repos/result.txt", JsonSerializer.Serialize(GetValues(gridInfo, s, 10, 10)));
             Console.WriteLine(s.GetValue(0.1, 0.5));
             Console.WriteLine(s.GetValue(0.5, 0.5));
             Console.WriteLine(s.GetValue(0.9, 0.5));
+        }
 
-            //Func<double, double, double> u = (x, y) =>
-            //{
-            //    if (x <= 0.3)
-            //        return x;
+        static void ExponentProblem()
+        {
+            GridInfo gridInfo = new GridInfo
+            {
+                XBegin = -8.0,
+                XEnd = 2.0,
+                YBegin = 0.0,
+                YEnd = 1.0,
+                XIntervals = new()
+                {
+                    new(){ Begin = -8.0, End = -3.0, Mat = 0, NodeCount = 5, Order = 1 },
+                    new(){ Begin = -3.0, End = +2.0, Mat = 0, NodeCount = 10, Order = 3 },
+                },
+                YIntervals = new()
+                {
+                    new(){ Begin = 0.0, End = 1.0, Mat = 0, NodeCount = 3, Order = 3 },
+                },
+                TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
+                BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
+                LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
+                RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.First },
+            };
 
-            //    if (x >= 0.7)
-            //        return (x - 0.7) + 0.5;
+            GridBuilder gridBuilder = new GridBuilder(gridInfo);
+            gridBuilder.Build();
 
-            //    return (x - 0.3) / 2 + 0.3;
-            //};
-            // Console.WriteLine(Diff(gridInfo, s, u, 10, 10));
-            // List<double> u = JsonSerializer.Deserialize<List<double>>(File.ReadAllText("C:/repos/values.txt"));
-            // Console.WriteLine(Diff(gridInfo, s, u, 10, 10));
+            ProblemInfo info = new ProblemInfo
+            {
+                Basis = new TriangleCubicHierarchical(),
+                BoundaryBasis = new LineCubicHierarchical(),
+                BoundaryBasisFirstOrder = new LineLinearHierarchical(),
+                BoundaryBasisThirdOrder = new LineCubicHierarchical(),
+                MaterialDictionary = AreaInfo.Materials,
+                FirstBoundaryDictionary = AreaInfo.FirstBoundary,
+                SecondBoundaryDictionary = AreaInfo.SecondBoundary,
+                ThirdBoundaryDictionary = AreaInfo.ThirdBoundary
+            };
+
+
+            var meshBuilder = new HarmonicMeshBuilder();
+
+            Mesh mesh = Build(gridBuilder, info, meshBuilder);
+            info.Mesh = mesh;
+
+            PortraitBuilder PB = new PortraitBuilder(info);
+            Portrait p = PB.Build();
+
+            IMatrix A = new SparseMatrix(mesh.NodeCount);
+            double[] b = new double[mesh.NodeCount];
+            A.SetPortrait(p);
+
+            HarmonicSlaeBuilder builder = new HarmonicSlaeBuilder(info);
+            builder.Build(A, b);
+
+            ISolver solver = new LOSLU();
+            double[] q = solver.Solve(A, b);
+
+            Solution s = new Solution(q, mesh);
+            Console.WriteLine(Diff(gridInfo, s, (x, y) => Math.Exp(x), 10, 10));
+        }
+
+        static void Main(string[] args)
+        {
+            System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
+            culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
+            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+            ExponentProblem();
         }
     }
 }
