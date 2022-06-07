@@ -198,7 +198,7 @@ namespace OrderHarmonization
                     diff += (ureal - ucalc) * (ureal - ucalc);
                 }
 
-            return diff;
+            return Math.Sqrt(diff);
         }
 
         static double Diff(GridInfo info, Solution s, List<double> u, int xCount, int yCount)
@@ -322,12 +322,12 @@ namespace OrderHarmonization
                 YEnd = 1.0,
                 XIntervals = new()
                 {
-                    new(){ Begin = -8.0, End = -3.0, Mat = 0, NodeCount = 5, Order = 1 },
-                    new(){ Begin = -3.0, End = +2.0, Mat = 0, NodeCount = 10, Order = 3 },
+                    new(){ Begin = -8.0, End = -3.0, Mat = 0, NodeCount = 10, Order = 1 },
+                    new(){ Begin = -3.0, End = +2.0, Mat = 0, NodeCount = 10, Order = 2 },
                 },
                 YIntervals = new()
                 {
-                    new(){ Begin = 0.0, End = 1.0, Mat = 0, NodeCount = 3, Order = 3 },
+                    new(){ Begin = 0.0, End = 1.0, Mat = 0, NodeCount = 5, Order = 2 },
                 },
                 TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
@@ -370,7 +370,7 @@ namespace OrderHarmonization
             double[] q = solver.Solve(A, b);
 
             Solution s = new Solution(q, mesh);
-            Console.WriteLine(Diff(gridInfo, s, (x, y) => Math.Exp(x), 10, 10));
+            Console.WriteLine(Diff(gridInfo, s, (x, y) => Math.Exp(x), 100, 100));
         }
 
         static void Main(string[] args)

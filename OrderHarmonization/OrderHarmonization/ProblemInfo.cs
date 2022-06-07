@@ -13,7 +13,7 @@ namespace OrderHarmonization
                 Name = "Steel",
                 Lambda = 1,
                 RoCp = 1,
-                F = (double x, double y) => 0.0,
+                F = (double x, double y) => 0.0
             },
             [1] = new Material
             {
