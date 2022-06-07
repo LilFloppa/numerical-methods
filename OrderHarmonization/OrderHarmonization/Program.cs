@@ -180,66 +180,6 @@ namespace OrderHarmonization
             return builder.Build();
         }
 
-        static void Problem1()
-        {
-            ProblemInfo info = new ProblemInfo
-            {
-                Basis = new TriangleCubicHierarchical(),
-                BoundaryBasis = new LineCubicHierarchical(),
-                BoundaryBasisFirstOrder = new LineLinearHierarchical(),
-                BoundaryBasisThirdOrder = new LineCubicHierarchical(),
-                MaterialDictionary = AreaInfo.Materials,
-                FirstBoundaryDictionary = AreaInfo.FirstBoundary,
-                SecondBoundaryDictionary = AreaInfo.SecondBoundary,
-                ThirdBoundaryDictionary = AreaInfo.ThirdBoundary
-            };
-
-            //ProblemInfo info = new ProblemInfo
-            //{
-            //    Basis = new TriangleLinearHierarchical(),
-            //    BoundaryBasis = new LineLinearHierarchical(),
-            //    BoundaryBasisFirstOrder = new LineLinearHierarchical(),
-            //    BoundaryBasisThirdOrder = new LineCubicHierarchical(),
-            //    MaterialDictionary = AreaInfo.Materials,
-            //    FirstBoundaryDictionary = AreaInfo.FirstBoundary,
-            //    SecondBoundaryDictionary = AreaInfo.SecondBoundary,
-            //    ThirdBoundaryDictionary = AreaInfo.ThirdBoundary
-            //};
-
-            var meshBuilder = new HarmonicMeshBuilder();
-
-            Mesh mesh = LoadMesh(
-              @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\points.txt",
-              @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\triangles.txt",
-              @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\boundary1.txt",
-              @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\boundary2.txt",
-              @"C:\repos\numerical-methods\OrderHarmonization\OrderHarmonization\Input\boundary3.txt",
-              info,
-              meshBuilder);
-
-            info.Mesh = mesh;
-
-            PortraitBuilder PB = new PortraitBuilder(info);
-            Portrait p = PB.Build();
-
-            IMatrix A = new SparseMatrix(mesh.NodeCount);
-            double[] b = new double[mesh.NodeCount];
-            A.SetPortrait(p);
-
-            HarmonicSlaeBuilder builder = new HarmonicSlaeBuilder(info);
-            builder.Build(A, b);
-
-            ISolver solver = new LOSLU();
-            double[] q = solver.Solve(A, b);
-
-            Solution s = new Solution(q, mesh);
-
-            double value = s.GetValue(new Point(1.5, 0.3));
-            double value1 = s.GetValue(new Point(0.5, 1.2));
-            Console.WriteLine(value);
-            Console.WriteLine(value1);
-        }
-
         static double Diff(GridInfo info, Solution s, Func<double, double, double> u, int xCount, int yCount)
         {
             double xStep = (info.XEnd - info.XBegin) / (xCount - 1);
@@ -250,7 +190,7 @@ namespace OrderHarmonization
                 for (int j = 0; j < xCount; j++)
                 {
                     double x = info.XBegin + xStep * j;
-                    double y = info.YBegin + yStep * i;
+                    double y = 0.5;
 
                     double ureal = u(x, y);
                     double ucalc = s.GetValue(x, y);
@@ -319,20 +259,22 @@ namespace OrderHarmonization
                 XEnd = 1.0,
                 YBegin = 0.0,
                 YEnd = 1.0,
-                XNodeCount = 30,
-                YNodeCount = 30,
+                XIntervals = new()
+                {
+                    new(){ Begin = 0.0, End = 0.4, Mat = 0, NodeCount = 10, Order = 1 },
+                    new(){ Begin = 0.4, End = 0.6, Mat = 1, NodeCount = 10, Order = 1 },
+                    new(){ Begin = 0.6, End = 1.0, Mat = 0, NodeCount = 10, Order = 1 },
+                },
+                YIntervals = new()
+                {
+                    new(){ Begin = 0.0, End = 0.4, Mat = 0, NodeCount = 10, Order = 1 },
+                    new(){ Begin = 0.4, End = 0.6, Mat = 1, NodeCount = 10, Order = 1 },
+                    new(){ Begin = 0.6, End = 1.0, Mat = 0, NodeCount = 10, Order = 1 },
+                },
                 TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
-                LeftBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.Second },
-                RightBoundary = new GridBoundary { FuncNo = 2, Type = BoundaryType.Second },
-                OrderSubDomains = new()
-                {
-                    new(0.2, 0.8, 0.2, 0.8, 3)
-                },
-                MaterialSubDomains = new()
-                {
-                    new(0.29, 0.71, 0.29, 0.71, 1)
-                }
+                LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
+                RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.Second },
             };
             
             GridBuilder gridBuilder = new GridBuilder(gridInfo);
@@ -370,8 +312,25 @@ namespace OrderHarmonization
             double[] q = solver.Solve(A, b);
 
             Solution s = new Solution(q, mesh);
-            List<double> u = JsonSerializer.Deserialize<List<double>>(File.ReadAllText("C:/repos/values.txt"));
-            Console.WriteLine(Diff(gridInfo, s, u, 10, 10));
+
+            File.WriteAllText("C:/repos/result.txt", JsonSerializer.Serialize(GetValues(gridInfo, s, 10, 10)));
+            Console.WriteLine(s.GetValue(0.1, 0.5));
+            Console.WriteLine(s.GetValue(0.5, 0.5));
+            Console.WriteLine(s.GetValue(0.9, 0.5));
+
+            //Func<double, double, double> u = (x, y) =>
+            //{
+            //    if (x <= 0.3)
+            //        return x;
+
+            //    if (x >= 0.7)
+            //        return (x - 0.7) + 0.5;
+
+            //    return (x - 0.3) / 2 + 0.3;
+            //};
+            // Console.WriteLine(Diff(gridInfo, s, u, 10, 10));
+            // List<double> u = JsonSerializer.Deserialize<List<double>>(File.ReadAllText("C:/repos/values.txt"));
+            // Console.WriteLine(Diff(gridInfo, s, u, 10, 10));
         }
     }
 }

@@ -388,27 +388,49 @@ namespace OrderHarmonization
 
         protected virtual void AddThirdBoundary(IMatrix A, double[] b, ThirdBoundaryEdge edge)
         {
-            //double[,] M = info.BoundaryBasis.MassMatrix;
+            var basis = edge.Order == 1 ? info.BoundaryBasisFirstOrder : info.BoundaryBasisThirdOrder;
+            var boundaryPsi = basis.GetFuncs();
 
-            //Func<double, double, double> ubeta = edge.UBeta;
-            //double beta = edge.Beta;
+            double[,] M = basis.MassMatrix;
 
-            //Point p1 = info.Mesh.Points[edge[0]];
-            //Point p2 = info.Mesh.Points[edge[edge.NodeCount - 1]];
+            Func<double, double, double> ubeta = edge.UBeta;
+            double beta = edge.Beta;
 
-            //double x0 = p1.X;
-            //double y0 = p1.Y;
-            //double x1 = p2.X;
-            //double y1 = p2.Y;
+            Point p1 = info.Mesh.Points[edge[0]];
+            Point p2 = info.Mesh.Points[edge[edge.NodeCount - 1]];
 
-            //double h = Point.Distance(p1, p2);
+            double x0 = p1.X;
+            double y0 = p1.Y;
+            double x1 = p2.X;
+            double y1 = p2.Y;
 
-            //for (int i = 0; i < info.BoundaryBasis.Size; i++)
-            //    b[edge[i]] += beta * h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => ubeta(x0 + ksi * (x1 - x0), y0 + ksi * (y1 - y0)) * boundaryPsi[i](ksi));
+            double h = Point.Distance(p1, p2);
 
-            //for (int i = 0; i < info.BoundaryBasis.Size; i++)
-            //    for (int j = 0; j < info.BoundaryBasis.Size; j++)
-            //        A.Add(edge[i], edge[j], beta * h * M[i, j]);
+            int index = 0;
+            for (int i = 0; i < edge.NodeCount; i++)
+                if (edge[i] != -1)
+                {
+                    b[edge[i]] += beta * h * Quadratures.NewtonCotes(0.0, 1.0, (double ksi) => ubeta(x0 + ksi * (x1 - x0), y0 + ksi * (y1 - y0)) * boundaryPsi[index](ksi));
+                    index++;
+                }
+
+            int indexi = 0;
+            int indexj = 0;
+            for (int i = 0; i < edge.NodeCount; i++)
+            {
+                if (edge[i] != -1)
+                {
+                    for (int j = 0; j < edge.NodeCount; j++)
+                    {
+                        if (edge[j] != -1)
+                        {
+                            A.Add(edge[i], edge[j], beta * h * M[indexi, indexj]);
+                            indexj++;
+                        }
+                    }
+                    indexi++;
+                }
+            }
         }
 
         private Func<double, double, double> GetGrad(int i, int j, Point a, Point b, Point c)
