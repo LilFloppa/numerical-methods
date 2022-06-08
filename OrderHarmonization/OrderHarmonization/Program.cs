@@ -3,7 +3,6 @@ using OrderHarmonization.Meshes;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 
 namespace OrderHarmonization
 {
@@ -198,31 +197,7 @@ namespace OrderHarmonization
                     diff += (ureal - ucalc) * (ureal - ucalc);
                 }
 
-            return diff;
-        }
-
-        static double Diff(GridInfo info, Solution s, List<double> u, int xCount, int yCount)
-        {
-            var it = u.GetEnumerator();
-            it.MoveNext();
-            double xStep = (info.XEnd - info.XBegin) / (xCount - 1);
-            double yStep = (info.YEnd - info.YBegin) / (yCount - 1);
-
-            double diff = 0.0;
-            for (int i = 0; i < yCount; i++)
-                for (int j = 0; j < xCount; j++)
-                {
-                    double x = info.XBegin + xStep * j;
-                    double y = info.YBegin + yStep * i;
-
-                    double ureal = it.Current;
-                    it.MoveNext();
-                    double ucalc = s.GetValue(x, y);
-
-                    diff += (ureal - ucalc) * (ureal - ucalc);
-                }
-
-            return diff;
+            return Math.Sqrt(diff);
         }
 
         static List<double> GetValues(GridInfo info, Solution s, int xCount, int yCount)
@@ -316,32 +291,23 @@ namespace OrderHarmonization
         {
             GridInfo gridInfo = new GridInfo
             {
-                XBegin = -8.0,
-                XEnd = 2.0,
+                XBegin = 1.0,
+                XEnd = 10.0,
                 YBegin = 0.0,
                 YEnd = 1.0,
                 XIntervals = new()
                 {
-<<<<<<< HEAD
-                    new(){ Begin = -8.0, End = -3.0, Mat = 0, NodeCount = 5, Order = 1 },
-                    new(){ Begin = -3.0, End = +2.0, Mat = 0, NodeCount = 10, Order = 3 },
+                    new(){ Begin = 1.0, End = +5.0, Mat = 0, NodeCount = 42, Order = 1 },
+                    new(){ Begin = 5.0, End = 10.0, Mat = 0, NodeCount = 42, Order = 1 },
                 },
                 YIntervals = new()
                 {
-                    new(){ Begin = 0.0, End = 1.0, Mat = 0, NodeCount = 3, Order = 3 },
+                    new(){ Begin = 0.0, End = 1.0, Mat = 0, NodeCount = 10, Order = 3 },
                 },
                 TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
                 RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.First },
-=======
-                    new(0.1, 1.0, -3.0, 1.0, 3)
-                },
-                MaterialSubDomains = new()
-                {
-                    new(0.5, 0.6, -4.0, -3.0, 1)
-                }
->>>>>>> 6ce4487 (add Materual sub domains)
             };
 
             GridBuilder gridBuilder = new GridBuilder(gridInfo);
@@ -379,8 +345,7 @@ namespace OrderHarmonization
             double[] q = solver.Solve(A, b);
 
             Solution s = new Solution(q, mesh);
-<<<<<<< HEAD
-            Console.WriteLine(Diff(gridInfo, s, (x, y) => Math.Exp(x), 10, 10));
+            Console.WriteLine(Diff(gridInfo, s, (r, z) => Math.Exp(r - 8), 100, 100));
         }
 
         static void Main(string[] args)
@@ -390,10 +355,6 @@ namespace OrderHarmonization
             System.Threading.Thread.CurrentThread.CurrentCulture = culture;
             System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
             System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
-=======
-            Func<double, double, double> u = (r, z) => z;
-            Console.WriteLine(Diff(gridInfo, s, u, 5, 5));
->>>>>>> 6ce4487 (add Materual sub domains)
 
             ExponentProblem();
         }
