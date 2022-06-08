@@ -201,6 +201,34 @@ namespace OrderHarmonization
             return Math.Sqrt(diff);
         }
 
+
+        static double PrintToCSV(string filename, GridInfo info, Solution s, int xCount, int yCount)
+        {
+            double xStep = (info.XEnd - info.XBegin) / (xCount - 1);
+            double yStep = (info.YEnd - info.YBegin) / (yCount - 1);
+
+            double diff = 0.0;
+
+            using (var writer = File.CreateText(filename))
+            {
+                for (int i = 0; i < yCount; i++)
+                {
+                    for (int j = 0; j < xCount; j++)
+                    {
+                        double x = info.XBegin + xStep * j;
+                        double y = info.YBegin + yStep * i;
+
+                        double ucalc = s.GetValue(x, y);
+                        writer.Write($"{ucalc};");
+                    }
+
+                    writer.WriteLine();
+                }
+            }
+
+            return Math.Sqrt(diff);
+        }
+
         static double Diff(GridInfo info, Solution s, List<double> u, int xCount, int yCount)
         {
             var it = u.GetEnumerator();
@@ -267,8 +295,8 @@ namespace OrderHarmonization
                 },
                 TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
-                LeftBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
-                RightBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.Second },
+                LeftBoundary = new GridBoundary { FuncNo = 1, Type = BoundaryType.Second },
+                RightBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.First },
             };
 
             GridBuilder gridBuilder = new GridBuilder(gridInfo);
@@ -307,9 +335,7 @@ namespace OrderHarmonization
 
             Solution s = new Solution(q, mesh);
 
-            Console.WriteLine(s.GetValue(0.1, 0.5));
-            Console.WriteLine(s.GetValue(0.5, 0.5));
-            Console.WriteLine(s.GetValue(0.9, 0.5));
+            PrintToCSV("C:/repos/result.csv", gridInfo, s, 100, 100);
         }
 
         static void ExponentProblem()
@@ -322,12 +348,12 @@ namespace OrderHarmonization
                 YEnd = 1.0,
                 XIntervals = new()
                 {
-                    new(){ Begin = -8.0, End = -3.0, Mat = 0, NodeCount = 10, Order = 1 },
-                    new(){ Begin = -3.0, End = +2.0, Mat = 0, NodeCount = 10, Order = 2 },
+                    new(){ Begin = -8.0, End = -3.0, Mat = 0, NodeCount = 9, Order = 1 },
+                    new(){ Begin = -3.0, End = +2.0, Mat = 0, NodeCount = 8, Order = 1 },
                 },
                 YIntervals = new()
                 {
-                    new(){ Begin = 0.0, End = 1.0, Mat = 0, NodeCount = 5, Order = 2 },
+                    new(){ Begin = 0.0, End = 1.0, Mat = 0, NodeCount = 3, Order = 2 },
                 },
                 TopBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
                 BottomBoundary = new GridBoundary { FuncNo = 0, Type = BoundaryType.Second },
@@ -375,13 +401,13 @@ namespace OrderHarmonization
 
         static void Main(string[] args)
         {
-            System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
-            culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
-            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
-            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
-            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+            //System.Globalization.CultureInfo culture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() as System.Globalization.CultureInfo ?? throw new InvalidCastException();
+            //culture.NumberFormat = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
+            //System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+            //System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            //System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
 
-            ExponentProblem();
+            LambdaProblem();
         }
     }
 }
