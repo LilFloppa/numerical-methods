@@ -160,5 +160,46 @@ namespace MathUtilities
 
 			return points;
 		}
+
+		public static double[] Alpha(Point a, Point b, Point c)
+		{
+			double[] alpha = new double[6];
+			double r1 = a.R;
+			double z1 = a.Z;
+			double r2 = b.R;
+			double z2 = b.Z;
+			double r3 = c.R;
+			double z3 = c.Z;
+
+			double D = Det(a, b, c);
+
+			alpha[0] = (z2 - z3) / D;
+			alpha[1] = (r3 - r2) / D;
+			alpha[2] = (z3 - z1) / D;
+			alpha[3] = (r1 - r3) / D;
+			alpha[4] = (z1 - z2) / D;
+			alpha[5] = (r2 - r1) / D;
+
+			return alpha;
+		}
+
+		public static double NewtonCotes(double a, double b, Func<double, double> f)
+		{
+			double h = (b - a) / 1000;
+			double result = f(a);
+
+			for (double x = h; x < b; x += h)
+				result += 2 * f(x);
+
+			result += f(b);
+			result *= 7;
+
+			for (double x = a; x < b; x += h)
+				result += 32 * f(x + h / 4) + 12 * f(x + h / 2) + 32 * f(x + 3 * h / 4);
+
+			result = result * 0.5 * h / 45;
+
+			return result;
+		}
 	}
 }

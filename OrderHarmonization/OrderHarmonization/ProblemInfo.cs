@@ -11,23 +11,16 @@ namespace OrderHarmonization
             [0] = new Material
             {
                 Name = "Steel",
-                Lambda = 1,
-                RoCp = 1,
-                F = (double x, double y) => 0.0,
-            },
-            [1] = new Material
-            {
-                Name = "Steel",
-                Lambda = 2,
-                RoCp = 0,
-                F = (double x, double y) => 0.0,
+                Lambda = 1.0,
+                RoCp = 1.0,
+                F = (double r, double z) => -Math.Exp(r - 8.0) / r
             },
         };
 
         public static Dictionary<int, Func<double, double, double>> FirstBoundary => new Dictionary<int, Func<double, double, double>>
         {
-            [0] = (x, y) => Math.Exp(-8.0),
-            [1] = (x, y) => Math.Exp(2.0),
+            [0] = (x, y) => Math.Exp(1.0 - 8.0),
+            [1] = (x, y) => Math.Exp(10.0 - 8.0),
         };
 
         public static Dictionary<int, Func<double, double, double>> SecondBoundary => new Dictionary<int, Func<double, double, double>>
